@@ -10,38 +10,38 @@ class MAC_Grid {
 public:
 
 	int gridsize;
-	//°ªµéÀ» ´ãÀ» vector
+	//ê°’ë“¤ì„ ë‹´ì„ vector
 	vector<T> cell_values;
 
 	MAC_Grid() {
 
 	}
 
-	MAC_Grid( int grid_N ) {
+	MAC_Grid(int grid_N) {
 		gridsize = grid_N;
 	}
 
-	//cellÁÂÇ¥¸¦ vector index·Î º¯°æ
+	//cellì¢Œí‘œë¥¼ vector indexë¡œ ë³€ê²½
 	int get_VectorIndex_from_cell(int i, int j) {
 		return i + j * gridsize;
 	}
 
-	//cell vector index¸¦ cellÁÂÇ¥·Î º¯°æ
+	//cell vector indexë¥¼ cellì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_i_from_VectorIndex(int vectorIndex) {
-		return i % gridsize;
+		return vectorIndex % gridsize;
 	}
 
-	//cell vector index¸¦ cellÁÂÇ¥·Î º¯°æ
+	//cell vector indexë¥¼ cellì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_j_from_VectorIndex(int vectorIndex) {
 		return vectorIndex / gridsize;
 	}
 
-	// particleÀÇ world_x ÁÂÇ¥¸¦ cell ÁÂÇ¥·Î º¯°æ
+	// particleì˜ world_x ì¢Œí‘œë¥¼ cell ì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_i_from_world(float particle_x) {
 		for (int i = 0; i < gridsize; i++) {
-			//ex 0.6 º¸´Ù Å¬¶§, 
-			if ((1.0 / (float)gridsize * i > particle_x) {
-				//ex 0.7º¸´Ù ÀÛÀ¸¸é
+			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
+			if (1.0 / (float)gridsize * i > particle_x) {
+				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
 				if (1.0 / (float)gridsize * (i + 1) < particle_x) {
 					return i;
 				}
@@ -50,18 +50,18 @@ public:
 		}
 	}
 
-	// particleÀÇ world_y ÁÂÇ¥¸¦ cell ÁÂÇ¥·Î º¯°æ
-	int get_cell_i_from_world(float particle_y) {
+	// particleì˜ world_y ì¢Œí‘œë¥¼ cell ì¢Œí‘œë¡œ ë³€ê²½
+	int get_cell_j_from_world(float particle_y) {
 		for (int j = 0; j < gridsize; j++) {
-			//ex 0.6 º¸´Ù Å¬¶§, 
-			if ((1.0 / (float)gridsize * j > particle_x) {
-				//ex 0.7º¸´Ù ÀÛÀ¸¸é
-				if (1.0 / (float)gridsize * (j + 1) < particle_x) {
+			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
+			if (1.0 / (float)gridsize * j > particle_y) {
+				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
+				if (1.0 / (float)gridsize * (j + 1) < particle_y) {
 					return j;
 				}
 			}
 		}
 	}
 
-	
+
 };

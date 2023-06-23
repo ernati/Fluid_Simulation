@@ -28,10 +28,10 @@ GLuint vbo;
 //time
 int time_idle;
 
-//simulation ¼±¾ğ
+//simulation ì„ ì–¸
 Constant_Acceleration_Simulator simulation;
 
-//number¸¦ Á¶ÀıÇÏ¸é particle ¼ö°¡ ¹Ù²ï´Ù.
+//numberë¥¼ ì¡°ì ˆí•˜ë©´ particle ìˆ˜ê°€ ë°”ë€ë‹¤.
 int number = 1000;
 
 vector<Vector2D> points;
@@ -40,15 +40,15 @@ Box bbox;
 vector<Vector2D> grid_line;
 Vector2D box_line[4];
 
-//grid_NÀ» Á¶ÀıÇÏ¸é grid ¼ö°¡ ¹Ù²ï´Ù.
+//grid_Nì„ ì¡°ì ˆí•˜ë©´ grid ìˆ˜ê°€ ë°”ë€ë‹¤.
 int grid_N = 20;
 
 void init(void) {
 	
-	//simulation ½ÇÇà ¹× ÀÔÀÚµé »ı¼º
+	//simulation ì‹¤í–‰ ë° ì…ìë“¤ ìƒì„±
 	simulation = Constant_Acceleration_Simulator(number, grid_N);
 
-	//particles¿¡¼­ particleµéÀÇ À§Ä¡¸¸ •û¿Í¼­ pointsµé¿¡ ÀúÀå, color´Â black °íÁ¤
+	//particlesì—ì„œ particleë“¤ì˜ ìœ„ì¹˜ë§Œ ëº´ì™€ì„œ pointsë“¤ì— ì €ì¥, colorëŠ” black ê³ ì •
 	for (int i = 0; i < number; i++) {
 		points.push_back(simulation.particles[i].Location);
 		color.push_back( vec3(0.0f, 0.0f, 0.0f) );
@@ -59,19 +59,19 @@ void init(void) {
 		color.push_back( vec3(0.0f, 0.0f, 0.0f) );
 	}
 
-	//bbox ¼±¾ğ
+	//bbox ì„ ì–¸
 	bbox = Box(0.0, 1.0, 0.0, 1.0);
 	box_line[0] = Vector2D(bbox.xmin, bbox.ymin);
 	box_line[1] = Vector2D(bbox.xmax, bbox.ymin);
 	box_line[2] = Vector2D(bbox.xmax, bbox.ymax);
 	box_line[3] = Vector2D(bbox.xmin, bbox.ymax);
 
-	//vectorÀÇ size¸¦ ¿øÇÏ´Â Å©±â¸¸Å­ ´Ã¸°´Ù.
+	//vectorì˜ sizeë¥¼ ì›í•˜ëŠ” í¬ê¸°ë§Œí¼ ëŠ˜ë¦°ë‹¤.
 	for (int i = 0; i < 4 * (grid_N - 1); i++) {
 		grid_line.push_back(Vector2D(0, 0));
 	}
 
-	//gridÀÇ Á¡À» ±×¸®´Â ÇÔ¼ö
+	//gridì˜ ì ì„ ê·¸ë¦¬ëŠ” í•¨ìˆ˜
 	make_Points_of_grids(grid_line, grid_N);
 
 	glGenVertexArrays(1, &(vao));
@@ -81,14 +81,14 @@ void init(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
 
-	//particleµé ·»´õ¸µ
+	//particleë“¤ ë Œë”ë§
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * number , &points[0]);
-	//box ·»´õ¸µ
+	//box ë Œë”ë§
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number, sizeof(box_line), box_line);
-	//grid ·»´õ¸µ
+	//grid ë Œë”ë§
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line), sizeof(Vector2D) * grid_line.size(), &grid_line[0]);
 
-	//color ÇÒ´ç
+	//color í• ë‹¹
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * color.size(), &color[0]);
 
 	//load shaders
@@ -131,24 +131,25 @@ void keyboard(unsigned char key, int x, int y) {
 
 void idle(void)
 {
-	////±¸ºĞ
+	////êµ¬ë¶„
 	//printf("\n__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 
-	//´©ÀûµÈ ¹Ğ¸®ÃÊ ¾ò±â
+	//ëˆ„ì ëœ ë°€ë¦¬ì´ˆ ì–»ê¸°
 	time_idle = glutGet(GLUT_ELAPSED_TIME);
 
+	//0.06ì´ˆ ë§ˆë‹¤ particle ìœ„ì¹˜ update
+	if (time_idle % 60 == 0) {
+		simulation.particle_simulation();
+	}
 
-	////ÀÔÀÚ ¿òÁ÷ÀÓ
-	//for (int i = 0; i < number; i++) {
-	//	/*printf("%f %f -> ", points[i].x, points[i].y);*/
-	//	particles[i].move((time_idle+i ));
-	//	points[i] = particles[i].Location;
-	//	//printf("%f %f\n", points[i].x, points[i].y);
-	//}
+	//ìœ„ì¹˜ updateí•œ ê±¸ openglì—ë„ ì ìš©
+	for (int i = 0; i < simulation.particles.size(); i++) {
+		points[i] = simulation.particles[i].Location;
+	}
 
 	glutPostRedisplay();
 }
@@ -159,25 +160,25 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 
-	//È­¸é mapping 
-	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // °î¼±ÀÌ ±×·ÁÁú Æò¸é
+	//í™”ë©´ mapping 
+	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // ê³¡ì„ ì´ ê·¸ë ¤ì§ˆ í‰ë©´
 	glUniformMatrix4fv(projection, 1, GL_TRUE, p);
 
-	//¹Ù²ï ÁÂÇ¥ ´Ù½Ã ¸Ş¸ğ¸®¿¡ ³Ö±â
+	//ë°”ë€ ì¢Œí‘œ ë‹¤ì‹œ ë©”ëª¨ë¦¬ì— ë„£ê¸°
 	glBindVertexArray(vao);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * number, &points[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number, sizeof(box_line), box_line);
 
 	glPointSize(3.0);
 
-	//particle ±×¸®±â
+	//particle ê·¸ë¦¬ê¸°
 	glDrawArrays(GL_POINTS, 0, number);
 
-	//box ±×¸®±â
+	//box ê·¸ë¦¬ê¸°
 	glLineWidth(1.0);
 	glDrawArrays(GL_LINE_LOOP, number, 4);
 
-	//grid ±×¸®±â
+	//grid ê·¸ë¦¬ê¸°
 	glDrawArrays(GL_LINES, number + 4, 4 * (grid_N-1));
 
 	

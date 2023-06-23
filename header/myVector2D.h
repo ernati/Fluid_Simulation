@@ -26,7 +26,7 @@ public :
     }
 
     //scalar와의 연산
-    Vector2D operator+ (const float c)
+    Vector2D operator+ (const float& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = c + this->X;
@@ -34,7 +34,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator- (const float c)
+    Vector2D operator- (const float& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X - c;
@@ -42,7 +42,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator* (const float c)
+    Vector2D operator* (const float& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X * c;
@@ -50,7 +50,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator/ (const float c)
+    Vector2D operator/ (const float& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X / c;
@@ -62,32 +62,32 @@ public :
     Vector2D operator+ (const Vector2D& c)
     {
         Vector2D tmp = Vector2D();
-        tmp.X = c.X + this->X;
-        tmp.Y = c.Y + this->Y; 
+        tmp.X = X + c.X;
+        tmp.Y = Y + c.Y; 
         return tmp;
     }
 
     Vector2D operator- (const Vector2D& c)
     {
         Vector2D tmp = Vector2D();
-        tmp.X = c.X - this->X;
-        tmp.Y = c.Y - this->Y; 
+        tmp.X = X - c.X;
+        tmp.Y = Y - c.Y;
         return tmp;
     }
 
     Vector2D operator* (const Vector2D& c)
     {
         Vector2D tmp = Vector2D();
-        tmp.X = c.X * this->X;
-        tmp.Y = c.Y * this->Y; 
+        tmp.X = X * c.X;
+        tmp.Y = Y * c.Y;
         return tmp;
     }
 
     Vector2D operator/ (const Vector2D& c)
     {
         Vector2D tmp = Vector2D();
-        tmp.X = c.X / this->X;
-        tmp.Y = c.Y / this->Y; 
+        tmp.X = X / c.X;
+        tmp.Y = Y / c.Y;
         return tmp;
     }
 

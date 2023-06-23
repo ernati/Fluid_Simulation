@@ -35,15 +35,15 @@ public :
             int randomLocation_Y = rand() % 50 ;
 
             //위치 X : 0.0~ 0.99, 위치 Y : 0.5 ~ 0.99
-            Particle2D tmp = Particle2D( float ( randomLocation_X / 100 ), float ( randomLocation_Y / 100 )+ 0.5,0,0,0,-9.8 );
+            Particle2D tmp = Particle2D( (float)randomLocation_X / 100.0 ,  (float)randomLocation_Y / 100.0 + 0.5 , 0,0,0,-0.0098 );
             particles.push_back( tmp );
         }
 
         //velocity grid 그리기
         velocity_grid = MAC_Grid<Vector2D>(10);
 
-        //timestep의 default = 60
-        timestep = 60.0;
+        //timestep의 default = 0.06
+        timestep = 0.06;
     }
 
     Constant_Acceleration_Simulator( int particle_number, int grid_N ) {
@@ -57,15 +57,24 @@ public :
             int randomLocation_Y = rand() % 50 ;
 
             //위치 X : 0.0~ 0.99, 위치 Y : 0.5 ~ 0.99
-            Particle2D tmp = Particle2D( float ( randomLocation_X / 100 ), float ( randomLocation_Y / 100 )+ 0.5,0,0,0,-9.8 );
+            Particle2D tmp = Particle2D((float)randomLocation_X / 100.0, (float)randomLocation_Y / 100.0 + 0.5 , 0, 0, 0, -0.098);
             particles.push_back( tmp );
         }
 
         //velocity grid 그리기
         velocity_grid = MAC_Grid<Vector2D>(grid_N);
 
-        //timestep의 default = 60
-        timestep = 60.0;
+        //timestep의 default = 0.06
+        timestep = 0.06;
+    }
+
+    void particle_simulation() {
+        //속도 update
+        Update_particles_Velocity();
+
+        //위치 update
+        Update_particles_Location();
+
     }
 
 
@@ -82,4 +91,7 @@ public :
             this->particles[i].Update_particle_Location(timestep);
         }
     }
+
+
+
 };

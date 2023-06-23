@@ -29,14 +29,19 @@ public:
 
     }
 
+
+
+
+
+    //=================등가속도======================================
     //입자 하나의 속도를 update
     void Update_particle_Velocity(float timestep) {
-        this->Velocity = this->Velocity + this->Velocity * timestep;
+        this->Velocity = this->Velocity + this->Acceleration * timestep;
     }
 
-    //입자 하나의 Location을 update
+    //입자 하나의 Location을 update   x = x + vt + 1/2*a*(t^2)
     void Update_particle_Location(float timestep) {
-        this->Location = this->Location + this->Velocity * timestep;
+        this->Location = this->Location + this->Velocity * timestep + this->Acceleration * timestep * timestep * 0.5;
     }
 
 };
