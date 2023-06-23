@@ -1,7 +1,8 @@
 #pragma once
 
-#include <myVector2D.h>
-#include <particle.h>
+#include "myVector2D.h"
+#include "particle.h"
+#include "grid.h"
 #include <vector>
 
 //난수 생성
@@ -13,17 +14,19 @@ using namespace std;
     //등가속도 운동 시뮬레이션 - v_n+1_ = v_n_ + a*t
 class Constant_Acceleration_Simulator {
 
-private :
+public : 
+
     //particle들을 담을 vector
     vector<Particle2D> particles;
-    int timestep;
+    float timestep;
 
-public :
-    //timestep의 default = 60
-    timestep = 60;
+    MAC_Grid<Vector2D> velocity_grid;
 
-    //아무 입력값이 없다면 기본 particle 수는 100개
+
+    //아무 입력값이 없다면 기본 particle 수는 100개, grid_N = 10
     Constant_Acceleration_Simulator() {
+
+        //입자들 초기화
         srand((unsigned int)time(NULL));
         for(int i = 0; i<100; i++) {
             //0~99 난수 생성    
@@ -35,9 +38,17 @@ public :
             Particle2D tmp = Particle2D( float ( randomLocation_X / 100 ), float ( randomLocation_Y / 100 )+ 0.5,0,0,0,-9.8 );
             particles.push_back( tmp );
         }
+
+        //velocity grid 그리기
+        velocity_grid = MAC_Grid<Vector2D>(10);
+
+        //timestep의 default = 60
+        timestep = 60.0;
     }
 
-    Constant_Acceleration_Simulator( int particle_number ) {
+    Constant_Acceleration_Simulator( int particle_number, int grid_N ) {
+
+        //입자들 초기화
         srand((unsigned int)time(NULL));
         for(int i = 0; i<particle_number; i++) {
             //0~99 난수 생성    
@@ -49,28 +60,26 @@ public :
             Particle2D tmp = Particle2D( float ( randomLocation_X / 100 ), float ( randomLocation_Y / 100 )+ 0.5,0,0,0,-9.8 );
             particles.push_back( tmp );
         }
+
+        //velocity grid 그리기
+        velocity_grid = MAC_Grid<Vector2D>(grid_N);
+
+        //timestep의 default = 60
+        timestep = 60.0;
     }
 
-    //입자 하나의 속도를 update
-    void Update_particle_Velocity( Particle2D& particle ) {
-        particle.Velocity = particle.Velocity + particle.Velocity * timestep ;
-    }
-
-    void Update_particle_Location( Particle2D& particle ) {
-        particle.Location = particle.Location + particle.Velocity * timestep ;
-    }
 
     //입자들의 속도를 모두 update
     void Update_particles_Velocity() {
-        for(int i=0; i<particles.size; i++) {
-            Update_particle_Velocity( particles[i] );
+        for(int i=0; i<particles.size(); i++) {
+            this->particles[i].Update_particle_Velocity(timestep);
         }
     }
 
     //입자들의 위치를 모두 update
     void Update_particles_Location() {
-        for(int i=0; i<particles.size; i++) {
-            Update_particle_Location( particles[i] );
+        for(int i=0; i<particles.size(); i++) {
+            this->particles[i].Update_particle_Location(timestep);
         }
     }
 };

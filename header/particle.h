@@ -1,16 +1,18 @@
 #pragma once
 
-#include <myVector2D.h>
+#include "myVector2D.h"
 
 //위치, 속도를 가지고 있는 입자 클래스
 class Particle2D {
 
-private:
+public:
+
     Vector2D Location;
     Vector2D Velocity;
     Vector2D Acceleration;
 
-public :
+    //==============================================
+
     Particle2D() {
         Location = Vector2D();
         Velocity = Vector2D();
@@ -25,6 +27,16 @@ public :
 
     ~Particle2D() {
 
+    }
+
+    //입자 하나의 속도를 update
+    void Update_particle_Velocity(float timestep) {
+        this->Velocity = this->Velocity + this->Velocity * timestep;
+    }
+
+    //입자 하나의 Location을 update
+    void Update_particle_Location(float timestep) {
+        this->Location = this->Location + this->Velocity * timestep;
     }
 
 };
