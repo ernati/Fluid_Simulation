@@ -29,7 +29,7 @@ GLuint vbo;
 int time_idle;
 
 //simulation 선언
-Constant_Acceleration_Simulator simulation;
+Fluid_Simulator simulation;
 
 //number를 조절하면 particle 수가 바뀐다.
 int number = 1000;
@@ -46,7 +46,7 @@ int grid_N = 20;
 void init(void) {
 	
 	//simulation 실행 및 입자들 생성
-	simulation = Constant_Acceleration_Simulator(number, grid_N);
+	simulation = Fluid_Simulator(number, grid_N);
 
 	//particles에서 particle들의 위치만 뺴와서 points들에 저장, color는 black 고정
 	for (int i = 0; i < number; i++) {
@@ -144,11 +144,11 @@ void idle(void)
 	//0.06초 마다 particle 위치 update
 	if (time_idle % 60 == 0) {
 		simulation.particle_simulation();
-	}
 
-	//위치 update한 걸 opengl에도 적용
-	for (int i = 0; i < simulation.particles.size(); i++) {
-		points[i] = simulation.particles[i].Location;
+		//위치 update한 걸 opengl에도 적용
+		for (int i = 0; i < simulation.particles.size(); i++) {
+			points[i] = simulation.particles[i].Location;
+		}
 	}
 
 	glutPostRedisplay();

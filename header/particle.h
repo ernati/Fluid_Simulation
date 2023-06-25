@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath> //for sqrt
+
 #include "myVector2D.h"
 
 //위치, 속도를 가지고 있는 입자 클래스
@@ -29,7 +31,11 @@ public:
 
     }
 
-
+    // 어떤 한 점과의 거리 구하기
+    float get_distance_from_point(Vector2D point) {
+        float distance_pow = (Location.X - point.X) * (Location.X - point.X) + (Location.Y - point.Y) * (Location.Y - point.Y);
+        return sqrt(distance_pow);
+    }
 
 
 
