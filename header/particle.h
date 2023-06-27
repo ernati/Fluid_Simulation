@@ -48,6 +48,11 @@ public:
     //입자 하나의 Location을 update   x = x + vt + 1/2*a*(t^2)
     void Update_particle_Location(float timestep) {
         this->Location = this->Location + this->Velocity * timestep + this->Acceleration * timestep * timestep * 0.5;
+
+        if (this->Location.Y < 0) {
+            this->Location.Y = 0.51;
+            this->Velocity.X = 0.0; this->Velocity.Y = 0.0;
+        }
     }
 
 };
