@@ -5,87 +5,87 @@
 #include "grid.h"
 #include <vector>
 
-//ë‚œìˆ˜ ìƒì„±
+//³­¼ö »ı¼º
 #include<cstdlib> //rand(), srand()
 #include<ctime>
 
 using namespace std;
 
-//ë“±ê°€ì†ë„ ìš´ë™ ì‹œë®¬ë ˆì´ì…˜ - v_n+1_ = v_n_ + a*t
+//µî°¡¼Óµµ ¿îµ¿ ½Ã¹Ä·¹ÀÌ¼Ç - v_n+1_ = v_n_ + a*t
 class Constant_Acceleration_Simulator {
 
 public:
 
-    //particleë“¤ì„ ë‹´ì„ vector
+    //particleµéÀ» ´ãÀ» vector
     vector<Particle2D> particles;
     float timestep;
 
     MAC_Grid<Vector2D> velocity_grid;
 
 
-    //ì•„ë¬´ ì…ë ¥ê°’ì´ ì—†ë‹¤ë©´ ê¸°ë³¸ particle ìˆ˜ëŠ” 100ê°œ, grid_N = 10
+    //¾Æ¹« ÀÔ·Â°ªÀÌ ¾ø´Ù¸é ±âº» particle ¼ö´Â 100°³, grid_N = 10
     Constant_Acceleration_Simulator() {
 
-        //ì…ìë“¤ ì´ˆê¸°í™”
+        //ÀÔÀÚµé ÃÊ±âÈ­
         srand((unsigned int)time(NULL));
         for (int i = 0; i < 100; i++) {
-            //0~99 ë‚œìˆ˜ ìƒì„±    
+            //0~99 ³­¼ö »ı¼º    
             int randomLocation_X = rand() % 100;
-            //0~49 ë‚œìˆ˜ ìƒì„±
+            //0~49 ³­¼ö »ı¼º
             int randomLocation_Y = rand() % 50;
 
-            //ìœ„ì¹˜ X : 0.0~ 0.99, ìœ„ì¹˜ Y : 0.5 ~ 0.99
+            //À§Ä¡ X : 0.0~ 0.99, À§Ä¡ Y : 0.5 ~ 0.99
             Particle2D tmp = Particle2D((float)randomLocation_X / 100.0, (float)randomLocation_Y / 100.0 + 0.5, 0, 0, 0, -0.0098);
             particles.push_back(tmp);
         }
 
-        //velocity grid ê·¸ë¦¬ê¸°
+        //velocity grid ±×¸®±â
         velocity_grid = MAC_Grid<Vector2D>(10);
 
-        //timestepì˜ default = 0.06
+        //timestepÀÇ default = 0.06
         timestep = 0.06;
     }
 
     Constant_Acceleration_Simulator(int particle_number, int grid_N) {
 
-        //ì…ìë“¤ ì´ˆê¸°í™”
+        //ÀÔÀÚµé ÃÊ±âÈ­
         srand((unsigned int)time(NULL));
         for (int i = 0; i < particle_number; i++) {
-            //0~99 ë‚œìˆ˜ ìƒì„±    
+            //0~99 ³­¼ö »ı¼º    
             int randomLocation_X = rand() % 100;
-            //0~49 ë‚œìˆ˜ ìƒì„±
+            //0~49 ³­¼ö »ı¼º
             int randomLocation_Y = rand() % 50;
 
-            //ìœ„ì¹˜ X : 0.0~ 0.99, ìœ„ì¹˜ Y : 0.5 ~ 0.99
+            //À§Ä¡ X : 0.0~ 0.99, À§Ä¡ Y : 0.5 ~ 0.99
             Particle2D tmp = Particle2D((float)randomLocation_X / 100.0, (float)randomLocation_Y / 100.0 + 0.5, 0, 0, 0, -0.098);
             particles.push_back(tmp);
         }
 
-        //velocity grid ê·¸ë¦¬ê¸°
+        //velocity grid ±×¸®±â
         velocity_grid = MAC_Grid<Vector2D>(grid_N);
 
-        //timestepì˜ default = 0.06
+        //timestepÀÇ default = 0.06
         timestep = 0.06;
     }
 
     void particle_simulation() {
-        //ì†ë„ update
+        //¼Óµµ update
         Update_particles_Velocity();
 
-        //ìœ„ì¹˜ update
+        //À§Ä¡ update
         Update_particles_Location();
 
     }
 
 
-    //ì…ìë“¤ì˜ ì†ë„ë¥¼ ëª¨ë‘ update
+    //ÀÔÀÚµéÀÇ ¼Óµµ¸¦ ¸ğµÎ update
     void Update_particles_Velocity() {
         for (int i = 0; i < particles.size(); i++) {
             this->particles[i].Update_particle_Velocity(timestep);
         }
     }
 
-    //ì…ìë“¤ì˜ ìœ„ì¹˜ë¥¼ ëª¨ë‘ update
+    //ÀÔÀÚµéÀÇ À§Ä¡¸¦ ¸ğµÎ update
     void Update_particles_Location() {
         for (int i = 0; i < particles.size(); i++) {
             this->particles[i].Update_particle_Location(timestep);
@@ -100,36 +100,39 @@ class Fluid_Simulator {
 
 public:
 
-    //particleë“¤ì„ ë‹´ì„ vector
+    //particleµéÀ» ´ãÀ» vector
     vector<Particle2D> particles;
     float timestep;
     int gridsize;
 
-    //grid í•œë³€ì˜ ê¸¸ì´
+    //grid ÇÑº¯ÀÇ ±æÀÌ
     float cellsize;
 
-    //cellë“¤ì˜ ì†ë„ë¥¼ ë‹´ì„ grid
+    //cellµéÀÇ ¼Óµµ¸¦ ´ãÀ» grid
     MAC_Grid<Vector2D> velocity_grid;
 
-    //cellë“¤ì˜ ê°€ì†ë„ë¥¼ ë‹´ì„ grid - ì™¸ë ¥
+    //cellµéÀÇ °¡¼Óµµ¸¦ ´ãÀ» grid - ¿Ü·Â
     MAC_Grid<Vector2D> bodyforce;
 
-    //cellë“¤ì˜ ì¤‘ì‹¬ì¢Œí‘œë¥¼ ë‹´ì„ grid
+    //cellµéÀÇ Áß½ÉÁÂÇ¥¸¦ ´ãÀ» grid
     MAC_Grid<Vector2D> cell_center_point;
 
-    //cellë³„ë¡œ ì†ë„ë¥¼ ë‹´ì„ë•Œ í•„ìš”í•œ weightë“¤ì„ ë‹´ì„ grid
+    //cellº°·Î ¼Óµµ¸¦ ´ãÀ»¶§ ÇÊ¿äÇÑ weightµéÀ» ´ãÀ» grid
     MAC_Grid<float> weight_velocity_grid;
+
+    //cellº°·Î particleÀÇ ¼ö¸¦ ´ãÀ» grid
+    MAC_Grid<int> the_number_of_particles_in_cell;
 
 
     Fluid_Simulator() {
-        //timestepì˜ default = 0.06
-        timestep = 0.06;
+        //timestepÀÇ default = 0.06
+        timestep = 0.000006;
 
         gridsize = 10;
 
-        cellsize = 1.0 / gridsize;
+        cellsize = 1.0 / (float)gridsize;
 
-        //velocity grid ì´ˆê¸°í™”
+        //velocity grid ÃÊ±âÈ­
         velocity_grid = MAC_Grid<Vector2D>(gridsize);
         for (int n = 0; n < (gridsize) * (gridsize); n++) {
             velocity_grid.cell_values.push_back(Vector2D());
@@ -138,62 +141,68 @@ public:
 
     Fluid_Simulator(int particle_number, int grid_N) {
 
-        //timestepì˜ default = 0.06
+        //timestepÀÇ default = 0.06
         timestep = 0.06;
 
         gridsize = grid_N;
 
-        cellsize = 1.0 / gridsize;
+        cellsize = 1.0 / (float)gridsize;
 
-        //ì…ìë“¤ ì´ˆê¸°í™”
+        //ÀÔÀÚµé ÃÊ±âÈ­
         srand((unsigned int)time(NULL));
         for (int i = 0; i < particle_number; i++) {
-            //0~99 ë‚œìˆ˜ ìƒì„±    
+            //0~99 ³­¼ö »ı¼º    
             int randomLocation_X = rand() % 100;
-            //0~49 ë‚œìˆ˜ ìƒì„±
+            //0~49 ³­¼ö »ı¼º
             int randomLocation_Y = rand() % 50;
 
-            //ìœ„ì¹˜ X : 0.0~ 0.99, ìœ„ì¹˜ Y : 0.5 ~ 0.99
+            //À§Ä¡ X : 0.0~ 0.99, À§Ä¡ Y : 0.5 ~ 0.99
             Particle2D tmp = Particle2D((float)randomLocation_X / 100.0, (float)randomLocation_Y / 100.0 + 0.5, 0, 0, 0, -0.098);
             particles.push_back(tmp);
         }
 
-        //velocity grid ì´ˆê¸°í™”
+        //velocity grid ÃÊ±âÈ­
         velocity_grid = MAC_Grid<Vector2D>(gridsize);
         for (int n = 0; n < (gridsize) * (gridsize); n++) {
             velocity_grid.cell_values.push_back(Vector2D());
         }
 
-        //body force ì´ˆê¸°í™”
+        //body force ÃÊ±âÈ­
         bodyforce = MAC_Grid<Vector2D>(gridsize);
         for (int n = 0; n < (gridsize) * (gridsize); n++) {
             bodyforce.cell_values.push_back(Vector2D());
         }
 
-        //cell_center_grid ì´ˆê¸°í™”
+        //cell_center_grid ÃÊ±âÈ­
         cell_center_point = MAC_Grid<Vector2D>(gridsize);
-        //cellë“¤ì—ë‹¤ê°€ cell_pointì •ë³´ ì‚½ì…
-        //1. cellì˜ ê°¯ìˆ˜ëŠ” gridsizeì˜ ì œê³±
+        //cellµé¿¡´Ù°¡ cell_pointÁ¤º¸ »ğÀÔ
+        //1. cellÀÇ °¹¼ö´Â gridsizeÀÇ Á¦°ö
         for (int v = 0; v < (gridsize) * (gridsize); v++) {
-            //2. (0,0) ì€ ( 1/gridsize , 1/ gridsize )
+            //2. (0,0) Àº ( 1/gridsize , 1/ gridsize )
             if (v == 0) {
                 cell_center_point.cell_values.push_back(Vector2D(cellsize / 2.0, cellsize / 2.0));
             }
-            //3. (i,j)ëŠ” ( 1/gridsize + i * gridsize , 1/gridsize + j* gridsize )
+            //3. (i,j)´Â ( 1/gridsize + i * gridsize , 1/gridsize + j* gridsize )
             else {
                 //3-1. v ( vector Index ) to (i,j)
                 int i = cell_center_point.get_cell_i_from_VectorIndex(v);
                 int j = cell_center_point.get_cell_j_from_VectorIndex(v);
 
-                //3-2. ì‹ ì ìš©
+                //3-2. ½Ä Àû¿ë
                 cell_center_point.cell_values.push_back(Vector2D(cellsize / 2.0 + i * cellsize, cellsize / 2.0 + j * cellsize));
             }
         }
 
-        //weight grid ì´ˆê¸°í™”
+        //weight grid ÃÊ±âÈ­
         weight_velocity_grid = MAC_Grid<float>(gridsize);
         for (int n = 0; n < (gridsize) * (gridsize); n++) {
             weight_velocity_grid.cell_values.push_back(0.0);
+        }
+
+        //cellº°·Î particleÀÇ ¼ö¸¦ ´ãÀ» grid
+        the_number_of_particles_in_cell = MAC_Grid<int>(gridsize);
+        for (int n = 0; n < (gridsize) * (gridsize); n++) {
+            the_number_of_particles_in_cell.cell_values.push_back( 0 );
         }
 
 
@@ -205,10 +214,10 @@ public:
         //particle to grid
         transfer_velocity_to_grid_from_particle();
 
-        //gridì— bodyforce ì¶”ê°€
+        //grid¿¡ bodyforce Ãß°¡
         add_body_force();
 
-        //bodyforceë¥¼ velocityì— ì ìš©
+        //bodyforce¸¦ velocity¿¡ Àû¿ë
         apply_bodyforce_to_Velocity();
 
         //grid to particle - Velocity
@@ -222,109 +231,140 @@ public:
 
     }
 
-    //bodyforceì— ì ìš©í•˜ê³  ì‹¶ì€ ì™¸ë ¥ ì¶”ê°€ - ì¤‘ë ¥
+    //bodyforce¿¡ Àû¿ëÇÏ°í ½ÍÀº ¿Ü·Â Ãß°¡ - Áß·Â
     void add_body_force() {
         for (int i = 0; i < (gridsize * gridsize); i++) {
-            bodyforce.cell_values[i] = Vector2D(0.0, -0.000000098);
+            bodyforce.cell_values[i] = Vector2D(0.0, -0.0000098);
         }
     }
 
-    //bodyforceë¥¼ velocity gridì— ì ìš© - ë“±ê°€ì†ë„
+    //bodyforce¸¦ velocity grid¿¡ Àû¿ë - µî°¡¼Óµµ
     void apply_bodyforce_to_Velocity() {
         for (int i = 0; i < (gridsize * gridsize); i++) {
-
-            //if ( i == 200 ) std::cout << velocity_grid.cell_values[i].X << " " << velocity_grid.cell_values[i].Y << endl;
             velocity_grid.cell_values[i] = velocity_grid.cell_values[i] + bodyforce.cell_values[i] * timestep;
-            //if( i == 200 ) std::cout << velocity_grid.cell_values[i].X << " " << velocity_grid.cell_values[i].Y << endl;
-            //if( i == 200 )std::cout << endl;
         }
     }
 
-    //ì¼ê´„ì ìœ¼ë¡œ ê°™ì€ ê°’ì„ ì „ë‹¬ë°›ì•„ë„ ë˜ì§€ë§Œ, ì¼ë‹¨ í¬í•¨ëœ cellì˜ ì •ë³´ë¥¼ ë°›ì„ ìˆ˜ ìˆê²Œ í•´ë†“ìŒ.
+    //ÀÏ°ıÀûÀ¸·Î °°Àº °ªÀ» Àü´Ş¹Ş¾Æµµ µÇÁö¸¸, ÀÏ´Ü Æ÷ÇÔµÈ cellÀÇ Á¤º¸¸¦ ¹ŞÀ» ¼ö ÀÖ°Ô ÇØ³õÀ½.
     void transfer_bodyforce_to_particle_from_grid() {
         for (int p = 0; p < particles.size(); p++) {
-            //1. particleì´ ì–´ë”” cellì¸ì§€ íŒŒì•…
+            //1. particleÀÌ ¾îµğ cellÀÎÁö ÆÄ¾Ç
             Vector2D i_j = bodyforce.get_cell_i_j_from_world(particles[p].Location);
 
-            //2. bodyforce cellê°’ì„ Acccelerationì— ì „ë‹¬
+            //2. bodyforce cell°ªÀ» Accceleration¿¡ Àü´Ş
             particles[p].Acceleration = bodyforce.cell_values[bodyforce.get_VectorIndex_from_cell(i_j)];
         }
     }
 
-    //ì…ìë“¤ì˜ ì†ë„ë¥¼ ëª¨ë‘ update
+    //ÀÔÀÚµéÀÇ ¼Óµµ¸¦ ¸ğµÎ update
     void Update_particles_Velocity() {
         for (int i = 0; i < particles.size(); i++) {
             this->particles[i].Update_particle_Velocity(timestep);
         }
     }
 
-    //ì…ìë“¤ì˜ ìœ„ì¹˜ë¥¼ ëª¨ë‘ update
+    //ÀÔÀÚµéÀÇ À§Ä¡¸¦ ¸ğµÎ update
     void Update_particles_Location() {
         for (int i = 0; i < particles.size(); i++) {
             this->particles[i].Update_particle_Location(timestep);
         }
     }
 
-    //particleì˜ valueë¥¼ ëª¨ë“  gridë¡œ ì „ë‹¬í•˜ëŠ” í•¨ìˆ˜
+    //particleÀÇ value¸¦ ¸ğµç grid·Î Àü´ŞÇÏ´Â ÇÔ¼ö
     void transfer_velocity_to_grid_from_particle() {
+        ////0. the number of particles in cell grid ÃÊ±âÈ­
+        //for (int i = 0; i < gridsize * gridsize; i++) {
+        //    the_number_of_particles_in_cell.cell_values[i] = 0;
+        //}
+
+        //for (int p = 0; p < particles.size(); p++) {
+        //    //1. particle cellÁÂÇ¥ Ã£±â
+        //    Vector2D i_j = velocity_grid.get_cell_i_j_from_world(particles[p].Location);
+
+        //    //2. cell¿¡ particleÀÇ ¼ö ´ã±â
+        //    the_number_of_particles_in_cell.cell_values[the_number_of_particles_in_cell.get_VectorIndex_from_cell(i_j)]++;
+
+        //    //3. velocity cell°ªÀ» ÁÖº¯ grid·Î Àü´Ş
+        //    extrapolation_value_to_grid_from_particle(velocity_grid, particles[p].Location, velocity_grid.cell_values[velocity_grid.get_VectorIndex_from_cell(i_j)]);
+
+        //}
+
+        ////4. particleÀÇ ¼ö¸¸Å­ ¼Óµµ¿¡¼­ ³ª´«´Ù.
+        //for (int i = 0; i < gridsize * gridsize; i++) {
+        //    if (the_number_of_particles_in_cell.cell_values[i] == 0) continue;
+        //    velocity_grid.cell_values[i] = velocity_grid.cell_values[i] / (float)the_number_of_particles_in_cell.cell_values[i];
+        //}
+
+        //========================================
+
         for (int p = 0; p < particles.size(); p++) {
-            //1. particle cellì¢Œí‘œ ì°¾ê¸°
+            //1. particle cell ÁÂÇ¥ Ã£±â
             Vector2D i_j = velocity_grid.get_cell_i_j_from_world(particles[p].Location);
 
-            //2. velocity cellê°’ì„ ì£¼ë³€ gridë¡œ ì „ë‹¬
-            extrapolation_value_to_grid_from_particle(velocity_grid, particles[p].Location, velocity_grid.cell_values[velocity_grid.get_VectorIndex_from_cell(i_j)]);
+            //2. particle°ú cellÀÇ ÁßÁ¡ ÁÂÇ¥ °Å¸® ±¸ÇÏ±â
+            float weight = 1.0 / particles[p].get_distance_from_point(cell_center_point.cell_values[ cell_center_point.get_VectorIndex_from_cell( i_j ) ] );
+            weight_velocity_grid.cell_values[weight_velocity_grid.cell_values[cell_center_point.get_VectorIndex_from_cell(i_j)]] = weight_velocity_grid.cell_values[weight_velocity_grid.cell_values[cell_center_point.get_VectorIndex_from_cell(i_j)]] + weight;
 
+            //3. weight¸¦ particleÀÇ ¼Óµµ¿Í °öÇØ¼­ velocity_grid¿¡ ´õÇÏ±â
+            velocity_grid.cell_values[velocity_grid.get_VectorIndex_from_cell(i_j)] = velocity_grid.cell_values[velocity_grid.get_VectorIndex_from_cell(i_j)] + velocity_grid.cell_values[velocity_grid.get_VectorIndex_from_cell(i_j)] * weight;
         }
+
+        //4. weightÃÑÇÕÀ» ¸ğµç grid¿Í ³ª´²ÁÖ±â
+        for (int i = 0; i < gridsize * gridsize; i++) {
+            if (weight_velocity_grid.cell_values[i] == 0) { continue; }
+            velocity_grid.cell_values[i] = velocity_grid.cell_values[i] / weight_velocity_grid.cell_values[i];
+        }
+
     }
 
-    //particleì˜ ì¢Œí‘œì— ë”°ë¼ valueê°’ì„ ì£¼ë³€ gridë¡œë¶€í„° ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
+    //particleÀÇ ÁÂÇ¥¿¡ µû¶ó value°ªÀ» ÁÖº¯ grid·ÎºÎÅÍ ¹Ş¾Æ¿À´Â ÇÔ¼ö
     template <class T>
     T interpolate_value_to_particle_from_grid(MAC_Grid<T> grid, Vector2D particle) {
-        //1. cell ì•ˆì—ì„œì˜ particleì˜ ìœ„ì¹˜ì°¾ê¸°
-        //1-1. particleì˜ cellì¢Œí‘œ ì°¾ê¸°
+        //1. cell ¾È¿¡¼­ÀÇ particleÀÇ À§Ä¡Ã£±â
+        //1-1. particleÀÇ cellÁÂÇ¥ Ã£±â
         Vector2D i_j = grid.get_cell_i_j_from_world(particle);
-        //1-2. particleê³¼ cellì˜ ì™¼ìª½ë©´, ì•„ë«ë©´ê³¼ì˜ ê±°ë¦¬ êµ¬í•˜ê¸°
+        //1-2. particle°ú cellÀÇ ¿ŞÂÊ¸é, ¾Æ·§¸é°úÀÇ °Å¸® ±¸ÇÏ±â
         float i_frac = particle.X - i_j.X * cellsize;
         float j_frac = particle.Y - i_j.Y * cellsize;
 
-        //2. í˜„ì¬ cellì„ ê¸°ì¤€ìœ¼ë¡œ ì˜¤ë¥¸ìª½, ìœ„, ì˜¤ë¥¸ìª½ìœ„ cellë“¤ ë¶ˆëŸ¬ì˜¤ê¸°
+        //2. ÇöÀç cellÀ» ±âÁØÀ¸·Î ¿À¸¥ÂÊ, À§, ¿À¸¥ÂÊÀ§ cellµé ºÒ·¯¿À±â
         float i_plus1 = grid.CLAMP(i_j.X + 1, 0, gridsize - 1);
-        float j_plus1 = grid.CLAMP(i_j.Y + 1, 0, gridsize - 1);                         
+        float j_plus1 = grid.CLAMP(i_j.Y + 1, 0, gridsize - 1);
         T value_i_j = grid.cell_values[grid.get_VectorIndex_from_cell(i_j)];
         T value_iplus1_j = grid.cell_values[grid.get_VectorIndex_from_cell(Vector2D(i_plus1, i_j.Y))];
         T value_i_jplus1 = grid.cell_values[grid.get_VectorIndex_from_cell(Vector2D(i_j.X, j_plus1))];
         T value_iplus1_jplus1 = grid.cell_values[grid.get_VectorIndex_from_cell(Vector2D(i_plus1, j_plus1))];
 
-        //ë¹„ìœ¨ì— ë”°ë¥¸ interpolate
-        //i,j ì™€ i+1,j ë³´ê°„
+        //ºñÀ²¿¡ µû¸¥ interpolate
+        //i,j ¿Í i+1,j º¸°£
         T value_y0 = value_i_j * (cellsize - i_frac) / cellsize + value_iplus1_j * i_frac / cellsize;
-        //i,j+1ê³¼ i+1,j+1ë³´ê°„
+        //i,j+1°ú i+1,j+1º¸°£
         T value_y1 = value_i_jplus1 * (cellsize - i_frac) / cellsize + value_iplus1_jplus1 * i_frac / cellsize;
 
-        //ë‘ ê°’ì„ yë¡œ ë³´ê°„
+        //µÎ °ªÀ» y·Î º¸°£
         T result = value_y0 * (cellsize - j_frac) / cellsize + value_y1 * j_frac / cellsize;
         return result;
     }
 
     template <class T>
     void extrapolation_value_to_grid_from_particle(MAC_Grid<T>& grid, Vector2D particle, T value) {
-        //1. cell ì•ˆì—ì„œì˜ particleì˜ ìœ„ì¹˜ì°¾ê¸°
-        //1-1. particleì˜ cellì¢Œí‘œ ì°¾ê¸°
+        //1. cell ¾È¿¡¼­ÀÇ particleÀÇ À§Ä¡Ã£±â
+        //1-1. particleÀÇ cellÁÂÇ¥ Ã£±â
         Vector2D i_j = grid.get_cell_i_j_from_world(particle);
-        //1-2. particleê³¼ cellì˜ ì™¼ìª½ë©´, ì•„ë«ë©´ê³¼ì˜ ê±°ë¦¬ êµ¬í•˜ê¸°
+        //1-2. particle°ú cellÀÇ ¿ŞÂÊ¸é, ¾Æ·§¸é°úÀÇ °Å¸® ±¸ÇÏ±â
         float i_frac = particle.X - i_j.X * cellsize;
         float j_frac = particle.Y - i_j.Y * cellsize;
 
 
-        //2. í˜„ì¬ cellì„ ê¸°ì¤€ìœ¼ë¡œ ì˜¤ë¥¸ìª½, ìœ„, ì˜¤ë¥¸ìª½ìœ„ cellë“¤ ë¶ˆëŸ¬ì˜¤ê¸°
+        //2. ÇöÀç cellÀ» ±âÁØÀ¸·Î ¿À¸¥ÂÊ, À§, ¿À¸¥ÂÊÀ§ cellµé ºÒ·¯¿À±â
         float i_plus1 = grid.CLAMP(i_j.X + 1, 0, gridsize - 1);
         float j_plus1 = grid.CLAMP(i_j.Y + 1, 0, gridsize - 1);
 
-        //yë°©í–¥ìœ¼ë¡œ extrapolation - interpolationì˜ ì—­ìˆœ
+        //y¹æÇâÀ¸·Î extrapolation - interpolationÀÇ ¿ª¼ø
         T value_y0 = value * (cellsize - j_frac) / cellsize;
         T value_y1 = value * j_frac / cellsize;
 
-        //xë°©í–¥ìœ¼ë¡œ extrapolation
+        //x¹æÇâÀ¸·Î extrapolation
         T value_i_j = value_y0 * (cellsize - i_frac) / cellsize;
         T value_iplus1_j = value_y0 * i_frac / cellsize;
         T value_i_jplus1 = value_y1 * (cellsize - i_frac) / cellsize;
@@ -339,12 +379,63 @@ public:
     }
 
     void transfer_Velocity_to_particle_from_grid() {
+
+        //for (int p = 0; p < particles.size(); p++) {
+        //    //1. particleÀÌ ¼ÓÇÑ cell Ã£±â
+        //    Vector2D i_j = velocity_grid.get_cell_i_j_from_world(particles[p].Location);
+
+        //    //2. cell Á¤º¸¸¦ particle¿¡°Ô Àü´Ş
+        //    particles[p].Velocity = interpolate_value_to_particle_from_grid(velocity_grid, particles[p].Location);
+
+        //}
+        //================================
         for (int p = 0; p < particles.size(); p++) {
-            //1. particleì´ ì†í•œ cell ì°¾ê¸°
+            //1. particleÀÌ ¼ÓÇÑ cell Ã£±â
             Vector2D i_j = velocity_grid.get_cell_i_j_from_world(particles[p].Location);
 
-            //2. cell ì •ë³´ë¥¼ particleì—ê²Œ ì „ë‹¬
-            particles[p].Velocity = interpolate_value_to_particle_from_grid(velocity_grid, particles[p].Location);
+            //2. particleÀÇ weight´Ù½Ã ±¸ÇÏ±â
+            float weight = 1.0 / particles[p].get_distance_from_point(cell_center_point.cell_values[cell_center_point.get_VectorIndex_from_cell(i_j)]);
+
+            //3. particleÀÇ velocity¸¦ weightÃÑÇÕ / weight¶û °öÇØ¼­ ´ëÀÔ
+            particles[p].Velocity = velocity_grid.cell_values[velocity_grid.get_VectorIndex_from_cell(i_j)] * weight_velocity_grid.cell_values[velocity_grid.get_VectorIndex_from_cell(i_j)] / weight;
+        }
+    }
+
+
+    //====================Debugging=========================
+
+    void print_particles(Particle2D particle) {
+        cout << "===========================simulation start=====================================";
+        cout << endl;
+        cout << "this is 2 particle" << endl;
+        cout << "Location :" << particle.Location.X << "," << particle.Location.Y << endl;
+        cout << "Velocity :" << particle.Velocity.X << "," << particle.Velocity.Y << endl;
+        cout << "Acceleration :" << particle.Acceleration.X << "," << particle.Acceleration.Y << endl;
+        cout << endl;
+        cout << "===========================simulation end=====================================" << endl << endl;
+    }
+
+    template <class T>
+    void print_grid_Vector(MAC_Grid<T> grid) {
+        cout << endl;
+        for (int i = 0; i < gridsize * gridsize; i++) {
+            cout << grid.cell_values[i].X << "," << grid.cell_values[i].Y;
+            cout << std::left << "===";
+            if (i % gridsize == gridsize - 1) {
+                cout << endl;
+            }
+        }
+    }
+
+    template <class T>
+    void print_grid_Scalar(MAC_Grid<T> grid) {
+        cout << endl;
+        for (int i = 0; i < gridsize * gridsize; i++) {
+            cout.width(15);
+            cout << std::left << grid.cell_values[i] << " ";
+            if (i % gridsize == gridsize - 1) {
+                cout << endl;
+            }
         }
     }
 

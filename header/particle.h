@@ -4,7 +4,7 @@
 
 #include "myVector2D.h"
 
-//ìœ„ì¹˜, ì†ë„ë¥¼ ê°€ì§€ê³  ìžˆëŠ” ìž…ìž í´ëž˜ìŠ¤
+//À§Ä¡, ¼Óµµ¸¦ °¡Áö°í ÀÖ´Â ÀÔÀÚ Å¬·¡½º
 class Particle2D {
 
 public:
@@ -21,17 +21,17 @@ public:
         Acceleration = Vector2D();
     }
 
-    Particle2D( float Location_X, float Location_Y, float Velocity_X, float Velocity_Y, float Acceleration_X, float Acceleration_Y ) {
+    Particle2D(float Location_X, float Location_Y, float Velocity_X, float Velocity_Y, float Acceleration_X, float Acceleration_Y) {
         Location = Vector2D(Location_X, Location_Y);
         Velocity = Vector2D(Velocity_X, Velocity_Y);
-        Acceleration = Vector2D( Acceleration_X, Acceleration_Y );
+        Acceleration = Vector2D(Acceleration_X, Acceleration_Y);
     }
 
     ~Particle2D() {
 
     }
 
-    // ì–´ë–¤ í•œ ì ê³¼ì˜ ê±°ë¦¬ êµ¬í•˜ê¸°
+    // ¾î¶² ÇÑ Á¡°úÀÇ °Å¸® ±¸ÇÏ±â
     float get_distance_from_point(Vector2D point) {
         float distance_pow = (Location.X - point.X) * (Location.X - point.X) + (Location.Y - point.Y) * (Location.Y - point.Y);
         return sqrt(distance_pow);
@@ -39,13 +39,13 @@ public:
 
 
 
-    //=================ë“±ê°€ì†ë„======================================
-    //ìž…ìž í•˜ë‚˜ì˜ ì†ë„ë¥¼ update
+    //=================µî°¡¼Óµµ======================================
+    //ÀÔÀÚ ÇÏ³ªÀÇ ¼Óµµ¸¦ update
     void Update_particle_Velocity(float timestep) {
         this->Velocity = this->Velocity + this->Acceleration * timestep;
     }
 
-    //ìž…ìž í•˜ë‚˜ì˜ Locationì„ update   x = x + vt + 1/2*a*(t^2)
+    //ÀÔÀÚ ÇÏ³ªÀÇ LocationÀ» update   x = x + vt + 1/2*a*(t^2)
     void Update_particle_Location(float timestep) {
         this->Location = this->Location + this->Velocity * timestep + this->Acceleration * timestep * timestep * 0.5;
 

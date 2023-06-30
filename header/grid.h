@@ -10,7 +10,7 @@ class MAC_Grid {
 public:
 
 	int gridsize;
-	//ê°’ë“¤ì„ ë‹´ì„ vector
+	//°ªµéÀ» ´ãÀ» vector
 	vector<T> cell_values;
 
 	MAC_Grid() {
@@ -21,27 +21,27 @@ public:
 		gridsize = grid_N;
 	}
 
-	//cellì¢Œí‘œë¥¼ vector indexë¡œ ë³€ê²½
+	//cellÁÂÇ¥¸¦ vector index·Î º¯°æ
 	int get_VectorIndex_from_cell(Vector2D i_j) {
 		return i_j.X + i_j.Y * gridsize;
 	}
 
-	//cell vector indexë¥¼ cellì¢Œí‘œë¡œ ë³€ê²½
+	//cell vector index¸¦ cellÁÂÇ¥·Î º¯°æ
 	int get_cell_i_from_VectorIndex(int vectorIndex) {
 		return vectorIndex % gridsize;
 	}
 
-	//cell vector indexë¥¼ cellì¢Œí‘œë¡œ ë³€ê²½
+	//cell vector index¸¦ cellÁÂÇ¥·Î º¯°æ
 	int get_cell_j_from_VectorIndex(int vectorIndex) {
 		return vectorIndex / gridsize;
 	}
 
-	// particleì˜ world_x ì¢Œí‘œë¥¼ cell ì¢Œí‘œë¡œ ë³€ê²½
+	// particleÀÇ world_x ÁÂÇ¥¸¦ cell ÁÂÇ¥·Î º¯°æ
 	int get_cell_i_from_world(float particle_x) {
 		for (int i = 0; i < gridsize; i++) {
-			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
+			//ex 0.6 º¸´Ù Å¬ ¶§,
 			if (1.0 / (float)gridsize * i < particle_x) {
-				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
+				//ex 0.7º¸´Ù ÀÛÀ¸¸é
 				if (1.0 / (float)gridsize * (i + 1) > particle_x) {
 					return i;
 				}
@@ -50,12 +50,12 @@ public:
 		}
 	}
 
-	// particleì˜ world_y ì¢Œí‘œë¥¼ cell ì¢Œí‘œë¡œ ë³€ê²½
+	// particleÀÇ world_y ÁÂÇ¥¸¦ cell ÁÂÇ¥·Î º¯°æ
 	int get_cell_j_from_world(float particle_y) {
 		for (int j = 0; j < gridsize; j++) {
-			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
+			//ex 0.6 º¸´Ù Å¬ ¶§,
 			if (1.0 / (float)gridsize * j < particle_y) {
-				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
+				//ex 0.7º¸´Ù ÀÛÀ¸¸é
 				if (1.0 / (float)gridsize * (j + 1) > particle_y) {
 					return j;
 				}
@@ -63,14 +63,14 @@ public:
 		}
 	}
 
-	//ì›”ë“œì¢Œí‘œë¥¼ ë°›ì•„ì„œ í•œë²ˆì— (i,j)ë¥¼ returní•˜ëŠ” í•¨ìˆ˜
+	//¿ùµåÁÂÇ¥¸¦ ¹Ş¾Æ¼­ ÇÑ¹ø¿¡ (i,j)¸¦ returnÇÏ´Â ÇÔ¼ö
 	Vector2D get_cell_i_j_from_world(Vector2D particle) {
 		Vector2D result = Vector2D();
 
 		for (int i = 0; i < gridsize; i++) {
-			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
+			//ex 0.6 º¸´Ù Å¬ ¶§,
 			if (1.0 / (float)gridsize * i < particle.X) {
-				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
+				//ex 0.7º¸´Ù ÀÛÀ¸¸é
 				if (1.0 / (float)gridsize * (i + 1) > particle.X) {
 					result.X = (float)i;
 				}
@@ -78,9 +78,9 @@ public:
 		}
 
 		for (int j = 0; j < gridsize; j++) {
-			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
+			//ex 0.6 º¸´Ù Å¬ ¶§,
 			if (1.0 / (float)gridsize * j < particle.Y) {
-				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
+				//ex 0.7º¸´Ù ÀÛÀ¸¸é
 				if (1.0 / (float)gridsize * (j + 1) > particle.Y) {
 					result.Y = (float)j;
 				}
@@ -91,7 +91,7 @@ public:
 
 	}
 
-	//cell ì¢Œí‘œê°€ í˜„ì¬ ì •ì˜ëœ cell ì•ˆì— ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
+	//cell ÁÂÇ¥°¡ ÇöÀç Á¤ÀÇµÈ cell ¾È¿¡ ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
 	float CLAMP(float d, float min, float max) {
 		float t = d < min ? min : d;
 		return t > max ? max : t;
