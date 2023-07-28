@@ -2,21 +2,21 @@
 
 class Vector2D {
 
-public:
+public :
 
-    //º¤ÅÍ ¼ººĞ
+    //ë²¡í„° ì„±ë¶„
     float X;
     float Y;
 
 
-    //»ı¼ºÀÚ - ¾Æ¹« ÀÔ·ÂÀÌ ¾ø´Ù¸é ¿µº¤ÅÍ
+    //ìƒì„±ì - ì•„ë¬´ ì…ë ¥ì´ ì—†ë‹¤ë©´ ì˜ë²¡í„°
     Vector2D() {
-        X = 0;
-        Y = 0;
+        X=0;
+        Y=0;
     }
 
-    //»ı¼ºÀÚ - ¼ººĞ°ªÀÌ ÁÖ¾îÁö¸é ±×´ë·Î 
-    Vector2D(float x, float y) {
+    //ìƒì„±ì - ì„±ë¶„ê°’ì´ ì£¼ì–´ì§€ë©´ ê·¸ëŒ€ë¡œ 
+    Vector2D( float x, float y ) {
         X = x;
         Y = y;
     }
@@ -25,7 +25,7 @@ public:
 
     }
 
-    //scalar¿ÍÀÇ ¿¬»ê
+    //scalarì™€ì˜ ì—°ì‚°
     Vector2D operator+ (const float& c)
     {
         Vector2D tmp = Vector2D();
@@ -58,12 +58,12 @@ public:
         return tmp;
     }
 
-    //¿¬»êÀÚ ÀçÁ¤ÀÇ - element wise
+    //ì—°ì‚°ì ì¬ì •ì˜ - element wise
     Vector2D operator+ (const Vector2D& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = X + c.X;
-        tmp.Y = Y + c.Y;
+        tmp.Y = Y + c.Y; 
         return tmp;
     }
 
