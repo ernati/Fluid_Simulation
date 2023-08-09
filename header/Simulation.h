@@ -9,6 +9,7 @@
 #include <Eigen/SparseCore>
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Dense>
+#include <random>
 
 //난수 생성
 #include<cstdlib> //rand(), srand()
@@ -139,6 +140,9 @@ public:
     ////cell별로 속도를 담을때 필요한 weight들을 담을 grid
     //MAC_Grid<float> weight_velocity_grid;
 
+    //사용할 행렬 변수들
+    Eigen::SparseMatrix<double> A;
+
 
     Fluid_Simulator_Grid() {
         //timestep의 default = 0.06
@@ -203,7 +207,7 @@ public:
         //cell_particle_number 초기화
         cell_particle_number = MAC_Grid<float>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-			cell_particle_number.cell_values.push_back(0);
+			cell_particle_number.cell_values.push_back(0.0);
 		}
 
         //velocity_difference_grid 초기화
@@ -213,6 +217,9 @@ public:
 			velocity_difference_X_grid.cell_values.push_back(0.0);
             velocity_difference_Y_grid.cell_values.push_back(0.0);
 		}
+
+        // 행렬 초기화
+        A = Eigen::SparseMatrix<double>(cell_number, cell_number);
 
         ////cell_center_grid 초기화
         //cell_center_point = MAC_Grid<Vector2D>(gridsize);
@@ -310,7 +317,7 @@ public:
         }
     }
 
-    int check_location_for_boundary(Vector2D& location) {
+    int check_location_for_boundary(Vector2D location) {
         if (location.X < 0) { return 1; }
         if (location.X > 1) { return 2; }
         if (location.Y < 0) { return 3; }
@@ -355,7 +362,7 @@ public:
 
     //==============================transferVelocity=================================
 
-    int check_particle_on_the_edge( Vector2D& Location, float threshold ) {
+    int check_particle_on_the_edge( Vector2D Location, float threshold ) {
         //0. edge들과의 거리 체크
         Vector2D i_j = previous_velocity_grid.get_cell_i_j_from_world(Location);
         float left_distance_x = abs(Location.X - delta_x * i_j.X);
@@ -389,6 +396,9 @@ public:
         for (int p = 0; p < particles.size(); p++) {
             //1. particle cell좌표 찾기
             Vector2D i_j = previous_velocity_grid.get_cell_i_j_from_world(particles[p].Location);
+
+            //cell 내부 particle이 8개 초과일 경우 밑의 과정 생략
+            if ( cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] > 9 ) { continue; } 
 
             //2. cell에 포함된 particle 수 세기
             cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] + 1.0;
@@ -493,8 +503,15 @@ public:
             //1. particle이 속한 cell 찾기
             Vector2D i_j = next_velocity_grid.get_cell_i_j_from_world(particles[p].Location);
 
-            //2. cell 정보를 particle에게 전달
+            //난수 준비
+	        std::random_device rd;
+	        std::mt19937 gen(rd());
+            std::uniform_int_distribution<int> dist(0, 100);
+
+
+            //2. cell 정보를 particle에게 전달 - 랜덤벡터 더하기
             particles[p].Velocity = next_velocity_grid.cell_values[next_velocity_grid.get_VectorIndex_from_cell(i_j)];
+            //particles[p].Velocity = next_velocity_grid.cell_values[next_velocity_grid.get_VectorIndex_from_cell(i_j)] + Vector2D(((float)dist(gen) - 50.0) / 10000.0, ((float)dist(gen) - 50.0) / 10000.0);
 
 
             //particles[p].Velocity = interpolate_value_to_particle_from_grid(previous_velocity_grid, particles[p].Location);
@@ -597,16 +614,25 @@ public:
     //==============================pressure_solve=================================
     void pressure_solve(float threshold_distance) {
 
+        ////사용할 행렬 변수들
+        //Eigen::SparseMatrix<double> A;
+
+        ////행렬 초기화
+        //A = Eigen::SparseMatrix<double>(cell_number, cell_number);
+
+        //solver
+        Eigen::BiCGSTAB<Eigen::SparseMatrix<double>> cg_solver;
+
 
         //0. 압력 계수 및 행렬 선언
         float pressure_coefficient = timestep / density;
 
-        Eigen::VectorXd x(cell_number), b(cell_number);
-
-        Eigen::SparseMatrix<double> A(cell_number, cell_number);
-
-        //solver
-        Eigen::BiCGSTAB<Eigen::SparseMatrix<double>> cg_solver;
+        Eigen::VectorXd x, b;
+        x = Eigen::VectorXd(cell_number);
+        b = Eigen::VectorXd(cell_number);
+        
+        //올바른 참조를 위해 0으로 초기화
+        A.setZero();
 
         //1. Ax=b에서 A 작성 - 입자 간의 거리 측정
         for (int i = 0; i < cell_number; i++) {
@@ -634,8 +660,6 @@ public:
                     //i나 j 중 하나가 particle을 가지고 있지 않다면
                     else {
                         A.insert(i, j) = 0.0; A.insert(j, i) = 0.0;
-
-
 
                     }
                 }
@@ -690,6 +714,10 @@ public:
             //4-2. new vel에다가 입력하기
             next_velocity_grid.cell_values[i] = Vector2D(new_vel_x, new_vel_y);
         }
+
+
+        //메모리 반납
+        
 
     }
 
@@ -850,10 +878,10 @@ public:
     }
 
     void boundary_work(Particle2D& particle) {
-        particle.Location.X = 0.5;
+        //particle.Location.X = 0.5;
         particle.Velocity.X = 0.0;
 
-        particle.Location.Y = 0.5;
+        particle.Location.Y = 0.1;
         particle.Velocity.Y = 0.0;
     }
 
