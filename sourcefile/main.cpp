@@ -32,7 +32,7 @@ GLuint vbo;
 int time_idle;
 
 //simulation 선언
-Fluid_Simulator_Grid simulation;
+Fluid_Simulator_Grid* simulation;
 
 //number를 조절하면 particle 수가 바뀐다.
 int number = 1000;
@@ -46,21 +46,52 @@ Vector2D box_line[4];
 //grid_N을 조절하면 grid 수가 바뀐다.
 int grid_N = 40;
 
+//시뮬레이션 상태를 조절할 option
+int Option = 3;
+
+bool isStart = false;
+bool isFluidMode = false;
+bool isParticleMode = true;
+
+//simulation의 particle들의 위치를 points에 저장
+void pushback_SimulationPoints_to_Points() {
+	points.clear();
+	for (int i = 0; i < number; i++) {
+		points.push_back(simulation->particles[i].Location);
+	}
+}
+
+void pushback_color() {
+	color.clear();
+
+	for (int i = 0; i < number; i++) {
+		color.push_back(vec3(0.0f, 0.0f, 0.0f));
+	}
+
+	for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
+		color.push_back(vec3(0.0f, 0.0f, 0.0f));
+	}
+
+	//fluid mode는 blue
+	for (int i = 0; i < simulation->fluid_cell_center_point.size(); i++) {
+		color.push_back(vec3(0.0f, 0.0f, 1.0f));
+	}
+}
+
+void Update_Points() {
+	for (int i = 0; i < simulation->particles.size(); i++) {
+			points[i] = simulation->particles[i].Location;
+	}
+}
+
 void init(void) {
 	
 	//simulation 실행 및 입자들 생성
-	simulation = Fluid_Simulator_Grid(number, grid_N);
+	simulation = new Fluid_Simulator_Grid(number, grid_N);
 
-	//particles에서 particle들의 위치만 뺴와서 points들에 저장, color는 black 고정
-	for (int i = 0; i < number; i++) {
-		points.push_back(simulation.particles[i].Location);
-		color.push_back( vec3(0.0f, 0.0f, 0.0f) );
-		//printf("%f %f\n", points[i].x, points[i].y);
-	}
+	pushback_SimulationPoints_to_Points();
 
-	for (int i = 0; i < 4 + 4*(grid_N-1); i++) {
-		color.push_back( vec3(0.0f, 0.0f, 0.0f) );
-	}
+	pushback_color();
 
 	//bbox 선언
 	bbox = Box(0.0, 1.0, 0.0, 1.0);
@@ -83,20 +114,20 @@ void init(void) {
 	glGenBuffers(1, &(vbo));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation.fluid_cell_center_point.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
 
 	//particle들 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * number , &points[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points.size() , &points[0]);
 	//box 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number, sizeof(box_line), box_line);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size(), sizeof(box_line), box_line);
 	//grid 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line), sizeof(Vector2D) * grid_line.size(), &grid_line[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line), sizeof(Vector2D) * grid_line.size(), &grid_line[0]);
 
 	//fluid cell center point 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation.fluid_cell_center_point.size(), &simulation.fluid_cell_center_point[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point.size(), &simulation->fluid_cell_center_point[0]);
 
 	//color 할당
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * color.size(), &color[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * color.size(), &color[0]);
 
 	//load shaders
 	GLuint program = InitShader("vshader_2dBezier.glsl", "fshader_2dBezier.glsl");
@@ -126,7 +157,6 @@ void reshape(int width, int height)
 
 
 void keyboard(unsigned char key, int x, int y) {
-	float speed = 0.05;
 	switch (key) {
 	case 'q':
 		exit(EXIT_SUCCESS);
@@ -150,27 +180,10 @@ void idle(void)
 
 	//0.06초 마다 particle 위치 update
 	if (time_idle % 60 == 0) {
-		simulation.particle_simulation();
-
-		//위치 update한 걸 opengl에도 적용
-		for (int i = 0; i < simulation.particles.size(); i++) {
-			points[i] = simulation.particles[i].Location;
+		if (isStart) {
+			simulation->particle_simulation();
+			Update_Points();
 		}
-
-		////오류발생 확인
-		//for (int i=0; i < simulation.particles.size(); i++) {
-		//	cout << i << "번째 particle의 속도 :" << points[i].X << " " << points[i].Y << endl;
-		//}
-
-
-		////오류발생 확인
-		//for (int i=0; i < simulation.particles.size(); i++) {
-		//	if (points[i].X > 1 || points[i].X < 0 || points[i].Y > 1 || points[i].Y < 0) {
-		//		cout << i << "번째 particle의 위치 :" << points[i].X << " " << points[i].Y << endl;
-		//		cout <<  " error : " << i << "번째 particle이 box를 벗어났습니다. " << endl;
-		//	}
-		//}
-
 	}
 
 	glutPostRedisplay();
@@ -188,27 +201,63 @@ void display() {
 
 	//바뀐 좌표 다시 메모리에 넣기
 	glBindVertexArray(vao);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * number, &points[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation.fluid_cell_center_point.size(), &simulation.fluid_cell_center_point[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points.size(), &points[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point.size(), &simulation->fluid_cell_center_point[0]);
 
 	glPointSize(3.0);
-
-	//particle 그리기
-	//glDrawArrays(GL_POINTS, 0, number);
+	
+	if (isStart) {
+		if (isParticleMode) { glDrawArrays(GL_POINTS, 0, points.size()); }
+	}
 
 	//box 그리기
 	glLineWidth(0.1);
-	glDrawArrays(GL_LINE_LOOP, number, 4);
+	glDrawArrays(GL_LINE_LOOP, points.size(), 4);
 
 	//grid 그리기
-	glDrawArrays(GL_LINES, number + 4, 4 * (grid_N-1));
+	glDrawArrays(GL_LINES, points.size() + 4, 4 * (grid_N-1));
 
 	glPointSize(10.0);
-	glDrawArrays(GL_POINTS, number + 4 + 4 * (grid_N - 1), simulation.fluid_cell_center_point.size() );
+	if (isStart) {
+		if (isFluidMode) { glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1), simulation->fluid_cell_center_point.size()); }
+	}
+	
+
 	
 
 	glBindVertexArray(0);
 	glutSwapBuffers();
+}
+
+void Menu(int Option) {
+
+	switch (Option) {
+		//particlemode
+		case 0 :
+			isParticleMode = true;
+			isFluidMode = false;
+			break;
+
+		//fluidmode
+		case 1 :
+			isParticleMode = false;
+			isFluidMode = true;
+			break;
+
+		//start
+		case 2 : 
+			isStart = true;
+			break;
+
+		//finish
+		case 3 :
+			isStart = false;
+			simulation->clear_and_ReInit();
+			break;
+
+		
+	}
+	
 }
 
 int main(int argc, char** argv) {
@@ -219,8 +268,6 @@ int main(int argc, char** argv) {
 
 	glutCreateWindow("2D Particle Simulation");
 
-
-
 	glewInit();
 	init();
 
@@ -228,6 +275,14 @@ int main(int argc, char** argv) {
 	glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
+
+	glutCreateMenu(Menu);
+	glutAddMenuEntry("ParticleMode", 0);
+	glutAddMenuEntry("FluidMode", 1);
+	glutAddMenuEntry("Start", 2);
+	glutAddMenuEntry("Finish", 3);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+
 	glutMainLoop();
 
 	return 0;

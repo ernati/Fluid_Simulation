@@ -115,6 +115,8 @@ public:
 
     //particle들을 담을 vector
     vector<Particle2D> particles;
+
+    int particle_number;
     float timestep;
     int gridsize;
 
@@ -170,7 +172,12 @@ public:
     }
 
     Fluid_Simulator_Grid(int particle_number, int grid_N) {
+        this->particle_number = particle_number;
+        init(this->particle_number, grid_N);
+    }
 
+    //===========================================init and clear===========================================
+    void init(int particle_number, int grid_N) {
         //timestep의 default = 0.06
         timestep = 0.06;
 
@@ -187,7 +194,7 @@ public:
             int randomLocation_Y = rand() % 200;
 
             //위치 X : 0.1~0.3, 위치 Y : 0.6~0.8
-            Particle2D tmp = Particle2D( ( (float)randomLocation_X + 100 ) / 1000.0, ( ( (float)randomLocation_Y ) + 600 ) / 1000.0, (float)randomLocation_X / 500.0, (float)randomLocation_Y / 500.0, 0, -0.98);
+            Particle2D tmp = Particle2D(((float)randomLocation_X + 100) / 1000.0, (((float)randomLocation_Y) + 600) / 1000.0, (float)randomLocation_X / 500.0, (float)randomLocation_Y / 500.0, 0, -0.98);
             particles.push_back(tmp);
 
         }
@@ -219,16 +226,16 @@ public:
         //cell_particle_number 초기화
         cell_particle_number = MAC_Grid<float>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-			cell_particle_number.cell_values.push_back(0.0);
-		}
+            cell_particle_number.cell_values.push_back(0.0);
+        }
 
         //velocity_difference_grid 초기화
         velocity_difference_X_grid = MAC_Grid<float>(gridsize);
         velocity_difference_Y_grid = MAC_Grid<float>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-			velocity_difference_X_grid.cell_values.push_back(0.0);
+            velocity_difference_X_grid.cell_values.push_back(0.0);
             velocity_difference_Y_grid.cell_values.push_back(0.0);
-		}
+        }
 
         // 행렬 초기화
         A = Eigen::SparseMatrix<double>(cell_number, cell_number);
@@ -249,25 +256,43 @@ public:
                 int j = cell_center_point.get_cell_j_from_VectorIndex(v);
 
                 //3-2. 식 적용
-                cell_center_point.cell_values.push_back(Vector2D( delta_x / 2.0 + i * delta_x, delta_y / 2.0 + j * delta_y));
+                cell_center_point.cell_values.push_back(Vector2D(delta_x / 2.0 + i * delta_x, delta_y / 2.0 + j * delta_y));
             }
         }
 
         //cell_type_grid 초기화
         cell_type_grid = MAC_Grid<CellType>(gridsize);
-        for(int n = 0; n < cell_number; n++) {
-			cell_type_grid.cell_values.push_back(CellType::AIR);
-		}
-
-        ////weight grid 초기화
-        //weight_velocity_grid = MAC_Grid<float>(gridsize);
-        //for (int n = 0; n < cell_number; n++) {
-        //    weight_velocity_grid.cell_values.push_back(0.0);
-        //}
-
-
-
+        for (int n = 0; n < cell_number; n++) {
+            cell_type_grid.cell_values.push_back(CellType::AIR);
+        }
     }
+
+    //모든 정보를 초기화
+    void clear_and_ReInit() {
+        clear();
+
+        init(particle_number, gridsize);
+    }
+
+    void clear() {
+		//vector들을 clear
+		previous_velocity_grid.cell_values.clear();
+		next_velocity_grid.cell_values.clear();
+		bodyforce.cell_values.clear();
+		cell_particle_number.cell_values.clear();
+		velocity_difference_X_grid.cell_values.clear();
+		velocity_difference_Y_grid.cell_values.clear();
+		cell_center_point.cell_values.clear();
+		cell_type_grid.cell_values.clear();
+		particles.clear();
+
+        A.~SparseMatrix();
+	}
+
+    //================================================================================================
+
+
+    //========================================simulation=============================================
 
     void particle_simulation() {
 
@@ -318,7 +343,6 @@ public:
 
 
         //8. swap buffer
-
         cout << " swapbuffer start " << endl;
 
         swap_buffer();
@@ -328,6 +352,8 @@ public:
         rendering_fluid();
 
     }
+
+    //================================================================================================
 
     //==============================boundary 관련 함수==============================
 
