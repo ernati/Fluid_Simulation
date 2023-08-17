@@ -18,6 +18,12 @@
 
 using namespace std;
 
+enum CellType {
+	FLUID,
+	AIR,
+	SOLID
+};
+
 //등가속도 운동 시뮬레이션 - v_n+1_ = v_n_ + a*t
 class Constant_Acceleration_Simulator {
 
@@ -134,8 +140,14 @@ public:
     MAC_Grid<float> velocity_difference_X_grid;
     MAC_Grid<float> velocity_difference_Y_grid;
 
-    ////cell들의 중심좌표를 담을 grid
-    //MAC_Grid<Vector2D> cell_center_point;
+    //cell들의 중심좌표를 담을 grid
+    MAC_Grid<Vector2D> cell_center_point;
+
+    //유체가 들어있는 cell들의 위치를 담을 grid
+    MAC_Grid<CellType> cell_type_grid;
+
+    //유체가 들어있는 cell들의 중심좌표를 담을 vector
+    vector<Vector2D> fluid_cell_center_point;
 
     ////cell별로 속도를 담을때 필요한 weight들을 담을 grid
     //MAC_Grid<float> weight_velocity_grid;
@@ -170,12 +182,12 @@ public:
         srand((unsigned int)time(NULL));
         for (int i = 0; i < particle_number; i++) {
             //0~99 난수 생성    
-            int randomLocation_X = rand() % 100;
+            int randomLocation_X = rand() % 200;
             //0~99 난수 생성
-            int randomLocation_Y = rand() % 100;
+            int randomLocation_Y = rand() % 200;
 
-            //위치 X : 0~1, 위치 Y : 0~1
-            Particle2D tmp = Particle2D(((float)randomLocation_X ) / 100.0, ((float)randomLocation_Y ) / 100.0, (float)randomLocation_X / 500.0 + 0.1, (float)randomLocation_Y / 500.0, 0, -0.98);
+            //위치 X : 0.1~0.3, 위치 Y : 0.6~0.8
+            Particle2D tmp = Particle2D( ( (float)randomLocation_X + 100 ) / 1000.0, ( ( (float)randomLocation_Y ) + 600 ) / 1000.0, (float)randomLocation_X / 500.0, (float)randomLocation_Y / 500.0, 0, -0.98);
             particles.push_back(tmp);
 
         }
@@ -221,25 +233,31 @@ public:
         // 행렬 초기화
         A = Eigen::SparseMatrix<double>(cell_number, cell_number);
 
-        ////cell_center_grid 초기화
-        //cell_center_point = MAC_Grid<Vector2D>(gridsize);
-        ////cell들에다가 cell_point정보 삽입
-        ////1. cell의 갯수는 gridsize의 제곱
-        //for (int v = 0; v < cell_number; v++) {
-        //    //2. (0,0) 은 ( 1/gridsize , 1/ gridsize )
-        //    if (v == 0) {
-        //        cell_center_point.cell_values.push_back(Vector2D(cellsize / 2.0, cellsize / 2.0));
-        //    }
-        //    //3. (i,j)는 ( 1/gridsize + i * gridsize , 1/gridsize + j* gridsize )
-        //    else {
-        //        //3-1. v ( vector Index ) to (i,j)
-        //        int i = cell_center_point.get_cell_i_from_VectorIndex(v);
-        //        int j = cell_center_point.get_cell_j_from_VectorIndex(v);
+        //cell_center_grid 초기화
+        cell_center_point = MAC_Grid<Vector2D>(gridsize);
+        //cell들에다가 cell_point정보 삽입
+        //1. cell의 갯수는 gridsize의 제곱
+        for (int v = 0; v < cell_number; v++) {
+            //2. (0,0) 은 ( 1/gridsize , 1/ gridsize )
+            if (v == 0) {
+                cell_center_point.cell_values.push_back(Vector2D(delta_x / 2.0, delta_y / 2.0));
+            }
+            //3. (i,j)는 ( 1/gridsize + i * gridsize , 1/gridsize + j* gridsize )
+            else {
+                //3-1. v ( vector Index ) to (i,j)
+                int i = cell_center_point.get_cell_i_from_VectorIndex(v);
+                int j = cell_center_point.get_cell_j_from_VectorIndex(v);
 
-        //        //3-2. 식 적용
-        //        cell_center_point.cell_values.push_back(Vector2D(cellsize / 2.0 + i * cellsize, cellsize / 2.0 + j * cellsize));
-        //    }
-        //}
+                //3-2. 식 적용
+                cell_center_point.cell_values.push_back(Vector2D( delta_x / 2.0 + i * delta_x, delta_y / 2.0 + j * delta_y));
+            }
+        }
+
+        //cell_type_grid 초기화
+        cell_type_grid = MAC_Grid<CellType>(gridsize);
+        for(int n = 0; n < cell_number; n++) {
+			cell_type_grid.cell_values.push_back(CellType::AIR);
+		}
 
         ////weight grid 초기화
         //weight_velocity_grid = MAC_Grid<float>(gridsize);
@@ -273,6 +291,9 @@ public:
         //3. transfer_velocity_to_grid_from_particle
         transfer_velocity_to_grid_from_particle();
 
+        //4. cell 성질 분류
+        classify_cell_type();
+
         cout << " bodyforce start " << endl;
 
         //4. bodyforce 적용
@@ -287,7 +308,7 @@ public:
         cout << " pressureSolve start " << endl;
 
         //6. 압력 계산
-        pressure_solve(delta_x * sqrt(2));
+        pressure_solve();
 
 
         cout << " transfer_velocity_to_particle_from_grid start " << endl;
@@ -301,6 +322,10 @@ public:
         cout << " swapbuffer start " << endl;
 
         swap_buffer();
+
+
+        //9. 유체가 있는 cell들 색칠
+        rendering_fluid();
 
     }
 
@@ -318,26 +343,30 @@ public:
     }
 
     int check_location_for_boundary(Vector2D location) {
-        if (location.X < 0) { return 1; }
-        if (location.X > 1) { return 2; }
-        if (location.Y < 0) { return 3; }
-        if (location.Y > 1) { return 4; }
+        if (location.X < delta_x) { return 1; }
+        if (location.X > delta_x * (gridsize-1)) { return 2; }
+        if (location.Y < delta_y) { return 3; }
+        if (location.Y > delta_y * (gridsize-1)) { return 4; }
 
         return 0;
     }
 
     void boundary_work(int check, Particle2D& particle) {
         if (check == 1) {
-            particle.Velocity.X *= -1.0;
+            particle.Velocity.X *= -0.8;
+            particle.Velocity.Y *= 0.95;
 		}
 		else if (check == 2) {
-			particle.Velocity.X *= -1.0;
+			particle.Velocity.X *= -0.8;
+            particle.Velocity.Y *= 0.95;
 		}
 		else if (check == 3) {
-			particle.Velocity.Y *= -1.0;
+                particle.Velocity.X *= 0.95;
+                particle.Velocity.Y *= -0.8;
 		}
 		else if (check == 4) {
-			particle.Velocity.Y *= -1.0;
+            particle.Velocity.X *= 0.95;
+			particle.Velocity.Y *= -0.8;
 		}
 
         
@@ -511,10 +540,6 @@ public:
 
             //2. cell 정보를 particle에게 전달 - 랜덤벡터 더하기
             particles[p].Velocity = next_velocity_grid.cell_values[next_velocity_grid.get_VectorIndex_from_cell(i_j)];
-            //particles[p].Velocity = next_velocity_grid.cell_values[next_velocity_grid.get_VectorIndex_from_cell(i_j)] + Vector2D(((float)dist(gen) - 50.0) / 10000.0, ((float)dist(gen) - 50.0) / 10000.0);
-
-
-            //particles[p].Velocity = interpolate_value_to_particle_from_grid(previous_velocity_grid, particles[p].Location);
         }
     }
 
@@ -577,7 +602,32 @@ public:
     //    grid.cell_values[grid.get_VectorIndex_from_cell(Vector2D(i_j.X, j_plus1))] = grid.cell_values[grid.get_VectorIndex_from_cell(Vector2D(i_j.X, j_plus1))] + value_i_jplus1;
     //    grid.cell_values[grid.get_VectorIndex_from_cell(Vector2D(i_plus1, j_plus1))] = grid.cell_values[grid.get_VectorIndex_from_cell(Vector2D(i_plus1, j_plus1))] + value_iplus1_jplus1;
 
-    //}
+    //
+
+    //==============================cell type 분류==================================
+
+    void classify_cell_type() {
+        for (int i = 0; i < cell_number; i++) {
+            //cell 좌표 구하기
+            Vector2D i_j = Vector2D(cell_center_point.get_cell_i_from_VectorIndex(i), cell_center_point.get_cell_j_from_VectorIndex(i));
+
+            //셀이 벽쪽이라면 solid
+            if (i_j.X == 0 || i_j.X == gridsize - 1 || i_j.Y == 0 || i_j.Y == gridsize - 1) {
+				cell_type_grid.cell_values[i] = SOLID;
+			}
+            else {
+                //particle이 존재하는 cell이라면 fluid
+                if (cell_particle_number.cell_values[i] > 0) {
+					cell_type_grid.cell_values[i] = FLUID;
+				}
+                //particle이 존재하지 않는 cell이라면 air
+                else {
+                    cell_type_grid.cell_values[i] = AIR;
+                }
+            }
+        }
+    }
+
 
     //==============================================================================
 
@@ -612,7 +662,7 @@ public:
 
 
     //==============================pressure_solve=================================
-    void pressure_solve(float threshold_distance) {
+    void pressure_solve() {
 
         ////사용할 행렬 변수들
         //Eigen::SparseMatrix<double> A;
@@ -634,41 +684,81 @@ public:
         //올바른 참조를 위해 0으로 초기화
         A.setZero();
 
-        //1. Ax=b에서 A 작성 - 입자 간의 거리 측정
+        ////1. Ax=b에서 A 작성 - 입자 간의 거리 측정
+        //for (int i = 0; i < cell_number; i++) {
+        //    for (int j = 0; j < cell_number; j++) {
+        //        // 1. ( i,j )의 계수 
+        //        if (i < j) {
+        //            //1-0. i와 j가 particle을 가지고 있는 cell인지 체크
+        //            if (cell_particle_number.cell_values[i] > 0 && cell_particle_number.cell_values[j] > 0) {
+        //                // 1-1. 거리 측정
+        //                int cell_i_i = cell_particle_number.get_cell_i_from_VectorIndex(i);
+        //                int cell_i_j = cell_particle_number.get_cell_j_from_VectorIndex(i);
+
+        //                int cell_j_i = cell_particle_number.get_cell_i_from_VectorIndex(j);
+        //                int cell_j_j = cell_particle_number.get_cell_j_from_VectorIndex(j);
+
+        //                //cell간 거리 계산
+        //                float distance = sqrt(pow((cell_i_i - cell_j_i) * delta_x, 2) + pow((cell_i_j - cell_j_j) * delta_y, 2));
+
+        //                // 1-2. 계수 작성, 반대편 위치도 작성
+        //                if (distance > threshold_distance) { A.insert(i, j) = 0.0; A.insert(j, i) = 0.0; }
+        //                else { A.insert(i, j) = pressure_coefficient / (distance * distance);  A.insert(j, i) = pressure_coefficient / (distance * distance); }
+
+        //            }
+
+        //            //i나 j 중 하나가 particle을 가지고 있지 않다면
+        //            else {
+        //                A.insert(i, j) = 0.0; A.insert(j, i) = 0.0;
+        //            }
+        //        }
+        //    }
+        //}
+
+        //1.Ax=b에서 A 작성 - diagonal 요소들도 작성
         for (int i = 0; i < cell_number; i++) {
-            for (int j = 0; j < cell_number; j++) {
-                // 1. ( i,j )의 계수 
-                if (i < j) {
-                    //1-0. i와 j가 particle을 가지고 있는 cell인지 체크
-                    if (cell_particle_number.cell_values[i] > 0 && cell_particle_number.cell_values[j] > 0) {
-                        // 1-1. 거리 측정
-                        int cell_i_i = cell_particle_number.get_cell_i_from_VectorIndex(i);
-                        int cell_i_j = cell_particle_number.get_cell_j_from_VectorIndex(i);
+            double neighbor_sum = 0.0;
+            Vector2D i_j = Vector2D(cell_particle_number.get_cell_i_from_VectorIndex(i), cell_particle_number.get_cell_j_from_VectorIndex(i));
 
-                        int cell_j_i = cell_particle_number.get_cell_i_from_VectorIndex(j);
-                        int cell_j_j = cell_particle_number.get_cell_j_from_VectorIndex(j);
+            if (cell_particle_number.cell_values[i] == 0) { A.insert( (int)i_j.X, (int)i_j.Y ) = 0.0;  }
+            else {
+                //현재 셀의 좌표 구하기
+                Vector2D i_minus1_j = i_j + Vector2D(-1, 0);
+                Vector2D i_plus1_j = i_j + Vector2D(1, 0);
+                Vector2D i_j_minus1 = i_j + Vector2D(0, -1);
+                Vector2D i_j_plus1 = i_j + Vector2D(0, 1);
 
-                        //cell간 거리 계산
-                        float distance = sqrt(pow((cell_i_i - cell_j_i) * delta_x, 2) + pow((cell_i_j - cell_j_j) * delta_y, 2));
-
-                        // 1-2. 계수 작성, 반대편 위치도 작성
-                        if (distance > threshold_distance) { A.insert(i, j) = 0.0; A.insert(j, i) = 0.0; }
-                        else { A.insert(i, j) = pressure_coefficient / (distance * distance);  A.insert(j, i) = pressure_coefficient / (distance * distance); }
-
-                    }
-
-                    //i나 j 중 하나가 particle을 가지고 있지 않다면
-                    else {
-                        A.insert(i, j) = 0.0; A.insert(j, i) = 0.0;
-
+                //i-1,j
+                if (i_j.X > 0) {
+                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_minus1_j)] > 0) {
+                        A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
                     }
                 }
+                //i+1,j
+                if (i_j.X < gridsize - 1) {
+                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_plus1_j)] > 0) {
+						A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
+					}
+				}
+                //i,j-1
+                if (i_j.Y > 0) {
+                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_minus1)] > 0) {
+                        A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
+                    }
+                }
+                //i,j+1
+                if (i_j.Y < gridsize - 1) {
+                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_plus1)] > 0) {
+						A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
+					}
+				}
             }
-        }
+
+		}
 
         //diagonal 요소들도 작성
         for (int i = 0; i < cell_number; i++) {
-            A.insert(i, i) = 1.0;
+            A.insert(i, i) = pressure_coefficient / (delta_x * delta_x) ;
         }
 
         ////2. Ax=b에서 b 작성 - 벡터의 발산 - 그냥 요소를 다 더하자.
@@ -707,7 +797,7 @@ public:
 
         //4. x 값( 압력 )을 통해 cell들의 속도 계산
         for (int i = 0; i < cell_number; i++) {
-            //4-1. 새로운 속도 계산 - 압력 그대로 사용
+            //4-1. 새로운 속도 계산 - 압력 그대로 사용 - PIC
             float new_vel_x = previous_velocity_grid.cell_values[i].X - timestep / density * x(i);
             float new_vel_y = previous_velocity_grid.cell_values[i].Y - timestep / density * x(i);
 
@@ -739,6 +829,23 @@ public:
 	}
 
     //==============================================================================
+
+    //==============================rendering fluid================================
+
+    void rendering_fluid() {
+        //1. fluid center grid clear()
+        fluid_cell_center_point.clear();
+
+        for (int i = 0; i < cell_number; i++) {
+            //2. cellType이 fluid인 cell들의 center point를 구한다.
+            if (cell_type_grid.cell_values[i] == FLUID) {
+                fluid_cell_center_point.push_back(cell_center_point.cell_values[i]);
+            }
+        }
+    }
+
+
+    //=============================================================================
 
 };
 

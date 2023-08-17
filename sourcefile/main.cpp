@@ -44,7 +44,7 @@ vector<Vector2D> grid_line;
 Vector2D box_line[4];
 
 //grid_N을 조절하면 grid 수가 바뀐다.
-int grid_N = 10;
+int grid_N = 40;
 
 void init(void) {
 	
@@ -82,7 +82,8 @@ void init(void) {
 
 	glGenBuffers(1, &(vbo));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation.fluid_cell_center_point.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
 
 	//particle들 렌더링
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * number , &points[0]);
@@ -90,6 +91,9 @@ void init(void) {
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number, sizeof(box_line), box_line);
 	//grid 렌더링
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line), sizeof(Vector2D) * grid_line.size(), &grid_line[0]);
+
+	//fluid cell center point 렌더링
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation.fluid_cell_center_point.size(), &simulation.fluid_cell_center_point[0]);
 
 	//color 할당
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * color.size(), &color[0]);
@@ -152,6 +156,21 @@ void idle(void)
 		for (int i = 0; i < simulation.particles.size(); i++) {
 			points[i] = simulation.particles[i].Location;
 		}
+
+		////오류발생 확인
+		//for (int i=0; i < simulation.particles.size(); i++) {
+		//	cout << i << "번째 particle의 속도 :" << points[i].X << " " << points[i].Y << endl;
+		//}
+
+
+		////오류발생 확인
+		//for (int i=0; i < simulation.particles.size(); i++) {
+		//	if (points[i].X > 1 || points[i].X < 0 || points[i].Y > 1 || points[i].Y < 0) {
+		//		cout << i << "번째 particle의 위치 :" << points[i].X << " " << points[i].Y << endl;
+		//		cout <<  " error : " << i << "번째 particle이 box를 벗어났습니다. " << endl;
+		//	}
+		//}
+
 	}
 
 	glutPostRedisplay();
@@ -170,20 +189,22 @@ void display() {
 	//바뀐 좌표 다시 메모리에 넣기
 	glBindVertexArray(vao);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * number, &points[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number, sizeof(box_line), box_line);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation.fluid_cell_center_point.size(), &simulation.fluid_cell_center_point[0]);
 
 	glPointSize(3.0);
 
 	//particle 그리기
-	glDrawArrays(GL_POINTS, 0, number);
+	//glDrawArrays(GL_POINTS, 0, number);
 
 	//box 그리기
-	glLineWidth(1.0);
+	glLineWidth(0.1);
 	glDrawArrays(GL_LINE_LOOP, number, 4);
 
 	//grid 그리기
 	glDrawArrays(GL_LINES, number + 4, 4 * (grid_N-1));
 
+	glPointSize(10.0);
+	glDrawArrays(GL_POINTS, number + 4 + 4 * (grid_N - 1), simulation.fluid_cell_center_point.size() );
 	
 
 	glBindVertexArray(0);
@@ -208,8 +229,6 @@ int main(int argc, char** argv) {
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutMainLoop();
-
-	/*delete simulation;*/
 
 	return 0;
 }
