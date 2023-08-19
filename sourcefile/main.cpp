@@ -35,7 +35,7 @@ int time_idle;
 Fluid_Simulator_Grid* simulation;
 
 //number를 조절하면 particle 수가 바뀐다.
-int number = 1000;
+int number = 6000;
 
 vector<Vector2D> points;
 vector<vec3> color;
@@ -73,7 +73,7 @@ void pushback_color() {
 	}
 
 	//fluid mode는 blue
-	for (int i = 0; i < simulation->fluid_cell_center_point.size(); i++) {
+	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
 		color.push_back(vec3(0.0f, 0.0f, 1.0f));
 	}
 }
@@ -114,7 +114,7 @@ void init(void) {
 	glGenBuffers(1, &(vbo));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
 
 	//particle들 렌더링
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points.size() , &points[0]);
@@ -124,7 +124,7 @@ void init(void) {
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line), sizeof(Vector2D) * grid_line.size(), &grid_line[0]);
 
 	//fluid cell center point 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point.size(), &simulation->fluid_cell_center_point[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 
 	//color 할당
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * color.size(), &color[0]);
@@ -202,7 +202,7 @@ void display() {
 	//바뀐 좌표 다시 메모리에 넣기
 	glBindVertexArray(vao);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points.size(), &points[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point.size(), &simulation->fluid_cell_center_point[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 
 	glPointSize(3.0);
 	
@@ -219,7 +219,7 @@ void display() {
 
 	glPointSize(10.0);
 	if (isStart) {
-		if (isFluidMode) { glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1), simulation->fluid_cell_center_point.size()); }
+		if (isFluidMode) { glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1), simulation->fluid_cell_center_point->size()); }
 	}
 	
 

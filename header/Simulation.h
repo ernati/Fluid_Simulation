@@ -129,27 +129,27 @@ public:
     int cell_number;
 
     //cell들의 속도를 담을 grid
-    MAC_Grid<Vector2D> previous_velocity_grid;
-    MAC_Grid<Vector2D> next_velocity_grid;
+    MAC_Grid<Vector2D>* previous_velocity_grid;
+    MAC_Grid<Vector2D>* next_velocity_grid;
 
     //cell들의 가속도를 담을 grid - 외력
-    MAC_Grid<Vector2D> bodyforce;
+    MAC_Grid<Vector2D>* bodyforce;
 
     //cell 안의 포함된 particle 수를 담을 grid
-    MAC_Grid<float> cell_particle_number;
+    MAC_Grid<float>* cell_particle_number;
 
     //divergence 계산을 위한 velocity 차 grid
-    MAC_Grid<float> velocity_difference_X_grid;
-    MAC_Grid<float> velocity_difference_Y_grid;
+    MAC_Grid<float>* velocity_difference_X_grid;
+    MAC_Grid<float>* velocity_difference_Y_grid;
 
     //cell들의 중심좌표를 담을 grid
-    MAC_Grid<Vector2D> cell_center_point;
+    MAC_Grid<Vector2D>* cell_center_point;
 
     //유체가 들어있는 cell들의 위치를 담을 grid
-    MAC_Grid<CellType> cell_type_grid;
+    MAC_Grid<CellType>* cell_type_grid;
 
     //유체가 들어있는 cell들의 중심좌표를 담을 vector
-    vector<Vector2D> fluid_cell_center_point;
+    vector<Vector2D>* fluid_cell_center_point;
 
     ////cell별로 속도를 담을때 필요한 weight들을 담을 grid
     //MAC_Grid<float> weight_velocity_grid;
@@ -165,9 +165,9 @@ public:
         gridsize = 10;
 
         //velocity grid 초기화
-        previous_velocity_grid = MAC_Grid<Vector2D>(gridsize);
+        previous_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
         for (int n = 0; n < (gridsize) * (gridsize); n++) {
-            previous_velocity_grid.cell_values.push_back(Vector2D());
+            previous_velocity_grid->cell_values.push_back(Vector2D());
         }
     }
 
@@ -206,65 +206,68 @@ public:
         delta_y = 1.0 / (float)grid_N;
 
         //previous_velocity grid 초기화
-        previous_velocity_grid = MAC_Grid<Vector2D>(gridsize);
+        previous_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-            previous_velocity_grid.cell_values.push_back(Vector2D());
+            previous_velocity_grid->cell_values.push_back(Vector2D());
         }
 
         //previous_velocity grid 초기화
-        next_velocity_grid = MAC_Grid<Vector2D>(gridsize);
+        next_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-            next_velocity_grid.cell_values.push_back(Vector2D());
+            next_velocity_grid->cell_values.push_back(Vector2D());
         }
 
         //body force 초기화
-        bodyforce = MAC_Grid<Vector2D>(gridsize);
+        bodyforce = new MAC_Grid<Vector2D>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-            bodyforce.cell_values.push_back(Vector2D());
+            bodyforce->cell_values.push_back(Vector2D());
         }
 
         //cell_particle_number 초기화
-        cell_particle_number = MAC_Grid<float>(gridsize);
+        cell_particle_number = new MAC_Grid<float>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-            cell_particle_number.cell_values.push_back(0.0);
+            cell_particle_number->cell_values.push_back(0.0);
         }
 
         //velocity_difference_grid 초기화
-        velocity_difference_X_grid = MAC_Grid<float>(gridsize);
-        velocity_difference_Y_grid = MAC_Grid<float>(gridsize);
+        velocity_difference_X_grid = new MAC_Grid<float>(gridsize);
+        velocity_difference_Y_grid = new MAC_Grid<float>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-            velocity_difference_X_grid.cell_values.push_back(0.0);
-            velocity_difference_Y_grid.cell_values.push_back(0.0);
+            velocity_difference_X_grid->cell_values.push_back(0.0);
+            velocity_difference_Y_grid->cell_values.push_back(0.0);
         }
 
         // 행렬 초기화
         A = Eigen::SparseMatrix<double>(cell_number, cell_number);
 
         //cell_center_grid 초기화
-        cell_center_point = MAC_Grid<Vector2D>(gridsize);
+        cell_center_point = new MAC_Grid<Vector2D>(gridsize);
         //cell들에다가 cell_point정보 삽입
         //1. cell의 갯수는 gridsize의 제곱
         for (int v = 0; v < cell_number; v++) {
             //2. (0,0) 은 ( 1/gridsize , 1/ gridsize )
             if (v == 0) {
-                cell_center_point.cell_values.push_back(Vector2D(delta_x / 2.0, delta_y / 2.0));
+                cell_center_point->cell_values.push_back(Vector2D(delta_x / 2.0, delta_y / 2.0));
             }
             //3. (i,j)는 ( 1/gridsize + i * gridsize , 1/gridsize + j* gridsize )
             else {
                 //3-1. v ( vector Index ) to (i,j)
-                int i = cell_center_point.get_cell_i_from_VectorIndex(v);
-                int j = cell_center_point.get_cell_j_from_VectorIndex(v);
+                int i = cell_center_point->get_cell_i_from_VectorIndex(v);
+                int j = cell_center_point->get_cell_j_from_VectorIndex(v);
 
                 //3-2. 식 적용
-                cell_center_point.cell_values.push_back(Vector2D(delta_x / 2.0 + i * delta_x, delta_y / 2.0 + j * delta_y));
+                cell_center_point->cell_values.push_back(Vector2D(delta_x / 2.0 + i * delta_x, delta_y / 2.0 + j * delta_y));
             }
         }
 
         //cell_type_grid 초기화
-        cell_type_grid = MAC_Grid<CellType>(gridsize);
+        cell_type_grid = new MAC_Grid<CellType>(gridsize);
         for (int n = 0; n < cell_number; n++) {
-            cell_type_grid.cell_values.push_back(CellType::AIR);
+            cell_type_grid->cell_values.push_back(CellType::AIR);
         }
+
+        //fluid_cell_center_point 초기화
+        fluid_cell_center_point = new vector<Vector2D>;
     }
 
     //모든 정보를 초기화
@@ -276,18 +279,32 @@ public:
 
     void clear() {
 		//vector들을 clear
-		previous_velocity_grid.cell_values.clear();
-		next_velocity_grid.cell_values.clear();
-		bodyforce.cell_values.clear();
-		cell_particle_number.cell_values.clear();
-		velocity_difference_X_grid.cell_values.clear();
-		velocity_difference_Y_grid.cell_values.clear();
-		cell_center_point.cell_values.clear();
-		cell_type_grid.cell_values.clear();
+		previous_velocity_grid->cell_values.clear();
+		next_velocity_grid->cell_values.clear();
+		bodyforce->cell_values.clear();
+		cell_particle_number->cell_values.clear();
+		velocity_difference_X_grid->cell_values.clear();
+		velocity_difference_Y_grid->cell_values.clear();
+		cell_center_point->cell_values.clear();
+		cell_type_grid->cell_values.clear();
+        fluid_cell_center_point->clear();
 		particles.clear();
 
-        A.~SparseMatrix();
+        A.setZero();
+
 	}
+
+    void delete_vectors() {
+        delete previous_velocity_grid;
+        delete next_velocity_grid;
+        delete bodyforce;
+        delete cell_particle_number;
+        delete velocity_difference_X_grid;
+        delete velocity_difference_Y_grid;
+        delete cell_center_point;
+        delete cell_type_grid;
+        delete fluid_cell_center_point;
+    }
 
     //================================================================================================
 
@@ -419,7 +436,7 @@ public:
 
     int check_particle_on_the_edge( Vector2D Location, float threshold ) {
         //0. edge들과의 거리 체크
-        Vector2D i_j = previous_velocity_grid.get_cell_i_j_from_world(Location);
+        Vector2D i_j = previous_velocity_grid->get_cell_i_j_from_world(Location);
         float left_distance_x = abs(Location.X - delta_x * i_j.X);
         float right_distance_x = abs(Location.X - delta_x * (i_j.X + 1));
         float down_distance_y = abs(Location.Y - delta_y * i_j.Y);
@@ -444,26 +461,26 @@ public:
 
         //0. cell_particle_number,previous_velocity_grid 초기화
         for (int i = 0; i < cell_number; i++) {
-            cell_particle_number.cell_values[i] = 0.0;
-            previous_velocity_grid.cell_values[i] = Vector2D();
+            cell_particle_number->cell_values[i] = 0.0;
+            previous_velocity_grid->cell_values[i] = Vector2D();
         }
 
         for (int p = 0; p < particles.size(); p++) {
             //1. particle cell좌표 찾기
-            Vector2D i_j = previous_velocity_grid.get_cell_i_j_from_world(particles[p].Location);
+            Vector2D i_j = previous_velocity_grid->get_cell_i_j_from_world(particles[p].Location);
 
             //cell 내부 particle이 8개 초과일 경우 밑의 과정 생략
-            if ( cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] > 9 ) { continue; } 
+            if ( cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] > 9 ) { continue; } 
 
             //2. cell에 포함된 particle 수 세기
-            cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] + 1.0;
+            cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] + 1.0;
 
             //3. cell에 포함된 particle의 속도 더하기 - edge처리 포함
             float check = check_particle_on_the_edge(particles[p].Location, 0.01);
 
             //3-0. edge에 없는 경우
             if (check == 0) {
-                previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] + particles[p].Velocity;
+                previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity;
             }
 
             //edge에 있는 경우
@@ -472,62 +489,62 @@ public:
                 if (check == 1) {
                     Vector2D i_j_plus_1 = Vector2D(i_j.X, i_j.Y + 1);
                     //cell_particle_number (i,j)에는 0.5 빼주고, (i,j+1)에는 0.5 더해주기
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] - 0.5;
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_plus_1)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_plus_1)] + 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] - 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_plus_1)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_plus_1)] + 0.5;
 
                     //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j_plus_1)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j_plus_1)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_plus_1)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_plus_1)] + particles[p].Velocity * 0.5;
                 }
 
                 //3-2. down edge에 있는 경우
                 else if (check == 2) {
                     Vector2D i_j_minus_1 = Vector2D(i_j.X, i_j.Y - 1);
                     //cell_particle_number (i,j)에는 0.5 빼주고, (i,j-1)에는 0.5 더해주기
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] - 0.5;
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_minus_1)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_minus_1)] + 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] - 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_minus_1)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_minus_1)] + 0.5;
 
                     //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j_minus_1)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j_minus_1)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_minus_1)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_minus_1)] + particles[p].Velocity * 0.5;
                 }
                 //3-3. left edge에 있는 경우
                 else if (check == 3) {
                     Vector2D i_minus_1_j = Vector2D(i_j.X - 1, i_j.Y);
                     //cell_particle_number (i,j)에는 0.5 빼주고, (i-1,j)에는 0.5 더해주기
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] - 0.5;
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_minus_1_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_minus_1_j)] + 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] - 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_minus_1_j)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_minus_1_j)] + 0.5;
 
                     //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_minus_1_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_minus_1_j)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_minus_1_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_minus_1_j)] + particles[p].Velocity * 0.5;
                 }
 
                 //3-4. right edge에 있는 경우
                 else { //check==4
                     Vector2D i_plus_1_j = Vector2D(i_j.X + 1, i_j.Y);
                     //cell_particle_number (i,j)에는 0.5 빼주고, (i+1,j)에는 0.5 더해주기
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j)] - 0.5;
-                    cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_plus_1_j)] = cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_plus_1_j)] + 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j)] - 0.5;
+                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_plus_1_j)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_plus_1_j)] + 0.5;
 
                     //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_plus_1_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_plus_1_j)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_plus_1_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_plus_1_j)] + particles[p].Velocity * 0.5;
                 }
             }
 
         }
             
-        /*extrapolation_value_to_grid_from_particle(previous_velocity_grid, particles[p].Location, previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)]);*/
+        /*extrapolation_value_to_grid_from_particle(previous_velocity_grid, particles[p].Location, previous_velocity_grid->cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)]);*/
     
 
         //4. cell에 포함된 particle의 속도 평균내기
         for (int i = 0; i < cell_number; i++) {
-			if (cell_particle_number.cell_values[i] != 0) {
-				previous_velocity_grid.cell_values[i] = previous_velocity_grid.cell_values[i] / cell_particle_number.cell_values[i];
+			if (cell_particle_number->cell_values[i] != 0) {
+				previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] / cell_particle_number->cell_values[i];
 			}
             else {
-                previous_velocity_grid.cell_values[i] = Vector2D();
+                previous_velocity_grid->cell_values[i] = Vector2D();
             }
 		}
 
@@ -541,13 +558,13 @@ public:
                 Vector2D i_j_plus1 = Vector2D(i, j + 1);
 
                 //발산 구하기 - 속도의 공간 변화량 구하기
-                velocity_difference_X_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = (previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_plus1_j)].X - previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)].X);
+                velocity_difference_X_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = (previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_plus1_j)].X - previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)].X);
                 if (i == 0) {
-					velocity_difference_X_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)].X;
+					velocity_difference_X_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)].X;
 				}
-                velocity_difference_Y_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = (previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j_plus1)].Y - previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)].Y);
+                velocity_difference_Y_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = (previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_plus1)].Y - previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)].Y);
                 if (j == 0) {
-                    velocity_difference_Y_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)] = previous_velocity_grid.cell_values[previous_velocity_grid.get_VectorIndex_from_cell(i_j)].Y;
+                    velocity_difference_Y_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)].Y;
                 }
             }
         }
@@ -556,7 +573,7 @@ public:
     void transfer_Velocity_to_particle_from_grid() {
         for (int p = 0; p < particles.size(); p++) {
             //1. particle이 속한 cell 찾기
-            Vector2D i_j = next_velocity_grid.get_cell_i_j_from_world(particles[p].Location);
+            Vector2D i_j = next_velocity_grid->get_cell_i_j_from_world(particles[p].Location);
 
             //난수 준비
 	        std::random_device rd;
@@ -565,7 +582,7 @@ public:
 
 
             //2. cell 정보를 particle에게 전달 - 랜덤벡터 더하기
-            particles[p].Velocity = next_velocity_grid.cell_values[next_velocity_grid.get_VectorIndex_from_cell(i_j)];
+            particles[p].Velocity = next_velocity_grid->cell_values[next_velocity_grid->get_VectorIndex_from_cell(i_j)];
         }
     }
 
@@ -635,20 +652,20 @@ public:
     void classify_cell_type() {
         for (int i = 0; i < cell_number; i++) {
             //cell 좌표 구하기
-            Vector2D i_j = Vector2D(cell_center_point.get_cell_i_from_VectorIndex(i), cell_center_point.get_cell_j_from_VectorIndex(i));
+            Vector2D i_j = Vector2D(cell_center_point->get_cell_i_from_VectorIndex(i), cell_center_point->get_cell_j_from_VectorIndex(i));
 
             //셀이 벽쪽이라면 solid
             if (i_j.X == 0 || i_j.X == gridsize - 1 || i_j.Y == 0 || i_j.Y == gridsize - 1) {
-				cell_type_grid.cell_values[i] = SOLID;
+				cell_type_grid->cell_values[i] = SOLID;
 			}
             else {
                 //particle이 존재하는 cell이라면 fluid
-                if (cell_particle_number.cell_values[i] > 0) {
-					cell_type_grid.cell_values[i] = FLUID;
+                if (cell_particle_number->cell_values[i] > 0) {
+					cell_type_grid->cell_values[i] = FLUID;
 				}
                 //particle이 존재하지 않는 cell이라면 air
                 else {
-                    cell_type_grid.cell_values[i] = AIR;
+                    cell_type_grid->cell_values[i] = AIR;
                 }
             }
         }
@@ -662,14 +679,14 @@ public:
     //bodyforce에 적용하고 싶은 외력 추가 - 중력
     void add_body_force() {
         for (int i = 0; i < cell_number; i++) {
-            bodyforce.cell_values[i] = Vector2D(0.0, -0.98);
+            bodyforce->cell_values[i] = Vector2D(0.0, -0.98);
         }
     }
 
     //bodyforce를 grid의 velocity에 적용
     void Adjust_velocity_from_bodyforce() {
         for (int i = 0; i < cell_number; i++) {
-            previous_velocity_grid.cell_values[i] = previous_velocity_grid.cell_values[i] + bodyforce.cell_values[i] * timestep;
+            previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + bodyforce->cell_values[i] * timestep;
         }
     }
 
@@ -744,9 +761,9 @@ public:
         //1.Ax=b에서 A 작성 - diagonal 요소들도 작성
         for (int i = 0; i < cell_number; i++) {
             double neighbor_sum = 0.0;
-            Vector2D i_j = Vector2D(cell_particle_number.get_cell_i_from_VectorIndex(i), cell_particle_number.get_cell_j_from_VectorIndex(i));
+            Vector2D i_j = Vector2D(cell_particle_number->get_cell_i_from_VectorIndex(i), cell_particle_number->get_cell_j_from_VectorIndex(i));
 
-            if (cell_particle_number.cell_values[i] == 0) { A.insert( (int)i_j.X, (int)i_j.Y ) = 0.0;  }
+            if (cell_particle_number->cell_values[i] == 0) { A.insert( (int)i_j.X, (int)i_j.Y ) = 0.0;  }
             else {
                 //현재 셀의 좌표 구하기
                 Vector2D i_minus1_j = i_j + Vector2D(-1, 0);
@@ -756,25 +773,25 @@ public:
 
                 //i-1,j
                 if (i_j.X > 0) {
-                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_minus1_j)] > 0) {
+                    if (cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_minus1_j)] > 0) {
                         A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
                     }
                 }
                 //i+1,j
                 if (i_j.X < gridsize - 1) {
-                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_plus1_j)] > 0) {
+                    if (cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_plus1_j)] > 0) {
 						A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
 					}
 				}
                 //i,j-1
                 if (i_j.Y > 0) {
-                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_minus1)] > 0) {
+                    if (cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_minus1)] > 0) {
                         A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
                     }
                 }
                 //i,j+1
                 if (i_j.Y < gridsize - 1) {
-                    if (cell_particle_number.cell_values[cell_particle_number.get_VectorIndex_from_cell(i_j_plus1)] > 0) {
+                    if (cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_plus1)] > 0) {
 						A.insert((int)i_j.X, (int)i_j.Y) += pressure_coefficient / (delta_x * delta_x);
 					}
 				}
@@ -794,7 +811,7 @@ public:
 
         //2. Ax=b에서 b 작성 - 벡터의 발산 - 제대로...?
         for(int k=0; k < cell_number; k++) {            
-            b(k) = velocity_difference_X_grid.cell_values[k] + velocity_difference_Y_grid.cell_values[k];
+            b(k) = velocity_difference_X_grid->cell_values[k] + velocity_difference_Y_grid->cell_values[k];
         }
 
         //3. x solve
@@ -824,11 +841,11 @@ public:
         //4. x 값( 압력 )을 통해 cell들의 속도 계산
         for (int i = 0; i < cell_number; i++) {
             //4-1. 새로운 속도 계산 - 압력 그대로 사용 - PIC
-            float new_vel_x = previous_velocity_grid.cell_values[i].X - timestep / density * x(i);
-            float new_vel_y = previous_velocity_grid.cell_values[i].Y - timestep / density * x(i);
+            float new_vel_x = previous_velocity_grid->cell_values[i].X - timestep / density * x(i);
+            float new_vel_y = previous_velocity_grid->cell_values[i].Y - timestep / density * x(i);
 
             //4-2. new vel에다가 입력하기
-            next_velocity_grid.cell_values[i] = Vector2D(new_vel_x, new_vel_y);
+            next_velocity_grid->cell_values[i] = Vector2D(new_vel_x, new_vel_y);
         }
 
 
@@ -848,9 +865,9 @@ public:
 
     void swap_buffer() {
 		for (int i = 0; i < cell_number; i++) {
-			Vector2D tmp = previous_velocity_grid.cell_values[i];
-			previous_velocity_grid.cell_values[i] = next_velocity_grid.cell_values[i];
-			next_velocity_grid.cell_values[i] = tmp;
+			Vector2D tmp = previous_velocity_grid->cell_values[i];
+			previous_velocity_grid->cell_values[i] = next_velocity_grid->cell_values[i];
+			next_velocity_grid->cell_values[i] = tmp;
 		}
 	}
 
@@ -860,12 +877,12 @@ public:
 
     void rendering_fluid() {
         //1. fluid center grid clear()
-        fluid_cell_center_point.clear();
+        fluid_cell_center_point->clear();
 
         for (int i = 0; i < cell_number; i++) {
             //2. cellType이 fluid인 cell들의 center point를 구한다.
-            if (cell_type_grid.cell_values[i] == FLUID) {
-                fluid_cell_center_point.push_back(cell_center_point.cell_values[i]);
+            if (cell_type_grid->cell_values[i] == FLUID) {
+                fluid_cell_center_point->push_back(cell_center_point->cell_values[i]);
             }
         }
     }
