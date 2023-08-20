@@ -35,7 +35,7 @@ int time_idle;
 Fluid_Simulator_Grid* simulation;
 
 //number를 조절하면 particle 수가 바뀐다.
-int number = 6000;
+int number = 4000;
 
 vector<Vector2D> points;
 vector<vec3> color;
@@ -52,6 +52,7 @@ int Option = 3;
 bool isStart = false;
 bool isFluidMode = false;
 bool isParticleMode = true;
+bool isExtrapolationCell = false;
 
 //simulation의 particle들의 위치를 points에 저장
 void pushback_SimulationPoints_to_Points() {
@@ -126,6 +127,10 @@ void init(void) {
 	//fluid cell center point 렌더링
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 
+	//air cell center point 렌더링
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * 
+		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
+
 	//color 할당
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * color.size(), &color[0]);
 
@@ -159,6 +164,8 @@ void reshape(int width, int height)
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 	case 'q':
+		simulation->delete_vectors();
+		delete simulation;
 		exit(EXIT_SUCCESS);
 		break;
 
@@ -203,6 +210,8 @@ void display() {
 	glBindVertexArray(vao);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points.size(), &points[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) *
+		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
 
 	glPointSize(3.0);
 	
@@ -219,11 +228,16 @@ void display() {
 
 	glPointSize(10.0);
 	if (isStart) {
-		if (isFluidMode) { glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1), simulation->fluid_cell_center_point->size()); }
-	}
-	
+		if (isFluidMode) { 
+			glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1), simulation->fluid_cell_center_point->size()); 
+		}
+		if (isExtrapolationCell) {
+			//glLineWidth(0.05);
+			//glDrawArrays(GL_LINES, points.size() + 4 + 4 * (grid_N - 1) + simulation->fluid_cell_center_point->size(), simulation->air_cell_center_point->size());
 
-	
+			glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1) + simulation->fluid_cell_center_point->size(), simulation->air_cell_center_point->size());
+		}
+	}
 
 	glBindVertexArray(0);
 	glutSwapBuffers();
@@ -255,6 +269,10 @@ void Menu(int Option) {
 			simulation->clear_and_ReInit();
 			break;
 
+		//extra_visible
+		case 4:
+			isExtrapolationCell = !isExtrapolationCell;
+			break;
 		
 	}
 	
@@ -281,6 +299,7 @@ int main(int argc, char** argv) {
 	glutAddMenuEntry("FluidMode", 1);
 	glutAddMenuEntry("Start", 2);
 	glutAddMenuEntry("Finish", 3);
+	glutAddMenuEntry("extra_visible", 4);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	glutMainLoop();
