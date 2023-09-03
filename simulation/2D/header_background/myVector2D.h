@@ -5,8 +5,8 @@ class Vector2D {
 public :
 
     //벡터 성분
-    float X;
-    float Y;
+    double X;
+    double Y;
 
 
     //생성자 - 아무 입력이 없다면 영벡터
@@ -16,7 +16,7 @@ public :
     }
 
     //생성자 - 성분값이 주어지면 그대로 
-    Vector2D( float x, float y ) {
+    Vector2D( double x, double y ) {
         X = x;
         Y = y;
     }
@@ -26,7 +26,7 @@ public :
     }
 
     //scalar와의 연산
-    Vector2D operator+ (const float& c)
+    Vector2D operator+ (const double& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = c + this->X;
@@ -34,7 +34,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator- (const float& c)
+    Vector2D operator- (const double& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X - c;
@@ -42,7 +42,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator* (const float& c)
+    Vector2D operator* (const double& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X * c;
@@ -50,7 +50,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator/ (const float& c)
+    Vector2D operator/ (const double& c)
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X / c;
