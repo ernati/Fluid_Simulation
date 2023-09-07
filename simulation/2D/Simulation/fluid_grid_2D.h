@@ -11,6 +11,7 @@
 #include <Eigen/Dense>
 #include <random>
 #include <algorithm>
+#include <thread>
 
 //난수 생성
 #include<cstdlib> //rand(), srand()
@@ -352,6 +353,17 @@ public:
 
     //collision detection
     void collision_detection() {
+     //   //0. 멀티스레드 초기화
+     //   vector<thread> threads;
+     //   for (int i = 0; i < 6; i++) {
+		   // threads.push_back(thread(std::push_back, ref(model), ref(vec_tmp_X[i]), ref(vec_tmp_Y[i]), 0.4, 10000));
+	    //}
+
+     //   for (int i = 0; i < 6; i++) {
+	    //    threads[i].join();
+     //   }
+
+
         vector< tuple<Vector2D, int> >*  temp_particles = new vector< tuple<Vector2D, int> >;
         vector< tuple<int, int>  >* temp_particles2 = new vector< tuple<int, int>  >;
 
@@ -382,7 +394,8 @@ public:
 
             //현재 particle과 다음 particle의 거리가 0이상 2*radius 이하이면 충돌 가능성이 있음.
             else {
-                double distance = sqrt(pow(get<0>((*temp_particles)[i]).X - get<0>((*temp_particles)[i + 1]).X, 2) + pow(get<0>((*temp_particles)[i]).Y - get<0>((*temp_particles)[i + 1]).Y, 2));
+                double distance = sqrt(pow(get<0>((*temp_particles)[i]).X - get<0>((*temp_particles)[i + 1]).X, 2) 
+                    + pow(get<0>((*temp_particles)[i]).Y - get<0>((*temp_particles)[i + 1]).Y, 2));
                 if (distance <= 2 * 0.05 ) {
 					//충돌 가능성이 있는 particle들을 저장
 					temp_particles2->push_back(make_tuple(  get<1>( (*temp_particles)[i] ), get<1>( (*temp_particles)[i + 1] ) ) );

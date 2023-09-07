@@ -9,6 +9,11 @@
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Dense>
 
+#include <iostream>
+#include <Windows.h>
+
+#include "../../threadpool/threadpool.h"
+
 #include "../header_background/grid.h"
 #include "../header_background/drawgrid.h"
 #include "../Simulation/fluid_grid_2D.h"
@@ -34,14 +39,17 @@ int time_idle;
 //simulation 선언
 Fluid_Simulator_Grid* simulation;
 
+//thread_pool
+std::unique_ptr<thread_pool> threadpool;
+
 //number를 조절하면 particle 수가 바뀐다.
 int number = 8000;
 
-vector<Vector2D> points;
-vector<vec3> color;
+vector<Vector2D>* points;
+vector<vec3>* color;
 Box bbox;
 vector<Vector2D> grid_line;
-Vector2D box_line[4];
+vector<Vector2D> box_line;
 
 //grid_N을 조절하면 grid 수가 바뀐다.
 int grid_N = 40;
@@ -56,50 +64,61 @@ bool isExtrapolationCell = false;
 
 //simulation의 particle들의 위치를 points에 저장
 void pushback_SimulationPoints_to_Points() {
-	points.clear();
+	points->clear();
 	for (int i = 0; i < number; i++) {
-		points.push_back(simulation->particles[i].Location);
+		points->push_back(simulation->particles[i].Location);
 	}
+
 }
 
 void pushback_color() {
-	color.clear();
+	color->clear();
 
 	for (int i = 0; i < number; i++) {
-		color.push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
 
 	for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
-		color.push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
 
 	//fluid mode는 blue
 	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
-		color.push_back(vec3(0.0f, 0.0f, 1.0f));
+		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
+
 }
 
 void Update_Points() {
 	for (int i = 0; i < simulation->particles.size(); i++) {
-			points[i] = simulation->particles[i].Location;
+			(*points)[i] = simulation->particles[i].Location;
 	}
 }
 
 void init(void) {
+
+	points = new vector<Vector2D>();
+	color = new vector<vec3>();
+
+	threadpool = make_unique<thread_pool>(3);
 	
 	//simulation 실행 및 입자들 생성
 	simulation = new Fluid_Simulator_Grid(number, grid_N);
 
-	pushback_SimulationPoints_to_Points();
+	//pushback_SimulationPoints_to_Points();
+	threadpool->thread_pool_submit_void( pushback_SimulationPoints_to_Points );
 
-	pushback_color();
+	//pushback_color();
+	threadpool->thread_pool_submit_void( pushback_color );
+
+	Sleep(4000);
 
 	//bbox 선언
 	bbox = Box(0.0, 1.0, 0.0, 1.0);
-	box_line[0] = Vector2D(bbox.xmin, bbox.ymin);
-	box_line[1] = Vector2D(bbox.xmax, bbox.ymin);
-	box_line[2] = Vector2D(bbox.xmax, bbox.ymax);
-	box_line[3] = Vector2D(bbox.xmin, bbox.ymax);
+	box_line.push_back( Vector2D(bbox.xmin, bbox.ymin) );
+	box_line.push_back(Vector2D(bbox.xmax, bbox.ymin));
+	box_line.push_back(Vector2D(bbox.xmax, bbox.ymax));
+	box_line.push_back(Vector2D(bbox.xmin, bbox.ymax));
 
 	//vector의 size를 원하는 크기만큼 늘린다.
 	for (int i = 0; i < 4 * (grid_N - 1); i++) {
@@ -114,25 +133,25 @@ void init(void) {
 
 	glGenBuffers(1, &(vbo));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * color.size(), NULL, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * number + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * color->size(), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * color->size(), NULL, GL_STATIC_DRAW);
 
 	//particle들 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points.size() , &points[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points->size() , &( (*points)[0] ));
 	//box 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size(), sizeof(box_line), box_line);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size(), sizeof(Vector2D) * box_line.size() , &( box_line[0] ));
 	//grid 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line), sizeof(Vector2D) * grid_line.size(), &grid_line[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size(), sizeof(Vector2D) * grid_line.size(), &(grid_line[0]) );
 
 	//fluid cell center point 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 
-	//air cell center point 렌더링
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * 
-		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
+	////air cell center point 렌더링
+	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * 
+	//	simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
 
 	//color 할당
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D)* grid_line.size(), sizeof(Vector2D) * color.size(), &color[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D)* grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() , sizeof(Vector2D) * color->size(), &( (*color)[0]) );
 
 	//load shaders
 	GLuint program = InitShader("simulation/2D/src/vshader_2dBezier.glsl", "simulation/2D/src/fshader_2dBezier.glsl");
@@ -144,7 +163,7 @@ void init(void) {
 
 	//color position
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), BUFFER_OFFSET(sizeof(points) + sizeof(box_line) + sizeof(grid_line) + sizeof(simulation->fluid_cell_center_point->size() + sizeof(simulation->air_cell_center_point->size()))));
+	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), BUFFER_OFFSET(sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() ));
 
 	glEnableVertexAttribArray(0);
 	//initialize uniform variable from vertex shander
@@ -189,6 +208,8 @@ void idle(void)
 	if (time_idle % 120 == 0) {
 		if (isStart) {
 			simulation->particle_simulation();
+			/*function<void(Fluid_Simulator_Grid&)> func = &Fluid_Simulator_Grid::particle_simulation;
+			threadpool->thread_pool_submit_void_simulation( simulation,  func );*/
 			Update_Points();
 		}
 	}
@@ -208,34 +229,34 @@ void display() {
 
 	//바뀐 좌표 다시 메모리에 넣기
 	glBindVertexArray(vao);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points.size(), &points[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) *
-		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * points->size(), &( (*points)[0] ));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
+	/*glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) *
+		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));*/
 
 	glPointSize(2.0);
 	
 	if (isStart) {
-		if (isParticleMode) { glDrawArrays(GL_POINTS, 0, points.size()); }
+		if (isParticleMode) { glDrawArrays(GL_POINTS, 0, points->size()); }
 	}
 
 	//box 그리기
 	glLineWidth(0.1);
-	glDrawArrays(GL_LINE_LOOP, points.size(), 4);
+	glDrawArrays(GL_LINE_LOOP, points->size(), 4);
 
 	//grid 그리기
-	//glDrawArrays(GL_LINES, points.size() + 4, 4 * (grid_N-1));
+	//glDrawArrays(GL_LINES, points->size() + 4, 4 * (grid_N-1));
 
 	glPointSize(10.0);
 	if (isStart) {
 		if (isFluidMode) { 
-			glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1), simulation->fluid_cell_center_point->size()); 
+			glDrawArrays(GL_POINTS, points->size() + 4 + 4 * (grid_N - 1), simulation->fluid_cell_center_point->size()); 
 		}
 		if (isExtrapolationCell) {
 			//glLineWidth(0.05);
-			//glDrawArrays(GL_LINES, points.size() + 4 + 4 * (grid_N - 1) + simulation->fluid_cell_center_point->size(), simulation->air_cell_center_point->size());
+			//glDrawArrays(GL_LINES, points->size() + 4 + 4 * (grid_N - 1) + simulation->fluid_cell_center_point->size(), simulation->air_cell_center_point->size());
 
-			glDrawArrays(GL_POINTS, points.size() + 4 + 4 * (grid_N - 1) + simulation->fluid_cell_center_point->size(), simulation->air_cell_center_point->size());
+			glDrawArrays(GL_POINTS, points->size() + 4 + 4 * (grid_N - 1) + simulation->fluid_cell_center_point->size(), simulation->air_cell_center_point->size());
 		}
 	}
 
