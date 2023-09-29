@@ -28,25 +28,25 @@ public:
 	vector<Vector3D>* make_box_points() {
 		vector<Vector3D>* result = new vector<Vector3D>;
 
-		//Á¤»ç°¢Çü 1
+		//ì •ì‚¬ê°í˜• 1
 		result->push_back(Vector3D(xmin, ymin, zmin));
 		result->push_back(Vector3D(xmax, ymin, zmin));
 		result->push_back(Vector3D(xmax, ymax, zmin));
 		result->push_back(Vector3D(xmin, ymax, zmin));
 
-		//Á¤»ç°¢Çü 2
+		//ì •ì‚¬ê°í˜• 2
 		result->push_back(Vector3D(xmin, ymin, zmax));
 		result->push_back(Vector3D(xmax, ymin, zmax));
 		result->push_back(Vector3D(xmax, ymax, zmax));
 		result->push_back(Vector3D(xmin, ymax, zmax));
 
-		//Á¤»ç°¢Çü 3
+		//ì •ì‚¬ê°í˜• 3
 		result->push_back(Vector3D(xmin, ymin, zmin));
 		result->push_back(Vector3D(xmin, ymin, zmax));
 		result->push_back(Vector3D(xmin, ymax, zmax));
 		result->push_back(Vector3D(xmin, ymax, zmin));
 
-		//Á¤»ç°¢Çü 4
+		//ì •ì‚¬ê°í˜• 4
 		result->push_back(Vector3D(xmax, ymin, zmin));
 		result->push_back(Vector3D(xmax, ymin, zmax));
 		result->push_back(Vector3D(xmax, ymax, zmax));

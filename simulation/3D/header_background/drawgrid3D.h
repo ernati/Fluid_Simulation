@@ -5,7 +5,7 @@
 
 using namespace std;
 
-//ÃÑ °¹¼ö´Â 4* (n+1)^2 -> 
+//ì´ ê°¯ìˆ˜ëŠ” 4* (n+1)^2 -> 
 vector<Vector3D>* make_Points_of_grids(int n) {
 
 	vector< Vector3D >tmp_z_0;
@@ -16,7 +16,7 @@ vector<Vector3D>* make_Points_of_grids(int n) {
 
 	vector< Vector3D >* result = new vector< Vector3D >;
 
-	//1. Á¡µé Ã¤¿ì±â
+	//1. ì ë“¤ ì±„ìš°ê¸°
 	for (int i = 0; i <= n; i++) {
 		for (int j = 0; j <= n; j++) {
 			tmp_z_0.push_back( Vector3D((double)j / (double)n, (double)i/(double)n, 0.0)); // (0,0,0) ~ (n,n,0)
@@ -27,13 +27,13 @@ vector<Vector3D>* make_Points_of_grids(int n) {
 		}
 	}
 
-	//tmp_z_0, tmp_z_nÀ» ÇÏ³ª¾¿ °í´ë·Î push_back
+	//tmp_z_0, tmp_z_nì„ í•˜ë‚˜ì”© ê³ ëŒ€ë¡œ push_back
 	for (int i = 0; i < tmp_z_0.size(); i++) {
 		result->push_back(tmp_z_0[i]);
 		result->push_back(tmp_z_n[i]);
 	}
 
-	//tmp_x_0, tmp_x_nÀ» ÇÏ³ª¾¿ °í´ë·Î push_back
+	//tmp_x_0, tmp_x_nì„ í•˜ë‚˜ì”© ê³ ëŒ€ë¡œ push_back
 	for (int i = 0; i < tmp_x_0.size(); i++) {
 		result->push_back(tmp_x_0[i]);
 		result->push_back(tmp_x_n[i]);

@@ -4,7 +4,7 @@
 
 #include "myVector3D.h"
 
-//À§Ä¡, ¼Óµµ¸¦ °¡Áö°í ÀÖ´Â ÀÔÀÚ Å¬·¡½º
+//ìœ„ì¹˜, ì†ë„ë¥¼ ê°€ì§€ê³  ìžˆëŠ” ìž…ìž í´ëž˜ìŠ¤
 class Particle3D {
 
 public:
@@ -40,7 +40,7 @@ public:
 
     }
 
-    // ¾î¶² ÇÑ Á¡°úÀÇ °Å¸® ±¸ÇÏ±â
+    // ì–´ë–¤ í•œ ì ê³¼ì˜ ê±°ë¦¬ êµ¬í•˜ê¸°
     double get_distance_from_point(Vector3D point) {
         double distance_pow = (Location.X - point.X) * (Location.X - point.X) + (Location.Y - point.Y) * (Location.Y - point.Y) + (Location.Z - point.Z) * (Location.Z - point.Z);
         return sqrt(distance_pow);
@@ -48,13 +48,13 @@ public:
 
 
 
-    //=================µî°¡¼Óµµ======================================
-    //ÀÔÀÚ ÇÏ³ªÀÇ ¼Óµµ¸¦ update
+    //=================ë“±ê°€ì†ë„======================================
+    //ìž…ìž í•˜ë‚˜ì˜ ì†ë„ë¥¼ update
     void Update_particle_Velocity(double timestep) {
         this->Velocity = this->Velocity + this->Acceleration * timestep;
     }
 
-    //ÀÔÀÚ ÇÏ³ªÀÇ LocationÀ» update   x = x + vt + 1/2*a*(t^2)
+    //ìž…ìž í•˜ë‚˜ì˜ Locationì„ update   x = x + vt + 1/2*a*(t^2)
     void Update_particle_Location(double timestep) {
         this->Location = this->Location + this->Velocity * timestep + this->Acceleration * timestep * timestep * 0.5;
 

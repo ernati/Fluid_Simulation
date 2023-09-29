@@ -23,8 +23,8 @@ public:
         Velocity = Vector2D();
         Acceleration = Vector2D();
 
-        radius = 0.001;
-        mass = 0.000001;
+        radius = 0.05;
+        mass = 0.0025;
     }
 
     Particle2D( double Location_X, double Location_Y, double Velocity_X, double Velocity_Y, double Acceleration_X, double Acceleration_Y ) {
@@ -32,8 +32,8 @@ public:
         Velocity = Vector2D(Velocity_X, Velocity_Y);
         Acceleration = Vector2D( Acceleration_X, Acceleration_Y );
 
-        radius = 0.001;
-        mass = 0.000001;
+        radius = 0.05;
+        mass = 0.0025;
     }
 
     ~Particle2D() {

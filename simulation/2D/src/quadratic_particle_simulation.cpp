@@ -31,7 +31,7 @@
 //
 //void init(void) {
 //
-//	// particles ¼±¾ğ
+//	// particles ì„ ì–¸
 //	srand((unsigned int)time(NULL));
 //	for (int i = 0; i < number; i++) {
 //		float init_loc_x = (float)(rand() % Width) / Width;
@@ -41,14 +41,14 @@
 //		particles[i] = quadratic_particle(1.0, vec2(init_loc_x, init_loc_y), vec2(init_vel_x / 1000, init_vel_y));
 //	}
 //
-//	//particles¿¡¼­ particleµéÀÇ À§Ä¡¸¸ •û¿Í¼­ pointsµé¿¡ ÀúÀå, color´Â black °íÁ¤
+//	//particlesì—ì„œ particleë“¤ì˜ ìœ„ì¹˜ë§Œ ëº´ì™€ì„œ pointsë“¤ì— ì €ì¥, colorëŠ” black ê³ ì •
 //	for (int i = 0; i < number; i++) {
 //		points[i] = particles[i].Location;
 //		color[i] = vec3(0.0f, 0.0f, 0.0f);
 //		//printf("%f %f\n", points[i].x, points[i].y);
 //	}
 //
-//	//bbox ¼±¾ğ
+//	//bbox ì„ ì–¸
 //	bbox = Box(0.0, 1.0, 0.0, 1.0);
 //	box_line[0] = vec2(bbox.xmin, bbox.ymin);
 //	box_line[1] = vec2(bbox.xmax, bbox.ymin);
@@ -63,9 +63,9 @@
 //	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 //	glBufferData(GL_ARRAY_BUFFER, sizeof(points) + sizeof(color) + sizeof(box_line), NULL, GL_STATIC_DRAW);
 //
-//	//particleµé ·»´õ¸µ
+//	//particleë“¤ ë Œë”ë§
 //	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(points), points);
-//	//box ·»´õ¸µ
+//	//box ë Œë”ë§
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(points), sizeof(box_line), box_line);
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(points) + sizeof(box_line), sizeof(color), color);
 //
@@ -109,18 +109,18 @@
 //
 //void idle(void)
 //{
-//	////±¸ºĞ
+//	////êµ¬ë¶„
 //	//printf("\n__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //
-//	//´©ÀûµÈ ¹Ğ¸®ÃÊ ¾ò±â
+//	//ëˆ„ì ëœ ë°€ë¦¬ì´ˆ ì–»ê¸°
 //	time_idle = glutGet(GLUT_ELAPSED_TIME);
 //
 //
-//	//ÀÔÀÚ ¿òÁ÷ÀÓ
+//	//ì…ì ì›€ì§ì„
 //	for (int i = 0; i < number; i++) {
 //		/*printf("%f %f -> ", points[i].x, points[i].y);*/
 //		particles[i].move( ( time_idle + i ) );
@@ -137,23 +137,23 @@
 //	glClear(GL_COLOR_BUFFER_BIT);
 //
 //
-//	//È­¸é mapping 
-//	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // °î¼±ÀÌ ±×·ÁÁú Æò¸é
+//	//í™”ë©´ mapping 
+//	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // ê³¡ì„ ì´ ê·¸ë ¤ì§ˆ í‰ë©´
 //	glUniformMatrix4fv(projection, 1, GL_TRUE, p);
 //
-//	//¹Ù²ï ÁÂÇ¥ ´Ù½Ã ¸Ş¸ğ¸®¿¡ ³Ö±â
+//	//ë°”ë€ ì¢Œí‘œ ë‹¤ì‹œ ë©”ëª¨ë¦¬ì— ë„£ê¸°
 //	glBindVertexArray(vao);
 //	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(points), points);
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(points), sizeof(box_line), box_line);
 //
 //	glPointSize(3.0);
 //
-//	//°è»êÇÑ Á¡µé ±×¸®±â
+//	//ê³„ì‚°í•œ ì ë“¤ ê·¸ë¦¬ê¸°
 //	for (int i = 0; i < number; i++) {
 //		glDrawArrays(GL_POINTS, i, 1);
 //	}
 //
-//	//box ±×¸®±â
+//	//box ê·¸ë¦¬ê¸°
 //	glLineWidth(2.0);
 //	glDrawArrays(GL_LINE_LOOP, number, 4);
 //

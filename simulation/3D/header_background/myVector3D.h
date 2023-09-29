@@ -4,20 +4,20 @@ class Vector3D {
 
 public:
 
-    //º¤ÅÍ ¼ººĞ
+    //ë²¡í„° ì„±ë¶„
     double X;
     double Y;
     double Z;
 
 
-    //»ı¼ºÀÚ - ¾Æ¹« ÀÔ·ÂÀÌ ¾ø´Ù¸é ¿µº¤ÅÍ
+    //ìƒì„±ì - ì•„ë¬´ ì…ë ¥ì´ ì—†ë‹¤ë©´ ì˜ë²¡í„°
     Vector3D() {
         X = 0;
         Y = 0;
         Z = 0;
     }
 
-    //»ı¼ºÀÚ - ¼ººĞ°ªÀÌ ÁÖ¾îÁö¸é ±×´ë·Î 
+    //ìƒì„±ì - ì„±ë¶„ê°’ì´ ì£¼ì–´ì§€ë©´ ê·¸ëŒ€ë¡œ 
     Vector3D(double x, double y, double z) {
         X = x;
         Y = y;
@@ -28,7 +28,7 @@ public:
 
     }
 
-    //scalar¿ÍÀÇ ¿¬»ê
+    //scalarì™€ì˜ ì—°ì‚°
     Vector3D operator+ (const double& c)
     {
         Vector3D tmp = Vector3D();
@@ -65,7 +65,7 @@ public:
         return tmp;
     }
 
-    //¿¬»êÀÚ ÀçÁ¤ÀÇ - element wise
+    //ì—°ì‚°ì ì¬ì •ì˜ - element wise
     Vector3D operator+ (const Vector3D& c)
     {
         Vector3D tmp = Vector3D();

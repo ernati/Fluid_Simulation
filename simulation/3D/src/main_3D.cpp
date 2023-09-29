@@ -31,11 +31,11 @@
 ////time
 //int time_idle;
 //
-////simulation ¼±¾ğ
+////simulation ì„ ì–¸
 //Fluid_Simulator_Grid* simulation;
 //
-////number¸¦ Á¶ÀıÇÏ¸é particle ¼ö°¡ ¹Ù²ï´Ù.
-//int number = 50000;
+////numberë¥¼ ì¡°ì ˆí•˜ë©´ particle ìˆ˜ê°€ ë°”ë€ë‹¤.
+//int number = 1000000;
 //
 //GLfloat radius = 3.0;
 //GLfloat theta = 5.0;
@@ -47,10 +47,10 @@
 //vector<Vector3D>* grid_points;
 //vector<Vector3D>* box_points;
 //
-////grid_NÀ» Á¶ÀıÇÏ¸é grid ¼ö°¡ ¹Ù²ï´Ù.
+////grid_Nì„ ì¡°ì ˆí•˜ë©´ grid ìˆ˜ê°€ ë°”ë€ë‹¤.
 //int grid_N = 10;
 //
-////½Ã¹Ä·¹ÀÌ¼Ç »óÅÂ¸¦ Á¶ÀıÇÒ option
+////ì‹œë®¬ë ˆì´ì…˜ ìƒíƒœë¥¼ ì¡°ì ˆí•  option
 //int Option = 3;
 //
 //bool isStart = false;
@@ -62,14 +62,14 @@
 //// Projection transformation parameters
 //GLfloat fovy = 45.0; //field-of-view in y direction angle (in degrees)
 //
-////fovy¸¦ Áõ°¡½ÃÅ°¸é boxÀÇ Å©±â°¡ ÀÛ¾ÆÁü -> fov´Â x_near ¿Í y_maxÀÇ
-////°Å¸®¸¦ ³ªÅ¸³½´Ù - Áï ÁÜ outÀ» ÇÑ È¿°ú°¡ ³­´Ù
+////fovyë¥¼ ì¦ê°€ì‹œí‚¤ë©´ boxì˜ í¬ê¸°ê°€ ì‘ì•„ì§ -> fovëŠ” x_near ì™€ y_maxì˜
+////ê±°ë¦¬ë¥¼ ë‚˜íƒ€ë‚¸ë‹¤ - ì¦‰ ì¤Œ outì„ í•œ íš¨ê³¼ê°€ ë‚œë‹¤
 //
 //GLfloat aspect; //Viewport aspect ratio
-//GLfloat zNear = 0.1, zFar = 10.0; //0.5, 3¿¡¼­ practice6 ¶§ º¯°æ
+//GLfloat zNear = 0.1, zFar = 10.0; //0.5, 3ì—ì„œ practice6 ë•Œ ë³€ê²½
 //
 //
-////simulationÀÇ particleµéÀÇ À§Ä¡¸¦ points¿¡ ÀúÀå
+////simulationì˜ particleë“¤ì˜ ìœ„ì¹˜ë¥¼ pointsì— ì €ì¥
 //void pushback_SimulationPoints_to_Points() {
 //	points.clear();
 //	for (int i = 0; i < number; i++) {
@@ -100,7 +100,7 @@
 //
 //	cout << "fluid_cell_points's size is " << simulation->fluid_cell_center_point->size() << endl;
 //
-//	//fluid mode´Â blue
+//	//fluid modeëŠ” blue
 //	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
 //		color.push_back(vec3(0.0f, 0.0f, 0.0f));
 //	}
@@ -116,16 +116,16 @@
 //
 //void init(void) {
 //
-//	//simulation ½ÇÇà ¹× ÀÔÀÚµé »ı¼º
+//	//simulation ì‹¤í–‰ ë° ì…ìë“¤ ìƒì„±
 //	simulation = new Fluid_Simulator_Grid(number, grid_N);
 //
 //	pushback_SimulationPoints_to_Points();
 //
-//	//bbox ¼±¾ğ
+//	//bbox ì„ ì–¸
 //	bbox = Box3D(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
 //	box_points = bbox.make_box_points(); // 
 //
-//	//gridÀÇ Á¡À» ±×¸®´Â ÇÔ¼ö
+//	//gridì˜ ì ì„ ê·¸ë¦¬ëŠ” í•¨ìˆ˜
 //	grid_points = make_Points_of_grids(grid_N);
 //
 //	grid_points->clear();
@@ -141,23 +141,23 @@
 //	
 //	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3D) * points.size() + sizeof(Vector3D) * box_points->size() + sizeof(Vector3D) * grid_points->size() + sizeof(Vector3D) * color.size(), NULL, GL_STATIC_DRAW);
 //
-//	//particleµé ·»´õ¸µ
+//	//particleë“¤ ë Œë”ë§
 //	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector3D) * points.size(), &points[0]);
 //	
-//	////box ·»´õ¸µ
+//	////box ë Œë”ë§
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector3D) * points.size(), sizeof(Vector3D) * box_points->size(), &((*box_points)[0]));
 //	  
-//	//grid ·»´õ¸µ
+//	//grid ë Œë”ë§
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector3D) * points.size() + sizeof(Vector3D) * box_points->size(), sizeof(Vector3D) * grid_points->size(), &((*grid_points)[0]) );
 //
-//	//fluid cell center point ·»´õ¸µ
+//	//fluid cell center point ë Œë”ë§
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector3D) * points.size() + sizeof(Vector3D) * box_points->size() + sizeof(Vector3D) * grid_points->size(), sizeof(Vector3D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 //
-//	////air cell center point ·»´õ¸µ
+//	////air cell center point ë Œë”ë§
 //	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points.size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) *
 //	//	simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
 //
-//	////color ÇÒ´ç
+//	////color í• ë‹¹
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector3D) * points.size() + sizeof(Vector3D) * box_points->size() + sizeof(Vector3D) * grid_points->size() + sizeof(Vector3D) * simulation->fluid_cell_center_point->size(), sizeof(vec3) * color.size(), &color[0]);
 //
 //	//load shaders
@@ -224,17 +224,17 @@
 //
 //void idle(void)
 //{
-//	////±¸ºĞ
+//	////êµ¬ë¶„
 //	//printf("\n__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //
-//	//´©ÀûµÈ ¹Ğ¸®ÃÊ ¾ò±â
+//	//ëˆ„ì ëœ ë°€ë¦¬ì´ˆ ì–»ê¸°
 //	time_idle = glutGet(GLUT_ELAPSED_TIME);
 //
-//	//0.06ÃÊ ¸¶´Ù particle À§Ä¡ update
+//	//0.06ì´ˆ ë§ˆë‹¤ particle ìœ„ì¹˜ update
 //	if (time_idle % 60 == 0) {
 //		if (isStart) {
 //			simulation->particle_simulation();
@@ -265,7 +265,7 @@
 //    glUniformMatrix4fv(projection, 1, GL_TRUE, p);
 //
 //
-//	//¹Ù²ï ÁÂÇ¥ ´Ù½Ã ¸Ş¸ğ¸®¿¡ ³Ö±â
+//	//ë°”ë€ ì¢Œí‘œ ë‹¤ì‹œ ë©”ëª¨ë¦¬ì— ë„£ê¸°
 //	glBindVertexArray(vao);
 //	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector3D) * points.size(), &points[0]);
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector3D) * points.size() + sizeof(Vector3D) * box_points->size() + sizeof(Vector3D) * grid_points->size(), sizeof(Vector3D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
@@ -278,14 +278,14 @@
 //		if (isParticleMode) { glDrawArrays(GL_POINTS, 0, points.size()); }
 //	}
 //
-//	//box ±×¸®±â
+//	//box ê·¸ë¦¬ê¸°
 //	glLineWidth(2.0);
-//	glDrawArrays(GL_LINE_LOOP, points.size(), 4); // Á¤»ç°¢Çü 1
+//	glDrawArrays(GL_LINE_LOOP, points.size(), 4); // ì •ì‚¬ê°í˜• 1
 //	glDrawArrays(GL_LINE_LOOP, points.size()+4, 4);
 //	glDrawArrays(GL_LINE_LOOP, points.size()+8, 4);
-//	glDrawArrays(GL_LINE_LOOP, points.size()+12, 4); // Á¤»ç°¢Çü 4
+//	glDrawArrays(GL_LINE_LOOP, points.size()+12, 4); // ì •ì‚¬ê°í˜• 4
 //
-//	////grid ±×¸®±â
+//	////grid ê·¸ë¦¬ê¸°
 //	//glDrawArrays(GL_LINES, points.size() + 16, 4 * (grid_N + 1) * (grid_N + 1));
 //
 //	glPointSize(10.0);

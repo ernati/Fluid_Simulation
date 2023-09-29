@@ -12,7 +12,7 @@
 #include <random>
 #include <algorithm>
 
-//³­¼ö »ı¼º
+//ë‚œìˆ˜ ìƒì„±
 #include<cstdlib> //rand(), srand()
 #include<ctime>
 
@@ -41,14 +41,14 @@ bool compare3(tuple<Vector3D, int>& a, tuple<Vector3D, int>& b) {
 }
 
 
-//µî°¡¼Óµµ ¿îµ¿ ½Ã¹Ä·¹ÀÌ¼Ç - v_n+1_ = v_n_ + a*t
+//ë“±ê°€ì†ë„ ìš´ë™ ì‹œë®¬ë ˆì´ì…˜ - v_n+1_ = v_n_ + a*t
 
 
 class Fluid_Simulator_Grid {
 
 public:
 
-    //particleµéÀ» ´ãÀ» vector
+    //particleë“¤ì„ ë‹´ì„ vector
     vector<Particle3D> particles;
 
     int particle_number;
@@ -61,36 +61,39 @@ public:
     double delta_y;
     double delta_z;
 
-    //cell ÃÑ°³¼ö
+    //cell ì´ê°œìˆ˜
     int cell_number;
 
-    //cellµéÀÇ ¼Óµµ¸¦ ´ãÀ» grid
+    //cellë“¤ì˜ ì†ë„ë¥¼ ë‹´ì„ grid
     MAC_Grid<Vector3D>* previous_velocity_grid;
     MAC_Grid<Vector3D>* next_velocity_grid;
 
-    //cellµéÀÇ °¡¼Óµµ¸¦ ´ãÀ» grid - ¿Ü·Â
+    //cellë“¤ì˜ ê°€ì†ë„ë¥¼ ë‹´ì„ grid - ì™¸ë ¥
     MAC_Grid<Vector3D>* bodyforce;
 
-    //cell ¾ÈÀÇ Æ÷ÇÔµÈ particle ¼ö¸¦ ´ãÀ» grid
+    //cell ì•ˆì˜ í¬í•¨ëœ particle ìˆ˜ë¥¼ ë‹´ì„ grid
     MAC_Grid<double>* cell_particle_number;
 
-    //divergence °è»êÀ» À§ÇÑ velocity Â÷ grid
+    //divergence ê³„ì‚°ì„ ìœ„í•œ velocity ì°¨ grid
     MAC_Grid<double>* velocity_difference_X_grid;
     MAC_Grid<double>* velocity_difference_Y_grid;
     MAC_Grid<double>* velocity_difference_Z_grid;
 
-    //cellµéÀÇ Áß½ÉÁÂÇ¥¸¦ ´ãÀ» grid
+    //cellë“¤ì˜ ì¤‘ì‹¬ì¢Œí‘œë¥¼ ë‹´ì„ grid
     MAC_Grid<Vector3D>* cell_center_point;
 
-    //À¯Ã¼°¡ µé¾îÀÖ´Â cellµéÀÇ À§Ä¡¸¦ ´ãÀ» grid
+    //ìœ ì²´ê°€ ë“¤ì–´ìˆëŠ” cellë“¤ì˜ ìœ„ì¹˜ë¥¼ ë‹´ì„ grid
     MAC_Grid<CellType>* cell_type_grid;
 
-    //À¯Ã¼°¡ µé¾îÀÖ´Â cellµéÀÇ Áß½ÉÁÂÇ¥¸¦ ´ãÀ» vector
+    //ìœ ì²´ê°€ ë“¤ì–´ìˆëŠ” cellë“¤ì˜ ì¤‘ì‹¬ì¢Œí‘œë¥¼ ë‹´ì„ vector
     vector<Vector3D>* fluid_cell_center_point;
-    //fluid·ÎºÎÅÍ ¼Óµµ¸¦ extrapolation ¹ŞÀº AIR cellµéÀÇ Áß½ÉÁÂÇ¥¸¦ ´ãÀ» vector
+    //fluidë¡œë¶€í„° ì†ë„ë¥¼ extrapolation ë°›ì€ AIR cellë“¤ì˜ ì¤‘ì‹¬ì¢Œí‘œë¥¼ ë‹´ì„ vector
     vector<Vector3D>* air_cell_center_point;
 
-    //»ç¿ëÇÒ Çà·Ä º¯¼öµé
+    //grid ì¢Œí‘œ í•¨ìˆ˜ë“¤ì„ ìœ„í•œ tool
+    MAC_Grid<bool>* tool;
+
+    //ì‚¬ìš©í•  í–‰ë ¬ ë³€ìˆ˜ë“¤
     Eigen::SparseMatrix<double>* A;
 
 
@@ -104,58 +107,60 @@ public:
 
     //===========================================init and clear===========================================
     void init(int particle_number, int grid_N) {
-        //timestepÀÇ default = 0.06
+        //timestepì˜ default = 0.06
 
         gridsize = grid_N;
 
         cell_number = gridsize * gridsize * gridsize;
 
-        //ÀÔÀÚµé ÃÊ±âÈ­
+        //ì…ìë“¤ ì´ˆê¸°í™”
         srand((unsigned int)time(NULL));
         for (int i = 0; i < particle_number; i++) {
-            //0~99 ³­¼ö »ı¼º    
+            //0~99 ë‚œìˆ˜ ìƒì„±    
             int randomLocation_X = rand() % 200;
-            //0~99 ³­¼ö »ı¼º
+            //0~99 ë‚œìˆ˜ ìƒì„±
             int randomLocation_Y = rand() % 200;
 
-            //À§Ä¡ X : 0.1~0.3, À§Ä¡ Y : 0.6~0.8
+            //ìœ„ì¹˜ X : 0.1~0.3, ìœ„ì¹˜ Y : 0.6~0.8
             Particle3D tmp = Particle3D(((double)randomLocation_X + 100) / 1000.0, (((double)randomLocation_Y) + 600) / 1000.0, (((double)randomLocation_Y) + 600) / 1000.0,  (double)randomLocation_X / 500.0, (double)randomLocation_Y / 500.0, (double)randomLocation_Y / 500.0, 0,0, -0.98);
             particles.push_back(tmp);
 
         }
 
-        //timestepÀÇ default = 0.06
+        //timestepì˜ default = 0.06
         timestep = 0.06;
         density = 1.0;
         delta_x = 1.0 / (double)grid_N;
         delta_y = 1.0 / (double)grid_N;
         delta_z = 1.0 / (double)grid_N;
 
-        //previous_velocity grid ÃÊ±âÈ­
+        tool = new MAC_Grid<bool>(gridsize);
+
+        //previous_velocity grid ì´ˆê¸°í™”
         previous_velocity_grid = new MAC_Grid<Vector3D>(gridsize);
         for (int n = 0; n < cell_number; n++) {
             previous_velocity_grid->cell_values.push_back(Vector3D());
         }
 
-        //previous_velocity grid ÃÊ±âÈ­
+        //previous_velocity grid ì´ˆê¸°í™”
         next_velocity_grid = new MAC_Grid<Vector3D>(gridsize);
         for (int n = 0; n < cell_number; n++) {
             next_velocity_grid->cell_values.push_back(Vector3D());
         }
 
-        //body force ÃÊ±âÈ­
+        //body force ì´ˆê¸°í™”
         bodyforce = new MAC_Grid<Vector3D>(gridsize);
         for (int n = 0; n < cell_number; n++) {
             bodyforce->cell_values.push_back(Vector3D());
         }
 
-        //cell_particle_number ÃÊ±âÈ­
+        //cell_particle_number ì´ˆê¸°í™”
         cell_particle_number = new MAC_Grid<double>(gridsize);
         for (int n = 0; n < cell_number; n++) {
             cell_particle_number->cell_values.push_back(0.0);
         }
 
-        //velocity_difference_grid ÃÊ±âÈ­
+        //velocity_difference_grid ì´ˆê¸°í™”
         velocity_difference_X_grid = new MAC_Grid<double>(gridsize);
         velocity_difference_Y_grid = new MAC_Grid<double>(gridsize);
         velocity_difference_Z_grid = new MAC_Grid<double>(gridsize);
@@ -166,45 +171,45 @@ public:
             velocity_difference_Z_grid->cell_values.push_back(0.0);
         }
 
-        // Çà·Ä ÃÊ±âÈ­
+        // í–‰ë ¬ ì´ˆê¸°í™”
         A = new Eigen::SparseMatrix<double>(cell_number, cell_number);
         //A = Eigen::SparseMatrix<double>(cell_number, cell_number);
 
-        //cell_center_grid ÃÊ±âÈ­
+        //cell_center_grid ì´ˆê¸°í™”
         cell_center_point = new MAC_Grid<Vector3D>(gridsize);
-        //cellµé¿¡´Ù°¡ cell_pointÁ¤º¸ »ğÀÔ
-        //1. cellÀÇ °¹¼ö´Â gridsizeÀÇ ¼¼Á¦°ö
+        //cellë“¤ì—ë‹¤ê°€ cell_pointì •ë³´ ì‚½ì…
+        //1. cellì˜ ê°¯ìˆ˜ëŠ” gridsizeì˜ ì„¸ì œê³±
         for (int v = 0; v < cell_number; v++) {
-            //2. (0,0) Àº ( 1/gridsize , 1/ gridsize )
+            //2. (0,0) ì€ ( 1/gridsize , 1/ gridsize )
             if (v == 0) {
                 cell_center_point->cell_values.push_back(Vector3D(delta_x / 2.0, delta_y / 2.0, delta_z / 2.0));
             }
-            //3. (i,j)´Â ( 1/gridsize + i * gridsize , 1/gridsize + j* gridsize )
+            //3. (i,j)ëŠ” ( 1/gridsize + i * gridsize , 1/gridsize + j* gridsize )
             else {
                 //3-1. v ( vector Index ) to (i,j)
-                int i = cell_center_point->get_cell_i_from_VectorIndex(v);
-                int j = cell_center_point->get_cell_j_from_VectorIndex(v);
-                int k = cell_center_point->get_cell_k_from_VectorIndex(v);
+                int i = tool->get_cell_i_from_VectorIndex(v);
+                int j = tool->get_cell_j_from_VectorIndex(v);
+                int k = tool->get_cell_k_from_VectorIndex(v);
 
-                //3-2. ½Ä Àû¿ë
+                //3-2. ì‹ ì ìš©
                 cell_center_point->cell_values.push_back(Vector3D(delta_x / 2.0 + i * delta_x, delta_y / 2.0 + j * delta_y, delta_y / 2.0 + j * delta_z ));
             }
         }
 
-        //cell_type_grid ÃÊ±âÈ­
+        //cell_type_grid ì´ˆê¸°í™”
         cell_type_grid = new MAC_Grid<CellType>(gridsize);
         for (int n = 0; n < cell_number; n++) {
             cell_type_grid->cell_values.push_back(CellType::AIR);
         }
 
-        //fluid_cell_center_point ÃÊ±âÈ­
+        //fluid_cell_center_point ì´ˆê¸°í™”
         fluid_cell_center_point = new vector<Vector3D>;
 
-        //air_cell_center_point ÃÊ±âÈ­
+        //air_cell_center_point ì´ˆê¸°í™”
         air_cell_center_point = new vector<Vector3D>;
     }
 
-    //¸ğµç Á¤º¸¸¦ ÃÊ±âÈ­
+    //ëª¨ë“  ì •ë³´ë¥¼ ì´ˆê¸°í™”
     void clear_and_ReInit() {
         clear();
 
@@ -212,7 +217,7 @@ public:
     }
 
     void clear() {
-        //vectorµéÀ» clear
+        //vectorë“¤ì„ clear
         previous_velocity_grid->cell_values.clear();
         next_velocity_grid->cell_values.clear();
         bodyforce->cell_values.clear();
@@ -271,26 +276,26 @@ public:
         //3. transfer_velocity_to_grid_from_particle
         transfer_velocity_to_grid_from_particle();
 
-        //4. cell ¼ºÁú ºĞ·ù
+        //4. cell ì„±ì§ˆ ë¶„ë¥˜
         classify_cell_type();
 
         cout << " bodyforce start " << endl;
 
-        //4. bodyforce cell¿¡ Ãß°¡
+        //4. bodyforce cellì— ì¶”ê°€
         add_body_force();
 
         cout << " Adjust_velocity_from_bodyforce start " << endl;
 
-        //5. bodyforce Àû¿ë
+        //5. bodyforce ì ìš©
         Adjust_velocity_from_bodyforce();
 
-        //7. À¯Ã¼ÁÖº¯ ¼¿¿¡ º¸°£
+        //7. ìœ ì²´ì£¼ë³€ ì…€ì— ë³´ê°„
         extrapolate_velocity_to_air_cell();
 
 
         cout << " pressureSolve start " << endl;
 
-        //8. ¾Ğ·Â °è»ê
+        //8. ì••ë ¥ ê³„ì‚°
         pressure_solve();
 
         cout << " transfer_velocity_to_particle_from_grid start " << endl;
@@ -307,7 +312,7 @@ public:
         swap_buffer();
 
 
-        //12. À¯Ã¼°¡ ÀÖ´Â cellµé »öÄ¥
+        //12. ìœ ì²´ê°€ ìˆëŠ” cellë“¤ ìƒ‰ì¹ 
         rendering_fluid();
 
     }
@@ -323,53 +328,53 @@ public:
 
         vector<bool>* collision_check = new vector<bool>;
 
-        //0. ÃÊ±âÈ­
+        //0. ì´ˆê¸°í™”
         for (int i = 0; i < particles.size(); i++) {
             collision_check->push_back(false);
         }
 
 
-        //1. ¿¹»ó À§Ä¡ °è»ê
+        //1. ì˜ˆìƒ ìœ„ì¹˜ ê³„ì‚°
         for (int p = 0; p < particles.size(); p++) {
             Vector3D expecting_Location = this->particles[p].Location + this->particles[p].Velocity * timestep;
             temp_particles->push_back(make_tuple(expecting_Location, p));
         }
 
-        //2. particleµéÀ» sort
+        //2. particleë“¤ì„ sort
         sort(temp_particles->begin(), temp_particles->end(), compare3);
 
-        //3. Ãæµ¹ °¡´É¼º ÀÖ´Â particleµéÀ» ±¸ºĞ - sweep and prune
+        //3. ì¶©ëŒ ê°€ëŠ¥ì„± ìˆëŠ” particleë“¤ì„ êµ¬ë¶„ - sweep and prune
         for (int i = 0; i < temp_particles->size(); i++) {
-            //3-1. ¾Õ¿¡¼­ ÇÏ³ª¾¿ ÈÈ´Âµ¥, ÀÚ±â ´ÙÀ½ particle°úÀÇ °Å¸®°¡ radiusº¸´Ù ÀÛÀ¸¸é Ãæµ¹ °¡´É¼ºÀÌ ÀÖÀ½.
-            //ÀÌ¹Ì ºĞ·ùµÈ particleÀÌ¸é pass
+            //3-1. ì•ì—ì„œ í•˜ë‚˜ì”© í›‘ëŠ”ë°, ìê¸° ë‹¤ìŒ particleê³¼ì˜ ê±°ë¦¬ê°€ radiusë³´ë‹¤ ì‘ìœ¼ë©´ ì¶©ëŒ ê°€ëŠ¥ì„±ì´ ìˆìŒ.
+            //ì´ë¯¸ ë¶„ë¥˜ëœ particleì´ë©´ pass
             if ((*collision_check)[std::get<1>((*temp_particles)[i])]) { continue; }
-            //i°¡ ¸¶Áö¸· particleÀÌ¸é break
+            //iê°€ ë§ˆì§€ë§‰ particleì´ë©´ break
             else if (i == temp_particles->size() - 1) { break; }
 
-            //ÇöÀç particle°ú ´ÙÀ½ particleÀÇ °Å¸®°¡ 0ÀÌ»ó 2*radius ÀÌÇÏÀÌ¸é Ãæµ¹ °¡´É¼ºÀÌ ÀÖÀ½.
+            //í˜„ì¬ particleê³¼ ë‹¤ìŒ particleì˜ ê±°ë¦¬ê°€ 0ì´ìƒ 2*radius ì´í•˜ì´ë©´ ì¶©ëŒ ê°€ëŠ¥ì„±ì´ ìˆìŒ.
             else {
                 double distance = sqrt(pow(get<0>((*temp_particles)[i]).X - get<0>((*temp_particles)[i + 1]).X, 2) + pow(get<0>((*temp_particles)[i]).Y - get<0>((*temp_particles)[i + 1]).Y, 2) + pow(get<0>((*temp_particles)[i]).Z - get<0>((*temp_particles)[i + 1]).Z, 2) );
                 if (distance <= 2 * 0.05) {
-                    //Ãæµ¹ °¡´É¼ºÀÌ ÀÖ´Â particleµéÀ» ÀúÀå
+                    //ì¶©ëŒ ê°€ëŠ¥ì„±ì´ ìˆëŠ” particleë“¤ì„ ì €ì¥
                     temp_particles2->push_back(make_tuple(get<1>((*temp_particles)[i]), get<1>((*temp_particles)[i + 1])));
-                    //Ãæµ¹ °¡´É¼ºÀÌ ÀÖ´Â particleµéÀº true·Î ¹Ù²ãÁÜ
+                    //ì¶©ëŒ ê°€ëŠ¥ì„±ì´ ìˆëŠ” particleë“¤ì€ trueë¡œ ë°”ê¿”ì¤Œ
                     (*collision_check)[std::get<1>((*temp_particles)[i])] = true;
                     (*collision_check)[std::get<1>((*temp_particles)[i + 1])] = true;
                 }
             }
         }
 
-        // 4. Ãæµ¹ °¡´É¼º ÀÖ´Â particleµé³¢¸® ¸ğ¸àÅÒ º¸Á¸À» ÅëÇÑ Ãæµ¹ ÈÄ ¼Óµµ update¸¦ Àû¿ë
+        // 4. ì¶©ëŒ ê°€ëŠ¥ì„± ìˆëŠ” particleë“¤ë¼ë¦¬ ëª¨ë©˜í…€ ë³´ì¡´ì„ í†µí•œ ì¶©ëŒ í›„ ì†ë„ updateë¥¼ ì ìš©
         for (int i = 0; i < temp_particles2->size(); i++) {
             tuple<int, int> tmp = (*temp_particles2)[i];
             Vector3D v1 = this->particles[get<0>(tmp)].Velocity;
             Vector3D v2 = this->particles[get<1>(tmp)].Velocity;
 
-            //µÎ ÀÔÀÚÀÇ Áú·®ÀÌ °°À¸¹Ç·Î »¬¼À »ı·«
+            //ë‘ ì…ìì˜ ì§ˆëŸ‰ì´ ê°™ìœ¼ë¯€ë¡œ ëº„ì…ˆ ìƒëµ
             Vector3D new_v1 = (v2 * 2 * this->particles[get<1>(tmp)].mass) / (this->particles[get<0>(tmp)].mass + this->particles[get<1>(tmp)].mass);
             Vector3D new_v2 = (v1 * 2 * this->particles[get<0>(tmp)].mass) / (this->particles[get<0>(tmp)].mass + this->particles[get<1>(tmp)].mass);
 
-            //¼Óµµ update
+            //ì†ë„ update
             this->particles[get<0>(tmp)].Velocity = new_v1;
             this->particles[get<1>(tmp)].Velocity = new_v2;
         }
@@ -381,9 +386,9 @@ public:
         delete collision_check;
     }
 
-    //==============================boundary °ü·Ã ÇÔ¼ö==============================
+    //==============================boundary ê´€ë ¨ í•¨ìˆ˜==============================
 
-    //¾Ğ·Â °è»ê ÈÄÀÇ ¼Óµµ°¡ boundaryconditionÀ» ¹ş¾î³ª´Â °æ¿ì ¼Óµµ¸¦ Àû´çÇÑ Á¶°ÇÀ¸·Î º¯°æÇÔ.
+    //ì••ë ¥ ê³„ì‚° í›„ì˜ ì†ë„ê°€ boundaryconditionì„ ë²—ì–´ë‚˜ëŠ” ê²½ìš° ì†ë„ë¥¼ ì ë‹¹í•œ ì¡°ê±´ìœ¼ë¡œ ë³€ê²½í•¨.
     void boundarycondition_grid() {
         for (int i = 0; i < cell_number; i++) {
             Vector3D expecting_Location = this->cell_center_point->cell_values[i] + this->next_velocity_grid->cell_values[i] * timestep;
@@ -394,7 +399,7 @@ public:
         }
     }
 
-    //¼Óµµ¿¡ µû¸¥ À§Ä¡ ¿¹»ó °á°ú°ªÀÌ boundaryconditionÀ» ¹ş¾î³ª´Â °æ¿ì ¼Óµµ¸¦ Àû´çÇÑ Á¶°ÇÀ¸·Î º¯°æÇÔ.
+    //ì†ë„ì— ë”°ë¥¸ ìœ„ì¹˜ ì˜ˆìƒ ê²°ê³¼ê°’ì´ boundaryconditionì„ ë²—ì–´ë‚˜ëŠ” ê²½ìš° ì†ë„ë¥¼ ì ë‹¹í•œ ì¡°ê±´ìœ¼ë¡œ ë³€ê²½í•¨.
     void boundarycondition_particle() {
         for (int i = 0; i < particles.size(); i++) {
             Vector3D expecting_Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
@@ -458,16 +463,16 @@ public:
     //==============================advection=================================
 
 
-    //ÀÔÀÚµéÀÇ À§Ä¡¸¦ ¸ğµÎ update
+    //ì…ìë“¤ì˜ ìœ„ì¹˜ë¥¼ ëª¨ë‘ update
     void advection() {
         for (int i = 0; i < particles.size(); i++) {
             this->particles[i].Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
 
-            //boundary condition : ÀÔÀÚ À§Ä¡ °­Á¦ ÀÌµ¿ Ãß°¡
+            //boundary condition : ì…ì ìœ„ì¹˜ ê°•ì œ ì´ë™ ì¶”ê°€
             if (check_location_for_boundary(this->particles[i].Location)) {
                 srand((unsigned int)time(NULL));
 
-                // x ´Â 0.15~0.85 »çÀÌÀÇ ·£´ı°ª , y´Â 0.15 ~ 0.35 »çÀÌÀÇ ·£´ı°ª
+                // x ëŠ” 0.15~0.85 ì‚¬ì´ì˜ ëœë¤ê°’ , yëŠ” 0.15 ~ 0.35 ì‚¬ì´ì˜ ëœë¤ê°’
                 double random_x = (rand() % 70 + 15) / 100.0;
                 double random_y = (rand() % 20 + 15) / 100.0;
                 double random_z = (rand() % 20 + 15) / 100.0;
@@ -483,8 +488,8 @@ public:
     //==============================transferVelocity=================================
 
     int check_particle_on_the_plane(Vector3D Location, double threshold) {
-        //0. edgeµé°úÀÇ °Å¸® Ã¼Å©
-        Vector3D i_j_k = previous_velocity_grid->get_cell_i_j_k_from_world(Location);
+        //0. edgeë“¤ê³¼ì˜ ê±°ë¦¬ ì²´í¬
+        Vector3D i_j_k = tool->get_cell_i_j_k_from_world(Location);
         double left_distance_x = abs(Location.X - delta_x * i_j_k.X);
         double right_distance_x = abs(Location.X - delta_x * (i_j_k.X + 1));
         double down_distance_y = abs(Location.Y - delta_y * i_j_k.Y);
@@ -492,17 +497,17 @@ public:
         double down_distance_z = abs(Location.Z - delta_z * i_j_k.Z);
         double up_distance_z = abs(Location.Z - delta_z * (i_j_k.Z + 1));
 
-        //1. j_plus ¸é°ú °¡±î¿ò
+        //1. j_plus ë©´ê³¼ ê°€ê¹Œì›€
         if (up_distance_y < threshold && left_distance_x > threshold && right_distance_x > threshold && down_distance_z > threshold && up_distance_z > threshold) { return 1; }
-        //2. j¸é°ú °¡±î¿ò
+        //2. jë©´ê³¼ ê°€ê¹Œì›€
         if (down_distance_y < threshold && left_distance_x > threshold && right_distance_x > threshold && down_distance_z > threshold && up_distance_z > threshold) { return 2; }
-        //3. i_pus¸é°ú °¡±î¿ò
+        //3. i_pusë©´ê³¼ ê°€ê¹Œì›€
         if (right_distance_x < threshold && down_distance_y > threshold && up_distance_y > threshold && down_distance_z > threshold && up_distance_z > threshold) { return 3; }
-        //4. i¸é°ú °¡±î¿ò
+        //4. ië©´ê³¼ ê°€ê¹Œì›€
         if (left_distance_x < threshold && down_distance_y > threshold && up_distance_y > threshold && down_distance_z > threshold && up_distance_z > threshold) { return 4; }
-        //5. k_plus ¸é°ú °¡±î¿ò
+        //5. k_plus ë©´ê³¼ ê°€ê¹Œì›€
         if (up_distance_z < threshold && left_distance_x > threshold && right_distance_x > threshold && down_distance_y > threshold && up_distance_y > threshold) { return 1; }
-        //6. k¸é°ú °¡±î¿ò
+        //6. kë©´ê³¼ ê°€ê¹Œì›€
         if (down_distance_z < threshold && left_distance_x > threshold && right_distance_x > threshold && down_distance_y > threshold && up_distance_y > threshold) { return 2; }
 
         return 0;
@@ -510,111 +515,111 @@ public:
 
 
 
-    //particleÀÇ value¸¦ ¸ğµç grid·Î Àü´ŞÇÏ´Â ÇÔ¼ö
+    //particleì˜ valueë¥¼ ëª¨ë“  gridë¡œ ì „ë‹¬í•˜ëŠ” í•¨ìˆ˜
     void transfer_velocity_to_grid_from_particle() {
 
-        //0. cell_particle_number,previous_velocity_grid ÃÊ±âÈ­
+        //0. cell_particle_number,previous_velocity_grid ì´ˆê¸°í™”
         for (int i = 0; i < cell_number; i++) {
             cell_particle_number->cell_values[i] = 0.0;
             previous_velocity_grid->cell_values[i] = Vector3D();
         }
 
         for (int p = 0; p < particles.size(); p++) {
-            //1. particle cellÁÂÇ¥ Ã£±â
-            Vector3D i_j_k = previous_velocity_grid->get_cell_i_j_k_from_world(particles[p].Location);
+            //1. particle cellì¢Œí‘œ ì°¾ê¸°
+            Vector3D i_j_k = tool->get_cell_i_j_k_from_world(particles[p].Location);
 
-            //cell ³»ºÎ particleÀÌ 15°³ ÃÊ°úÀÏ °æ¿ì ¹ØÀÇ °úÁ¤ »ı·«
-            if (cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] > 15) { continue; }
+            //cell ë‚´ë¶€ particleì´ 15ê°œ ì´ˆê³¼ì¼ ê²½ìš° ë°‘ì˜ ê³¼ì • ìƒëµ
+            if (cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] > 15) { continue; }
 
-            //2. cell¿¡ Æ÷ÇÔµÈ particle ¼ö ¼¼±â
-            cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] + 1.0;
+            //2. cellì— í¬í•¨ëœ particle ìˆ˜ ì„¸ê¸°
+            cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + 1.0;
 
-            //3. cell¿¡ Æ÷ÇÔµÈ particleÀÇ ¼Óµµ ´õÇÏ±â - edgeÃ³¸® Æ÷ÇÔ
+            //3. cellì— í¬í•¨ëœ particleì˜ ì†ë„ ë”í•˜ê¸° - edgeì²˜ë¦¬ í¬í•¨
             double check = check_particle_on_the_plane(particles[p].Location, 0.01);
 
-            //3-0. edge¿¡ ¾ø´Â °æ¿ì
+            //3-0. edgeì— ì—†ëŠ” ê²½ìš°
             if (check == 0) {
-                previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity;
+                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity;
             }
 
-            //edge¿¡ ÀÖ´Â °æ¿ì
+            //edgeì— ìˆëŠ” ê²½ìš°
             else {
-                //3-1. j_plus ¸é°ú °¡±î¿ò
+                //3-1. j_plus ë©´ê³¼ ê°€ê¹Œì›€
                 if (check == 1) {
                     Vector3D i_j_plus_1_k = Vector3D(i_j_k.X, i_j_k.Y + 1, i_j_k.Z);
-                    //cell_particle_number (i,j)¿¡´Â 0.5 »©ÁÖ°í, (i,j+1)¿¡´Â 0.5 ´õÇØÁÖ±â
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] - 0.5;
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_plus_1_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_plus_1_k)] + 0.5;
+                    //cell_particle_number (i,j)ì—ëŠ” 0.5 ë¹¼ì£¼ê³ , (i,j+1)ì—ëŠ” 0.5 ë”í•´ì£¼ê¸°
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] - 0.5;
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1_k)] + 0.5;
 
-                    //previous_velocity_grid ¿¡´Ù°¡ °¢°¢ velocityÀÇ 0.5¹è¾¿ ´õÇØÁÖ±â
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_plus_1_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_plus_1_k)] + particles[p].Velocity * 0.5;
+                    //previous_velocity_grid ì—ë‹¤ê°€ ê°ê° velocityì˜ 0.5ë°°ì”© ë”í•´ì£¼ê¸°
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1_k)] + particles[p].Velocity * 0.5;
                 }
 
-                //3-2. j¸é°ú °¡±î¿ò
+                //3-2. jë©´ê³¼ ê°€ê¹Œì›€
                 else if (check == 2) {
                     Vector3D i_j_minus_1_k = Vector3D(i_j_k.X, i_j_k.Y - 1, i_j_k.Z);
-                    //cell_particle_number (i,j)¿¡´Â 0.5 »©ÁÖ°í, (i,j-1)¿¡´Â 0.5 ´õÇØÁÖ±â
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] - 0.5;
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_minus_1_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_minus_1_k)] + 0.5;
+                    //cell_particle_number (i,j)ì—ëŠ” 0.5 ë¹¼ì£¼ê³ , (i,j-1)ì—ëŠ” 0.5 ë”í•´ì£¼ê¸°
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] - 0.5;
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1_k)] + 0.5;
 
-                    //previous_velocity_grid ¿¡´Ù°¡ °¢°¢ velocityÀÇ 0.5¹è¾¿ ´õÇØÁÖ±â
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_minus_1_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_minus_1_k)] + particles[p].Velocity * 0.5;
+                    //previous_velocity_grid ì—ë‹¤ê°€ ê°ê° velocityì˜ 0.5ë°°ì”© ë”í•´ì£¼ê¸°
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1_k)] + particles[p].Velocity * 0.5;
                 }
-                //3-3. i_pus¸é°ú °¡±î¿ò
+                //3-3. i_pusë©´ê³¼ ê°€ê¹Œì›€
                 else if (check == 3) {
                     Vector3D i_plus_1_j_k = Vector3D(i_j_k.X + 1, i_j_k.Y, i_j_k.Z);
-                    //cell_particle_number (i,j)¿¡´Â 0.5 »©ÁÖ°í, (i+1,j)¿¡´Â 0.5 ´õÇØÁÖ±â
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] - 0.5;
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_plus_1_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_plus_1_j_k)] + 0.5;
+                    //cell_particle_number (i,j)ì—ëŠ” 0.5 ë¹¼ì£¼ê³ , (i+1,j)ì—ëŠ” 0.5 ë”í•´ì£¼ê¸°
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] - 0.5;
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j_k)] + 0.5;
 
-                    //previous_velocity_grid ¿¡´Ù°¡ °¢°¢ velocityÀÇ 0.5¹è¾¿ ´õÇØÁÖ±â
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_plus_1_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_plus_1_j_k)] + particles[p].Velocity * 0.5;
+                    //previous_velocity_grid ì—ë‹¤ê°€ ê°ê° velocityì˜ 0.5ë°°ì”© ë”í•´ì£¼ê¸°
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j_k)] + particles[p].Velocity * 0.5;
                 }
 
-                //3-4. i¸é°ú °¡±î¿ò
+                //3-4. ië©´ê³¼ ê°€ê¹Œì›€
                 else if (check==4) { 
                     Vector3D i_minus_1_j_k = Vector3D(i_j_k.X - 1, i_j_k.Y, i_j_k.Z);
-                    //cell_particle_number (i,j)¿¡´Â 0.5 »©ÁÖ°í, (i-1,j)¿¡´Â 0.5 ´õÇØÁÖ±â
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] - 0.5;
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_minus_1_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_minus_1_j_k)] + 0.5;
+                    //cell_particle_number (i,j)ì—ëŠ” 0.5 ë¹¼ì£¼ê³ , (i-1,j)ì—ëŠ” 0.5 ë”í•´ì£¼ê¸°
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] - 0.5;
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j_k)] + 0.5;
 
-                    //previous_velocity_grid ¿¡´Ù°¡ °¢°¢ velocityÀÇ 0.5¹è¾¿ ´õÇØÁÖ±â
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_minus_1_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_minus_1_j_k)] + particles[p].Velocity * 0.5;
+                    //previous_velocity_grid ì—ë‹¤ê°€ ê°ê° velocityì˜ 0.5ë°°ì”© ë”í•´ì£¼ê¸°
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j_k)] + particles[p].Velocity * 0.5;
                 }
 
-                //3-5.  k_plus ¸é°ú °¡±î¿ò
+                //3-5.  k_plus ë©´ê³¼ ê°€ê¹Œì›€
                 else if (check==5) { 
                     Vector3D i_j_k_plus_1 = Vector3D(i_j_k.X, i_j_k.Y, i_j_k.Z+1);
-                    //cell_particle_number (i,j)¿¡´Â 0.5 »©ÁÖ°í, (i+1,j)¿¡´Â 0.5 ´õÇØÁÖ±â
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] - 0.5;
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k_plus_1)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k_plus_1)] + 0.5;
+                    //cell_particle_number (i,j)ì—ëŠ” 0.5 ë¹¼ì£¼ê³ , (i+1,j)ì—ëŠ” 0.5 ë”í•´ì£¼ê¸°
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] - 0.5;
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k_plus_1)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k_plus_1)] + 0.5;
 
-                    //previous_velocity_grid ¿¡´Ù°¡ °¢°¢ velocityÀÇ 0.5¹è¾¿ ´õÇØÁÖ±â
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k_plus_1)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k_plus_1)] + particles[p].Velocity * 0.5;
+                    //previous_velocity_grid ì—ë‹¤ê°€ ê°ê° velocityì˜ 0.5ë°°ì”© ë”í•´ì£¼ê¸°
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_plus_1)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_plus_1)] + particles[p].Velocity * 0.5;
                 }
 
-                //3-6.  k¸é°ú °¡±î¿ò
+                //3-6.  kë©´ê³¼ ê°€ê¹Œì›€
                 else {
                     Vector3D i_j_k_minus_1 = Vector3D(i_j_k.X + 1, i_j_k.Y, i_j_k.Z-1);
-                    //cell_particle_number (i,j)¿¡´Â 0.5 »©ÁÖ°í, (i+1,j)¿¡´Â 0.5 ´õÇØÁÖ±â
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k)] - 0.5;
-                    cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k_minus_1)] = cell_particle_number->cell_values[cell_particle_number->get_VectorIndex_from_cell(i_j_k_minus_1)] + 0.5;
+                    //cell_particle_number (i,j)ì—ëŠ” 0.5 ë¹¼ì£¼ê³ , (i+1,j)ì—ëŠ” 0.5 ë”í•´ì£¼ê¸°
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] - 0.5;
+                    cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k_minus_1)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_k_minus_1)] + 0.5;
 
-                    //previous_velocity_grid ¿¡´Ù°¡ °¢°¢ velocityÀÇ 0.5¹è¾¿ ´õÇØÁÖ±â
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
-                    previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k_minus_1)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k_minus_1)] + particles[p].Velocity * 0.5;
+                    //previous_velocity_grid ì—ë‹¤ê°€ ê°ê° velocityì˜ 0.5ë°°ì”© ë”í•´ì£¼ê¸°
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] + particles[p].Velocity * 0.5;
+                    previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_minus_1)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_minus_1)] + particles[p].Velocity * 0.5;
                 }
             }
 
         }
 
 
-        //4. cell¿¡ Æ÷ÇÔµÈ particleÀÇ ¼Óµµ Æò±Õ³»±â
+        //4. cellì— í¬í•¨ëœ particleì˜ ì†ë„ í‰ê· ë‚´ê¸°
         for (int i = 0; i < cell_number; i++) {
             if (cell_particle_number->cell_values[i] != 0) {
                 previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] / cell_particle_number->cell_values[i];
@@ -624,7 +629,7 @@ public:
             }
         }
 
-        //5. cell¿¡ Æ÷ÇÔµÈ ¼Óµµ·Î velocity_difference_grid °ª Ã¤¿ì±â
+        //5. cellì— í¬í•¨ëœ ì†ë„ë¡œ velocity_difference_grid ê°’ ì±„ìš°ê¸°
         for (int i = 0; i < gridsize; i++) {
             for (int j = 0; j < gridsize; j++) {
                 for (int k = 0; k < gridsize; k++) {
@@ -635,18 +640,18 @@ public:
                     Vector3D i_j_plus1_k = Vector3D(i, j + 1,k);
                     Vector3D i_j_k_plus1 = Vector3D(i, j, k + 1);
 
-                    //¹ß»ê ±¸ÇÏ±â - ¼ÓµµÀÇ °ø°£ º¯È­·® ±¸ÇÏ±â
-                    velocity_difference_X_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = (previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_plus1_j_k)].X - previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)].X);
+                    //ë°œì‚° êµ¬í•˜ê¸° - ì†ë„ì˜ ê³µê°„ ë³€í™”ëŸ‰ êµ¬í•˜ê¸°
+                    velocity_difference_X_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = (previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus1_j_k)].X - previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)].X);
                     if (i == 0) {
-                        velocity_difference_X_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)].X;
+                        velocity_difference_X_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)].X;
                     }
-                    velocity_difference_Y_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = (previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_plus1_k)].Y - previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)].Y);
+                    velocity_difference_Y_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = (previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus1_k)].Y - previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)].Y);
                     if (j == 0) {
-                        velocity_difference_Y_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)].Y;
+                        velocity_difference_Y_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)].Y;
                     }
-                    velocity_difference_Z_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = (previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k_plus1)].Z - previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)].Z);
+                    velocity_difference_Z_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = (previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_plus1)].Z - previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)].Z);
                     if (j == 0) {
-                        velocity_difference_Z_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j_k)].Z;
+                        velocity_difference_Z_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)].Z;
                     }
                 }
             }
@@ -655,18 +660,18 @@ public:
 
     void transfer_Velocity_to_particle_from_grid() {
         for (int p = 0; p < particles.size(); p++) {
-            //1. particleÀÌ ¼ÓÇÑ cell Ã£±â
-            Vector3D i_j_k = next_velocity_grid->get_cell_i_j_k_from_world(particles[p].Location);
+            //1. particleì´ ì†í•œ cell ì°¾ê¸°
+            Vector3D i_j_k = tool->get_cell_i_j_k_from_world(particles[p].Location);
 
-            //2. cell Á¤º¸¸¦ particle¿¡°Ô Àü´Ş
-            particles[p].Velocity = next_velocity_grid->cell_values[next_velocity_grid->get_VectorIndex_from_cell(i_j_k)];
+            //2. cell ì •ë³´ë¥¼ particleì—ê²Œ ì „ë‹¬
+            particles[p].Velocity = next_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)];
 
-            //³­¼ö ÁØºñ
+            //ë‚œìˆ˜ ì¤€ë¹„
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<int> theta(0, 360);
 
-            //3. ·£´ı º¤ÅÍ »ı¼º - Å©±â 1
+            //3. ëœë¤ ë²¡í„° ìƒì„± - í¬ê¸° 1
             int angle_theta = theta(gen);
             int angle_phi = theta(gen);
             Vector3D randomvector = Vector3D(cos(angle_theta) * sin(angle_phi), sin(angle_theta) * sin(angle_phi),cos(angle_theta) );
@@ -679,7 +684,7 @@ public:
     }
 
     //void transfer_Velocity_to_particle_from_grid_PICFLIP(double PIC_ratio, double FLIP_ratio) {
-    //    //0. cell¿¡ Æ÷ÇÔµÈ ¼Óµµ·Î velocity_difference_grid °ª updateÇÏ±â
+    //    //0. cellì— í¬í•¨ëœ ì†ë„ë¡œ velocity_difference_grid ê°’ updateí•˜ê¸°
     //    for (int i = 0; i < gridsize; i++) {
     //        for (int j = 0; j < gridsize; j++) {
     //            //
@@ -688,7 +693,7 @@ public:
     //            Vector2D i_plus1_j = Vector2D(i + 1, j);
     //            Vector2D i_j_plus1 = Vector2D(i, j + 1);
 
-    //            //¹ß»ê ±¸ÇÏ±â - ¼ÓµµÀÇ °ø°£ º¯È­·® ±¸ÇÏ±â
+    //            //ë°œì‚° êµ¬í•˜ê¸° - ì†ë„ì˜ ê³µê°„ ë³€í™”ëŸ‰ êµ¬í•˜ê¸°
     //            velocity_difference_X_grid->cell_values[next_velocity_grid->get_VectorIndex_from_cell(i_j)] = (next_velocity_grid->cell_values[next_velocity_grid->get_VectorIndex_from_cell(i_plus1_j)].X - next_velocity_grid->cell_values[next_velocity_grid->get_VectorIndex_from_cell(i_j)].X);
     //            if (i == 0) {
     //                velocity_difference_X_grid->cell_values[next_velocity_grid->get_VectorIndex_from_cell(i_j)] = next_velocity_grid->cell_values[next_velocity_grid->get_VectorIndex_from_cell(i_j)].X;
@@ -701,7 +706,7 @@ public:
     //    }
 
     //    for (int p = 0; p < particles.size(); p++) {
-    //        //1. particleÀÌ ¼ÓÇÑ cell Ã£±â
+    //        //1. particleì´ ì†í•œ cell ì°¾ê¸°
     //        Vector2D i_j = next_velocity_grid->get_cell_i_j_from_world(particles[p].Location);
 
     //        //2. PIC
@@ -712,15 +717,15 @@ public:
     //        FLIP_velocity.X = PIC_velocity.X + (previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)].X);
     //        FLIP_velocity.Y = PIC_velocity.Y + (previous_velocity_grid->cell_values[previous_velocity_grid->get_VectorIndex_from_cell(i_j)].Y);
 
-    //        //4. cell Á¤º¸¸¦ PIC-FLIP ¹æ¹ı¿¡ µû¶ó particle¿¡°Ô Àü´Ş
+    //        //4. cell ì •ë³´ë¥¼ PIC-FLIP ë°©ë²•ì— ë”°ë¼ particleì—ê²Œ ì „ë‹¬
     //        particles[p].Velocity = PIC_velocity * PIC_ratio + FLIP_velocity * FLIP_ratio;
 
-    //        //³­¼ö ÁØºñ
+    //        //ë‚œìˆ˜ ì¤€ë¹„
     //        std::random_device rd;
     //        std::mt19937 gen(rd());
     //        std::uniform_int_distribution<int> theta(0, 360);
 
-    //        //5. ·£´ı º¤ÅÍ »ı¼º - Å©±â 1
+    //        //5. ëœë¤ ë²¡í„° ìƒì„± - í¬ê¸° 1
     //        int angle = theta(gen);
     //        Vector2D randomvector = Vector2D(cos(angle), sin(angle));
 
@@ -731,17 +736,17 @@ public:
     //    }
     //}
 
-    //À¯Ã¼ ¼Óµµ°ªÀ» ÀÎÁ¢ °ø±â¼¿¿¡ º¸°£
+    //ìœ ì²´ ì†ë„ê°’ì„ ì¸ì ‘ ê³µê¸°ì…€ì— ë³´ê°„
     void extrapolate_velocity_to_air_cell() {
-        //air_cell_center_point ÃÊ±âÈ­
+        //air_cell_center_point ì´ˆê¸°í™”
         air_cell_center_point->clear();
 
         for (int i = 0; i < cell_number; i++) {
-            //1. i_j ¼±¾ğ
-            Vector3D i_j_k = Vector3D(cell_type_grid->get_cell_i_from_VectorIndex(i), cell_type_grid->get_cell_j_from_VectorIndex(i), cell_type_grid->get_cell_k_from_VectorIndex(i));
+            //1. i_j ì„ ì–¸
+            Vector3D i_j_k = Vector3D(tool->get_cell_i_from_VectorIndex(i), tool->get_cell_j_from_VectorIndex(i), tool->get_cell_k_from_VectorIndex(i));
 
-            //2. i_j ¼¿ÀÌ °ø±â¼¿ÀÌ¶ó¸é
-            if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_k)] == AIR) {
+            //2. i_j ì…€ì´ ê³µê¸°ì…€ì´ë¼ë©´
+            if (cell_type_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k)] == AIR) {
                 int n_fluid_cells = 0;
 
                 Vector3D i_plus1_j_k = Vector3D(i_j_k.X + 1, i_j_k.Y, i_j_k.Z);
@@ -751,46 +756,46 @@ public:
                 Vector3D i_j_k_plus1 = Vector3D(i_j_k.X, i_j_k.Y, i_j_k.Z + 1);
                 Vector3D i_j_k_minus1 = Vector3D(i_j_k.X, i_j_k.Y, i_j_k.Z - 1);
 
-                //3. ÀÎÁ¢ÇÑ À¯Ã¼¼¿ÀÇ ¼Óµµ¸¦ ´õÇÑ´Ù.
+                //3. ì¸ì ‘í•œ ìœ ì²´ì…€ì˜ ì†ë„ë¥¼ ë”í•œë‹¤.
                 //3-1. i+1, j
-                if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_plus1_j_k)] == FLUID) {
-                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_plus1_j_k)];
+                if (cell_type_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus1_j_k)] == FLUID) {
+                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus1_j_k)];
                     n_fluid_cells++;
                 }
                 //3-2. i-1, j
-                if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_minus1_j_k)] == FLUID) {
-                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_minus1_j_k)];
+                if (cell_type_grid->cell_values[tool->get_VectorIndex_from_cell(i_minus1_j_k)] == FLUID) {
+                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_minus1_j_k)];
                     n_fluid_cells++;
                 }
                 //3-3. i, j+1
-                if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_plus1_k)] == FLUID) {
-                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_plus1_k)];
+                if (cell_type_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus1_k)] == FLUID) {
+                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus1_k)];
                     n_fluid_cells++;
                 }
                 //3-4. i, j-1
-                if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_minus1_k)] == FLUID) {
-                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_minus1_k)];
+                if (cell_type_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_minus1_k)] == FLUID) {
+                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_minus1_k)];
                     n_fluid_cells++;
                 }
 
                 //3-5. k+1
-                if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_k_plus1)] == FLUID) {
-                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_k_plus1)];
+                if (cell_type_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_plus1)] == FLUID) {
+                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_plus1)];
                     n_fluid_cells++;
                 }
 
                 //3-6. k-1
-                if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_k_minus1)] == FLUID) {
-                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_k_minus1)];
+                if (cell_type_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_minus1)] == FLUID) {
+                    previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_k_minus1)];
                     n_fluid_cells++;
                 }
 
-                //4. ÀÎÁ¢ÇÑ À¯Ã¼¼¿ÀÇ ¼ÓµµÀÇ Æò±ÕÀ» ±¸ÇÑ´Ù.
+                //4. ì¸ì ‘í•œ ìœ ì²´ì…€ì˜ ì†ë„ì˜ í‰ê· ì„ êµ¬í•œë‹¤.
                 if (n_fluid_cells > 0) {
-                    //¼Óµµ Æò±Õ³»±â
+                    //ì†ë„ í‰ê· ë‚´ê¸°
                     previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] / (double)n_fluid_cells;
 
-                    //extrapolation ¹ŞÀº cellÀ» air_cell¿¡ ³Ö´Â´Ù.
+                    //extrapolation ë°›ì€ cellì„ air_cellì— ë„£ëŠ”ë‹¤.
                     air_cell_center_point->push_back(cell_center_point->cell_values[i]);
                 }
 
@@ -798,23 +803,23 @@ public:
         }
     }
 
-    //==============================cell type ºĞ·ù==================================
+    //==============================cell type ë¶„ë¥˜==================================
 
     void classify_cell_type() {
         for (int i = 0; i < cell_number; i++) {
-            //cell ÁÂÇ¥ ±¸ÇÏ±â
-            Vector3D i_j_k = Vector3D(cell_center_point->get_cell_i_from_VectorIndex(i), cell_center_point->get_cell_j_from_VectorIndex(i), cell_center_point->get_cell_k_from_VectorIndex(i));
+            //cell ì¢Œí‘œ êµ¬í•˜ê¸°
+            Vector3D i_j_k = Vector3D(tool->get_cell_i_from_VectorIndex(i), tool->get_cell_j_from_VectorIndex(i), tool->get_cell_k_from_VectorIndex(i));
 
-            //¼¿ÀÌ º®ÂÊÀÌ¶ó¸é solid
+            //ì…€ì´ ë²½ìª½ì´ë¼ë©´ solid
             if (i_j_k.X == 0 || i_j_k.X == gridsize - 1 || i_j_k.Y == 0 || i_j_k.Y == gridsize - 1 || i_j_k.Z == 0 || i_j_k.Z == gridsize - 1) {
                 cell_type_grid->cell_values[i] = SOLID;
             }
             else {
-                //particleÀÌ Á¸ÀçÇÏ´Â cellÀÌ¶ó¸é fluid
+                //particleì´ ì¡´ì¬í•˜ëŠ” cellì´ë¼ë©´ fluid
                 if (cell_particle_number->cell_values[i] > 0) {
                     cell_type_grid->cell_values[i] = FLUID;
                 }
-                //particleÀÌ Á¸ÀçÇÏÁö ¾Ê´Â cellÀÌ¶ó¸é air
+                //particleì´ ì¡´ì¬í•˜ì§€ ì•ŠëŠ” cellì´ë¼ë©´ air
                 else {
                     cell_type_grid->cell_values[i] = AIR;
                 }
@@ -825,29 +830,29 @@ public:
 
     //==============================================================================
 
-    //==============================bodyforce °ü·Ã ÇÔ¼ö==============================
+    //==============================bodyforce ê´€ë ¨ í•¨ìˆ˜==============================
 
-    //bodyforce¿¡ Àû¿ëÇÏ°í ½ÍÀº ¿Ü·Â Ãß°¡ - Áß·Â
+    //bodyforceì— ì ìš©í•˜ê³  ì‹¶ì€ ì™¸ë ¥ ì¶”ê°€ - ì¤‘ë ¥
     void add_body_force() {
         for (int i = 0; i < cell_number; i++) {
             bodyforce->cell_values[i] = Vector3D(0.0, -9.8, 0.0);
         }
     }
 
-    //bodyforce¸¦ gridÀÇ velocity¿¡ Àû¿ë
+    //bodyforceë¥¼ gridì˜ velocityì— ì ìš©
     void Adjust_velocity_from_bodyforce() {
         for (int i = 0; i < cell_number; i++) {
             previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + bodyforce->cell_values[i] * timestep;
         }
     }
 
-    ////ÀÏ°ıÀûÀ¸·Î °°Àº °ªÀ» Àü´Ş¹Ş¾Æµµ µÇÁö¸¸, ÀÏ´Ü Æ÷ÇÔµÈ cellÀÇ Á¤º¸¸¦ ¹ŞÀ» ¼ö ÀÖ°Ô ÇØ³õÀ½.
+    ////ì¼ê´„ì ìœ¼ë¡œ ê°™ì€ ê°’ì„ ì „ë‹¬ë°›ì•„ë„ ë˜ì§€ë§Œ, ì¼ë‹¨ í¬í•¨ëœ cellì˜ ì •ë³´ë¥¼ ë°›ì„ ìˆ˜ ìˆê²Œ í•´ë†“ìŒ.
     //void transfer_bodyforce_to_particle_from_grid() {
     //    for (int p = 0; p < particles.size(); p++) {
-    //        //1. particleÀÌ ¾îµğ cellÀÎÁö ÆÄ¾Ç
+    //        //1. particleì´ ì–´ë”” cellì¸ì§€ íŒŒì•…
     //        Vector2D i_j = bodyforce.get_cell_i_j_from_world(particles[p].Location);
 
-    //        //2. bodyforce cell°ªÀ» Accceleration¿¡ Àü´Ş
+    //        //2. bodyforce cellê°’ì„ Acccelerationì— ì „ë‹¬
     //        particles[p].Acceleration = bodyforce.cell_values[bodyforce.get_VectorIndex_from_cell(i_j)];
     //    }
     //}
@@ -863,24 +868,24 @@ public:
 
         cg_solver.setMaxIterations(150);
 
-        //0. ¾Ğ·Â °è¼ö ¹× Çà·Ä ¼±¾ğ
+        //0. ì••ë ¥ ê³„ìˆ˜ ë° í–‰ë ¬ ì„ ì–¸
         double pressure_coefficient = timestep / density;
 
         Eigen::VectorXd x, b, b1;
         x = Eigen::VectorXd(cell_number);
         b = Eigen::VectorXd(cell_number);
 
-        //¿Ã¹Ù¸¥ ÂüÁ¶¸¦ À§ÇØ 0À¸·Î ÃÊ±âÈ­
+        //ì˜¬ë°”ë¥¸ ì°¸ì¡°ë¥¼ ìœ„í•´ 0ìœ¼ë¡œ ì´ˆê¸°í™”
         A->setZero();
 
-        //1.Ax=b¿¡¼­ A ÀÛ¼º - diagonal ¿ä¼Òµéµµ ÀÛ¼º
+        //1.Ax=bì—ì„œ A ì‘ì„± - diagonal ìš”ì†Œë“¤ë„ ì‘ì„±
         for (int i = 0; i < cell_number; i++) {
             double neighbor_sum = 0.0;
-            Vector3D i_j_k = Vector3D(cell_particle_number->get_cell_i_from_VectorIndex(i), cell_particle_number->get_cell_j_from_VectorIndex(i), cell_particle_number->get_cell_k_from_VectorIndex(i));
+            Vector3D i_j_k = Vector3D(tool->get_cell_i_from_VectorIndex(i), tool->get_cell_j_from_VectorIndex(i), tool->get_cell_k_from_VectorIndex(i));
 
             if (cell_particle_number->cell_values[i] == 0) { continue; }
             else {
-                //ÇöÀç ¼¿ÀÇ ÁÂÇ¥ ±¸ÇÏ±â
+                //í˜„ì¬ ì…€ì˜ ì¢Œí‘œ êµ¬í•˜ê¸°
                 Vector3D i_minus1_j_k = i_j_k + Vector3D(-1, 0,0);
                 Vector3D i_plus1_j_k = i_j_k + Vector3D(1, 0,0);
                 Vector3D i_j_minus1_k = i_j_k + Vector3D(0, -1,0);
@@ -888,11 +893,11 @@ public:
                 Vector3D i_j_k_minus1 = i_j_k + Vector3D(0, 0, -1);
                 Vector3D i_j_k_plus1 = i_j_k + Vector3D(0, 0, 1);
 
-                //¼¿ÁÂÇ¥¿¡ ´ëÀÀµÇ´Â vectorIndexÁÂÇ¥ ±¸ÇÏ±â
+                //ì…€ì¢Œí‘œì— ëŒ€ì‘ë˜ëŠ” vectorIndexì¢Œí‘œ êµ¬í•˜ê¸°
 
                 //i-1,j
                 if (i_j_k.X > 0) {
-                    int cell_i_minus1_j_k = cell_particle_number->get_VectorIndex_from_cell(i_minus1_j_k);
+                    int cell_i_minus1_j_k = tool->get_VectorIndex_from_cell(i_minus1_j_k);
                     if (cell_particle_number->cell_values[cell_i_minus1_j_k] > 0) {
                         A->insert(i, cell_i_minus1_j_k) -= pressure_coefficient / (delta_x * delta_x);
                         A->insert(cell_i_minus1_j_k, i) -= pressure_coefficient / (delta_x * delta_x);
@@ -900,7 +905,7 @@ public:
                 }
                 //i+1,j
                 if (i_j_k.X < gridsize - 1) {
-                    int cell_i_plus1_j_k = cell_particle_number->get_VectorIndex_from_cell(i_plus1_j_k);
+                    int cell_i_plus1_j_k = tool->get_VectorIndex_from_cell(i_plus1_j_k);
                     if (cell_particle_number->cell_values[cell_i_plus1_j_k] > 0) {
                         A->insert(i, cell_i_plus1_j_k) -= pressure_coefficient / (delta_x * delta_x);
                         A->insert(cell_i_plus1_j_k, i) -= pressure_coefficient / (delta_x * delta_x);
@@ -908,7 +913,7 @@ public:
                 }
                 //i,j-1
                 if (i_j_k.Y > 0) {
-                    int cell_i_j_minus1_k = cell_particle_number->get_VectorIndex_from_cell(i_j_minus1_k);
+                    int cell_i_j_minus1_k = tool->get_VectorIndex_from_cell(i_j_minus1_k);
                     if (cell_particle_number->cell_values[cell_i_j_minus1_k] > 0) {
                         A->insert(i, cell_i_j_minus1_k) -= pressure_coefficient / (delta_x * delta_x);
                         A->insert(cell_i_j_minus1_k, i) -= pressure_coefficient / (delta_x * delta_x);
@@ -916,7 +921,7 @@ public:
                 }
                 //i,j+1
                 if (i_j_k.Y < gridsize -1) {
-                    int cell_i_j_plus1_k = cell_particle_number->get_VectorIndex_from_cell(i_j_plus1_k);
+                    int cell_i_j_plus1_k = tool->get_VectorIndex_from_cell(i_j_plus1_k);
                     if (cell_particle_number->cell_values[cell_i_j_plus1_k] > 0) {
                         A->insert(i, cell_i_j_plus1_k) -= pressure_coefficient / (delta_x * delta_x);
                         A->insert(cell_i_j_plus1_k, i) -= pressure_coefficient / (delta_x * delta_x);
@@ -924,7 +929,7 @@ public:
                 }
                 //k-1
                 if (i_j_k.Z > 0) {
-                    int cell_i_j_k_minus1 = cell_particle_number->get_VectorIndex_from_cell(i_j_k_minus1);
+                    int cell_i_j_k_minus1 = tool->get_VectorIndex_from_cell(i_j_k_minus1);
                     if (cell_particle_number->cell_values[cell_i_j_k_minus1] > 0) {
                         A->insert(i, cell_i_j_k_minus1) -= pressure_coefficient / (delta_x * delta_x);
                         A->insert(cell_i_j_k_minus1, i) -= pressure_coefficient / (delta_x * delta_x);
@@ -932,7 +937,7 @@ public:
                 }
                 //k+1
                 if (i_j_k.Z < gridsize - 1) {
-                    int cell_i_j_k_plus1 = cell_particle_number->get_VectorIndex_from_cell(i_j_k_plus1);
+                    int cell_i_j_k_plus1 = tool->get_VectorIndex_from_cell(i_j_k_plus1);
                     if (cell_particle_number->cell_values[cell_i_j_k_plus1] > 0) {
                         A->insert(i, cell_i_j_k_plus1) -= pressure_coefficient / (delta_x * delta_x);
                         A->insert(cell_i_j_k_plus1, i) -= pressure_coefficient / (delta_x * delta_x);
@@ -942,12 +947,12 @@ public:
 
         }
 
-        //diagonal ¿ä¼Òµéµµ ÀÛ¼º
+        //diagonal ìš”ì†Œë“¤ë„ ì‘ì„±
         for (int i = 0; i < cell_number; i++) {
             A->insert(i, i) = 6 * pressure_coefficient / (delta_x * delta_x);
         }
 
-        //      //ÀÛÀº ¾ç °ËÃâ
+        //      //ì‘ì€ ì–‘ ê²€ì¶œ
 
         //      cout << "=====================================================" << endl;
         //     
@@ -975,12 +980,12 @@ public:
         //      cout << "=====================================================" << endl;
 
 
-              ////2. Ax=b¿¡¼­ b ÀÛ¼º - º¤ÅÍÀÇ ¹ß»ê - ±×³É ¿ä¼Ò¸¦ ´Ù ´õÇÏÀÚ.
+              ////2. Ax=bì—ì„œ b ì‘ì„± - ë²¡í„°ì˜ ë°œì‚° - ê·¸ëƒ¥ ìš”ì†Œë¥¼ ë‹¤ ë”í•˜ì.
               //for (int i = 0; i < cell_number; i++) {
               //    b(i) = previous_velocity_grid.cell_values[i].X + previous_velocity_grid.cell_values[i].Y;
               //}
 
-              //2. Ax=b¿¡¼­ b ÀÛ¼º - º¤ÅÍÀÇ ¹ß»ê - Á¦´ë·Î...?
+              //2. Ax=bì—ì„œ b ì‘ì„± - ë²¡í„°ì˜ ë°œì‚° - ì œëŒ€ë¡œ...?
         for (int k = 0; k < cell_number; k++) {
             b(k) = -1.0 * ( velocity_difference_X_grid->cell_values[k] + velocity_difference_Y_grid->cell_values[k] + velocity_difference_Z_grid->cell_values[k] );
         }
@@ -1025,20 +1030,20 @@ public:
 
         cout << " solver_done " << endl;
 
-        //4. x °ª( ¾Ğ·Â )À» ÅëÇØ cellµéÀÇ ¼Óµµ °è»ê
+        //4. x ê°’( ì••ë ¥ )ì„ í†µí•´ cellë“¤ì˜ ì†ë„ ê³„ì‚°
         for (int i = 0; i < cell_number; i++) {
-            //4-1. »õ·Î¿î ¼Óµµ °è»ê - ¾Ğ·Â ±×´ë·Î »ç¿ë - PIC
+            //4-1. ìƒˆë¡œìš´ ì†ë„ ê³„ì‚° - ì••ë ¥ ê·¸ëŒ€ë¡œ ì‚¬ìš© - PIC
             double new_vel_x = previous_velocity_grid->cell_values[i].X - timestep / density * x(i);
             double new_vel_y = previous_velocity_grid->cell_values[i].Y - timestep / density * x(i);
             double new_vel_z = previous_velocity_grid->cell_values[i].Z - timestep / density * x(i);
 
 
-            //4-2. new vel¿¡´Ù°¡ ÀÔ·ÂÇÏ±â
+            //4-2. new velì—ë‹¤ê°€ ì…ë ¥í•˜ê¸°
             next_velocity_grid->cell_values[i] = Vector3D(new_vel_x, new_vel_y, new_vel_z);
         }
 
 
-        //¸Ş¸ğ¸® ¹İ³³
+        //ë©”ëª¨ë¦¬ ë°˜ë‚©
 
 
     }
@@ -1049,7 +1054,7 @@ public:
 
     //==============================swap buffer=================================
 
-    //previous¿Í next_velocity ¸Â¹Ù²Ù±â
+    //previousì™€ next_velocity ë§ë°”ê¾¸ê¸°
 
 
     void swap_buffer() {
@@ -1071,7 +1076,7 @@ public:
         fluid_cell_center_point->clear();
 
         for (int i = 0; i < cell_number; i++) {
-            //2. cellTypeÀÌ fluidÀÎ cellµéÀÇ center point¸¦ ±¸ÇÑ´Ù.
+            //2. cellTypeì´ fluidì¸ cellë“¤ì˜ center pointë¥¼ êµ¬í•œë‹¤.
             if (cell_type_grid->cell_values[i] == FLUID) {
                 fluid_cell_center_point->push_back(cell_center_point->cell_values[i]);
             }

@@ -28,13 +28,13 @@ public:
 
 	}
 
-	// À§Ä¡ = ÇöÀç À§Ä¡ + ¼ø°£ ¼Óµµ
+	// ìœ„ì¹˜ = í˜„ìž¬ ìœ„ì¹˜ + ìˆœê°„ ì†ë„
 	void move() {
-		// ´ÙÀ½ À§Ä¡ °è»ê
+		// ë‹¤ìŒ ìœ„ì¹˜ ê³„ì‚°
 		float next_Loc_x = Location.x + Velocity.x;
 		float next_Loc_y = Location.y + Velocity.y;
 
-		// ±× À§Ä¡ °è»ê¿¡ µû¶ó ±×´ë·Î ¿òÁ÷ÀÏÁö, ¼Óµµ¸¦ ¹Ý´ë·Î Àû¿ëÇÒÁö °è»ê
+		// ê·¸ ìœ„ì¹˜ ê³„ì‚°ì— ë”°ë¼ ê·¸ëŒ€ë¡œ ì›€ì§ì¼ì§€, ì†ë„ë¥¼ ë°˜ëŒ€ë¡œ ì ìš©í• ì§€ ê³„ì‚°
 		if (next_Loc_x < 0.0 || next_Loc_x > 1.0) {
 			Velocity.x = -1 * Velocity.x;
 		}

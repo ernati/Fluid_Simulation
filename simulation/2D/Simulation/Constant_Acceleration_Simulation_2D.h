@@ -12,7 +12,7 @@
 #include <random>
 #include <algorithm>
 
-//³­¼ö »ı¼º
+//ë‚œìˆ˜ ìƒì„±
 #include<cstdlib> //rand(), srand()
 #include<ctime>
 
@@ -23,76 +23,76 @@ class Constant_Acceleration_Simulator {
 
 public:
 
-    //particleµéÀ» ´ãÀ» vector
+    //particleë“¤ì„ ë‹´ì„ vector
     vector<Particle2D> particles;
     float timestep;
 
     MAC_Grid<Vector2D> velocity_grid;
 
 
-    //¾Æ¹« ÀÔ·Â°ªÀÌ ¾ø´Ù¸é ±âº» particle ¼ö´Â 100°³, grid_N = 10
+    //ì•„ë¬´ ì…ë ¥ê°’ì´ ì—†ë‹¤ë©´ ê¸°ë³¸ particle ìˆ˜ëŠ” 100ê°œ, grid_N = 10
     Constant_Acceleration_Simulator() {
 
-        //ÀÔÀÚµé ÃÊ±âÈ­
+        //ì…ìë“¤ ì´ˆê¸°í™”
         srand((unsigned int)time(NULL));
         for (int i = 0; i < 100; i++) {
-            //0~99 ³­¼ö »ı¼º    
+            //0~99 ë‚œìˆ˜ ìƒì„±    
             int randomLocation_X = rand() % 100;
-            //0~49 ³­¼ö »ı¼º
+            //0~49 ë‚œìˆ˜ ìƒì„±
             int randomLocation_Y = rand() % 50;
 
-            //À§Ä¡ X : 0.0~ 0.99, À§Ä¡ Y : 0.5 ~ 0.99
+            //ìœ„ì¹˜ X : 0.0~ 0.99, ìœ„ì¹˜ Y : 0.5 ~ 0.99
             Particle2D tmp = Particle2D((float)randomLocation_X / 100.0, (float)randomLocation_Y / 100.0 + 0.5, 0, 0, 0, -0.0098);
             particles.push_back(tmp);
         }
 
-        //velocity grid ±×¸®±â
+        //velocity grid ê·¸ë¦¬ê¸°
         velocity_grid = MAC_Grid<Vector2D>(10);
 
-        //timestepÀÇ default = 0.06
+        //timestepì˜ default = 0.06
         timestep = 0.06;
     }
 
     Constant_Acceleration_Simulator(int particle_number, int grid_N) {
 
-        //ÀÔÀÚµé ÃÊ±âÈ­
+        //ì…ìë“¤ ì´ˆê¸°í™”
         srand((unsigned int)time(NULL));
         for (int i = 0; i < particle_number; i++) {
-            //0~99 ³­¼ö »ı¼º    
+            //0~99 ë‚œìˆ˜ ìƒì„±    
             int randomLocation_X = rand() % 100;
-            //0~49 ³­¼ö »ı¼º
+            //0~49 ë‚œìˆ˜ ìƒì„±
             int randomLocation_Y = rand() % 50;
 
-            //À§Ä¡ X : 0.0~ 0.99, À§Ä¡ Y : 0.5 ~ 0.99
+            //ìœ„ì¹˜ X : 0.0~ 0.99, ìœ„ì¹˜ Y : 0.5 ~ 0.99
             Particle2D tmp = Particle2D((float)randomLocation_X / 100.0, (float)randomLocation_Y / 100.0 + 0.5, 0, 0, 0, -0.098);
             particles.push_back(tmp);
         }
 
-        //velocity grid ±×¸®±â
+        //velocity grid ê·¸ë¦¬ê¸°
         velocity_grid = MAC_Grid<Vector2D>(grid_N);
 
-        //timestepÀÇ default = 0.06
+        //timestepì˜ default = 0.06
         timestep = 0.06;
     }
 
     void particle_simulation() {
-        //¼Óµµ update
+        //ì†ë„ update
         Update_particles_Velocity();
 
-        //À§Ä¡ update
+        //ìœ„ì¹˜ update
         Update_particles_Location();
 
     }
 
 
-    //ÀÔÀÚµéÀÇ ¼Óµµ¸¦ ¸ğµÎ update
+    //ì…ìë“¤ì˜ ì†ë„ë¥¼ ëª¨ë‘ update
     void Update_particles_Velocity() {
         for (int i = 0; i < particles.size(); i++) {
             this->particles[i].Update_particle_Velocity(timestep);
         }
     }
 
-    //ÀÔÀÚµéÀÇ À§Ä¡¸¦ ¸ğµÎ update
+    //ì…ìë“¤ì˜ ìœ„ì¹˜ë¥¼ ëª¨ë‘ update
     void Update_particles_Location() {
         for (int i = 0; i < particles.size(); i++) {
             this->particles[i].Update_particle_Location(timestep);

@@ -9,7 +9,7 @@ using namespace std;
 void make_Points_of_grids( vector<Vector2D> &grid, int n ) {
 
 	double j = 1;
-	//∞°∑Œ¡Ÿ
+	//Í∞ÄÎ°úÏ§Ñ
 	for (int i = 0; i < n-1; i++) {
 		
 		grid[2 * i] = Vector2D(0, 1 /(double)n * (double)j);
@@ -20,7 +20,7 @@ void make_Points_of_grids( vector<Vector2D> &grid, int n ) {
 
 	j = 1;
 
-	//ºº∑Œ¡Ÿ
+	//ÏÑ∏Î°úÏ§Ñ
 	for (int i = n - 1; i < 2 * (n - 1); i++) {
 		grid[2 * i] = Vector2D(1 / (double)n * (double)j, 0);
 		grid[2 * i + 1] = Vector2D(1 / (double)n * (double)j,1);

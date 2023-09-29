@@ -9,6 +9,7 @@
 #include <queue>
 #include <condition_variable>
 #include <functional>
+#include <chrono>
 
 #include "../2D/simulation/fluid_grid_2D.h"
 
@@ -17,12 +18,12 @@
 
 using namespace std;
 
-//ÇÔ¼ö Æ÷ÀÎÅÍ ¹× ÆÄ¶ó¹ÌÅÍµéÀ» ÀúÀåÇÏ´Â ±¸Á¶Ã¼
+//í•¨ìˆ˜ í¬ì¸í„° ë° íŒŒë¼ë¯¸í„°ë“¤ì„ ì €ì¥í•˜ëŠ” êµ¬ì¡°ì²´
 class task {
 public:
 	//function<void(void*)> func_param;
 	function<void()> func;
-	//void *param; //parameter·Î ¹¹°¡ ¿ÃÁö ¸ğ¸£¹Ç·Î void*·Î ¼±¾ğ
+	//void *param; //parameterë¡œ ë­ê°€ ì˜¬ì§€ ëª¨ë¥´ë¯€ë¡œ void*ë¡œ ì„ ì–¸
 
 	task() {
 		//func_param = nullptr;
@@ -30,18 +31,12 @@ public:
 		func = nullptr;
 	}
 
-
 	task(function<void()> f) {
 		//func_param = nullptr;
 		func = f;
 		//param = p;
 	}
 
-	/*task(void (*f)(void*) , void* p) {
-		func_param = f;
-		func = nullptr;
-		param = p;
-	}*/
 };
 
 class simulation_task {
@@ -55,7 +50,7 @@ public:
 	}
 
 
-	simulation_task(Fluid_Simulator_Grid* simul, function<void(Fluid_Simulator_Grid&)> f) {
+	simulation_task(Fluid_Simulator_Grid* simul, std::function<void(Fluid_Simulator_Grid&)> f) {
 		func = f;
 		simulation = simul;
 	}
@@ -74,21 +69,21 @@ private:
 	queue<simulation_task> simulation_task_queue;
 
 public:
-	thread_pool() {
+	thread_pool_simulation() {
 
 	}
 
-	thread_pool(int numberOfThread) {
+	thread_pool_simulation(int numberOfThread) {
 		cout << endl << "threadpool creating start" << endl;
 
 		this->thread_num = numberOfThread;
 
 		this->running = true;
 
-		//vector¿¡ reserve
+		//vectorì— reserve
 		threads.reserve(thread_num);
 
-		//Thread »ı¼º
+		//Thread ìƒì„±
 		for (int i = 0; i < thread_num; i++) {
 			/*std::function<void(thread_pool*)> func = worker;*/
 			//threads->emplace_back( &thread_pool::worker );
@@ -101,10 +96,10 @@ public:
 
 	//thread_pool(const thread_pool&) = delete;
 
-	//// º¹»ç ÇÒ´ç ¿¬»êÀÚ »èÁ¦
+	//// ë³µì‚¬ í• ë‹¹ ì—°ì‚°ì ì‚­ì œ
 	//thread_pool& operator=(const thread_pool&) = delete;
 
-	~thread_pool() {
+	~thread_pool_simulation() {
 		//delete threads;
 		running = false;
 		cv.notify_all();
@@ -114,25 +109,26 @@ public:
 		}
 	}
 
-	//threadµé¿¡°Ô ºÎ¿©µÉ ÇÔ¼ö - thread°¡ ÇÒ´ç¹ŞÀº task¸¦ ¼öÇà
+	//threadë“¤ì—ê²Œ ë¶€ì—¬ë  í•¨ìˆ˜ - threadê°€ í• ë‹¹ë°›ì€ taskë¥¼ ìˆ˜í–‰
 
 	//void thread_pool_submit_param(void (*f)(void* p), void* p) {
-	//	//mutex¸¦ È¹µæÇÑ´Ù.
+	//	//mutexë¥¼ íšë“í•œë‹¤.
 	//	mtx.lock();
 
 	//	//critical section
 	//	task* tsk = new task(f, p);
 	//	
-	//	//queue¿¡ ÇÔ¼ö¸¦ ³Ö´Â´Ù.
+	//	//queueì— í•¨ìˆ˜ë¥¼ ë„£ëŠ”ë‹¤.
 	//	task_queue.push(tsk);
 
-	//	//´Ù¸¥ ½º·¹µåµéÀÌ ÀÛ¾÷À» ÇÒ´ç¹ŞÀ» ¼ö ÀÖµµ·Ï notify
+	//	//ë‹¤ë¥¸ ìŠ¤ë ˆë“œë“¤ì´ ì‘ì—…ì„ í• ë‹¹ë°›ì„ ìˆ˜ ìˆë„ë¡ notify
 	//	cv.notify_all();
 
-	//	//mutex¸¦ ¹İÈ¯ÇÑ´Ù.
+	//	//mutexë¥¼ ë°˜í™˜í•œë‹¤.
 	//	mtx.unlock();
 	//}
 
+	//queueì— functionë“¤ì´ ë“¤ì–´ìˆëŠ” vector ë„£ê¸°
 	void Run(vector< function<void()> >* functions) {
 		if (functions->size() == 0) {
 			cout << endl << "error : no FUNCTIONS!!!" << endl;
@@ -150,62 +146,66 @@ public:
 		task tsk;
 		simulation_task sim_tsk;
 
-		//thread_poolÀÌ µ¹¾Æ°¡°í ÀÖÀ» ¶§
+		//thread_poolì´ ëŒì•„ê°€ê³  ìˆì„ ë•Œ
 		while (running) {
 
 			/*mtx.lock();*/
-			//±×³É ¹ÂÅ×½º¶ô ´ë½Å unique_lock »ç¿ë
+			//ê·¸ëƒ¥ ë®¤í…ŒìŠ¤ë½ ëŒ€ì‹  unique_lock ì‚¬ìš©
 			unique_lock<mutex> lock(mtx);
 
-			//waitÀº Æ¯¼º»ó unique lockÀ» »ç¿ëÇÒ ¼ö ¹Û¿¡ ¾ø´Ù.
+			//waitì€ íŠ¹ì„±ìƒ unique lockì„ ì‚¬ìš©í•  ìˆ˜ ë°–ì— ì—†ë‹¤.
 			//cv.wait(lock, [this]() { return !this->task_queue.empty() || !(running); } );
 			cv.wait(lock, [this]() { return !this->task_queue.empty() || !this->simulation_task_queue.empty() || !(running); });
 
 			if (!running && task_queue.empty() && simulation_task_queue.empty()) {
-				// ½º·¹µå Ç® Á¾·á Á¶°Ç
+				// ìŠ¤ë ˆë“œ í’€ ì¢…ë£Œ ì¡°ê±´
 				break;
-			}
-
-			if (!task_queue.empty()) {
-				tsk = task(task_queue.front().func);
-
-				//queue¿¡¼­ ÀÛ¾÷À» °¡Á®¿ÔÀ¸¹Ç·Î pop
-				task_queue.pop();
-
-				//´Ù¸¥ ½º·¹µåµéÀÌ ÀÛ¾÷À» ÇÒ´ç¹ŞÀ» ¼ö ÀÖµµ·Ï notify
-				cv.notify_one();
-
-				//critical section Á¾·á
-				lock.unlock();
-
-
-				tsk.func();
 			}
 
 			if (!simulation_task_queue.empty()) {
 				sim_tsk = simulation_task(simulation_task_queue.front().simulation, simulation_task_queue.front().func);
 
-				//queue¿¡¼­ ÀÛ¾÷À» °¡Á®¿ÔÀ¸¹Ç·Î pop
+				//queueì—ì„œ ì‘ì—…ì„ ê°€ì ¸ì™”ìœ¼ë¯€ë¡œ pop
 				simulation_task_queue.pop();
 
-				//´Ù¸¥ ½º·¹µåµéÀÌ ÀÛ¾÷À» ÇÒ´ç¹ŞÀ» ¼ö ÀÖµµ·Ï notify
+				//ë‹¤ë¥¸ ìŠ¤ë ˆë“œë“¤ì´ ì‘ì—…ì„ í• ë‹¹ë°›ì„ ìˆ˜ ìˆë„ë¡ notify
 				cv.notify_one();
 
-				//critical section Á¾·á
+				//critical section ì¢…ë£Œ
 				lock.unlock();
 
 
 				sim_tsk.func(*sim_tsk.simulation);
 			}
 
-			else {
+			else if (!task_queue.empty()) {
+				tsk = task(task_queue.front().func);
+
+				//queueì—ì„œ ì‘ì—…ì„ ê°€ì ¸ì™”ìœ¼ë¯€ë¡œ pop
+				task_queue.pop();
+
+				//ë‹¤ë¥¸ ìŠ¤ë ˆë“œë“¤ì´ ì‘ì—…ì„ í• ë‹¹ë°›ì„ ìˆ˜ ìˆë„ë¡ notify
+				cv.notify_one();
+
+				//critical section ì¢…ë£Œ
+				lock.unlock();
+
+
+				tsk.func();
+			}
+
+			else if ( simulation_task_queue.empty() && task_queue.empty() ){
 				cout << endl << "queue is empty!" << endl;
 
 				lock.unlock();
 			}
 
+			else {
+				continue;
+			}
+
 		}
-		//poolÀÌ Á¾·áµÇ¾ú´Ù¸é
+		//poolì´ ì¢…ë£Œë˜ì—ˆë‹¤ë©´
 		cout << "thread is exiting" << endl;
 		return;
 	};
@@ -213,7 +213,7 @@ public:
 	void thread_pool_submit_void(std::function<void()> f) {
 		if (running) {
 
-			//mutex¸¦ È¹µæÇÑ´Ù.
+			//mutexë¥¼ íšë“í•œë‹¤.
 			mtx.lock();
 
 			cout << endl << "submit function start" << endl;
@@ -221,16 +221,16 @@ public:
 			//critical section
 			task tsk = task(f);
 
-			//queue¿¡ ÇÔ¼ö¸¦ ³Ö´Â´Ù.
+			//queueì— í•¨ìˆ˜ë¥¼ ë„£ëŠ”ë‹¤.
 			task_queue.push(tsk);
 
-			//´Ù¸¥ ½º·¹µåµéÀÌ ÀÛ¾÷À» ÇÒ´ç¹ŞÀ» ¼ö ÀÖµµ·Ï notify
+			//ë‹¤ë¥¸ ìŠ¤ë ˆë“œë“¤ì´ ì‘ì—…ì„ í• ë‹¹ë°›ì„ ìˆ˜ ìˆë„ë¡ notify
 			//cv.notify_all();
 			cv.notify_one();
 
 			cout << endl << "submit function end" << endl;
 
-			//mutex¸¦ ¹İÈ¯ÇÑ´Ù.
+			//mutexë¥¼ ë°˜í™˜í•œë‹¤.
 			mtx.unlock();
 
 		}
@@ -240,27 +240,28 @@ public:
 		}
 	}
 
-	void thread_pool_submit_void_simulation(Fluid_Simulator_Grid* simulation, std::function<void(Fluid_Simulator_Grid&)> f) {
+	void thread_pool_submit_void_simulation(Fluid_Simulator_Grid* simulation, std::function<void (Fluid_Simulator_Grid&)> f) {
 		if (running) {
 
-			//mutex¸¦ È¹µæÇÑ´Ù.
+			//mutexë¥¼ íšë“í•œë‹¤.
 			mtx.lock();
 
 			cout << endl << "submit function start" << endl;
 
 			//critical section
+
 			simulation_task tsk = simulation_task(simulation, f);
 
-			//queue¿¡ ÇÔ¼ö¸¦ ³Ö´Â´Ù.
+			//queueì— í•¨ìˆ˜ë¥¼ ë„£ëŠ”ë‹¤.
 			simulation_task_queue.push(tsk);
 
-			//´Ù¸¥ ½º·¹µåµéÀÌ ÀÛ¾÷À» ÇÒ´ç¹ŞÀ» ¼ö ÀÖµµ·Ï notify
+			//ë‹¤ë¥¸ ìŠ¤ë ˆë“œë“¤ì´ ì‘ì—…ì„ í• ë‹¹ë°›ì„ ìˆ˜ ìˆë„ë¡ notify
 			//cv.notify_all();
 			cv.notify_one();
 
 			cout << endl << "submit simulation function end" << endl;
 
-			//mutex¸¦ ¹İÈ¯ÇÑ´Ù.
+			//mutexë¥¼ ë°˜í™˜í•œë‹¤.
 			mtx.unlock();
 
 		}
@@ -270,3 +271,5 @@ public:
 		}
 	}
 };
+
+

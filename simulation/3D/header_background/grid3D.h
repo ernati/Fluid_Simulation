@@ -11,7 +11,7 @@ class MAC_Grid {
 public:
 
 	int gridsize;
-	//°ªµéÀ» ´ãÀ» vector
+	//ê°’ë“¤ì„ ë‹´ì„ vector
 	vector<T> cell_values;
 
 	MAC_Grid() {
@@ -22,17 +22,17 @@ public:
 		gridsize = grid_N;
 	}
 
-	//cellÁÂÇ¥¸¦ vector index·Î º¯°æ
+	//cellì¢Œí‘œë¥¼ vector indexë¡œ ë³€ê²½
 	int get_VectorIndex_from_cell(Vector3D& i_j_k) {
 		return i_j_k.X + i_j_k.Y * gridsize + i_j_k.Z * gridsize * gridsize;
 	}
 
-	//cell vector index¸¦ cellÁÂÇ¥·Î º¯°æ
+	//cell vector indexë¥¼ cellì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_i_from_VectorIndex(int vectorIndex) {
 		return ( vectorIndex % (gridsize * gridsize) ) % gridsize;
 	}
 
-	//cell vector index¸¦ cellÁÂÇ¥·Î º¯°æ
+	//cell vector indexë¥¼ cellì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_j_from_VectorIndex(int vectorIndex) {
 		return (vectorIndex % (gridsize * gridsize)) / gridsize;
 	}
@@ -51,12 +51,12 @@ public:
 		return result;
 	}
 
-	// particleÀÇ world_x ÁÂÇ¥¸¦ cell ÁÂÇ¥·Î º¯°æ
+	// particleì˜ world_x ì¢Œí‘œë¥¼ cell ì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_i_from_world(double particle_x) {
 		for (int i = 0; i < gridsize; i++) {
-			//ex 0.6 º¸´Ù Å¬ ¶§,
+			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
 			if (1.0 / (double)gridsize * i < particle_x) {
-				//ex 0.7º¸´Ù ÀÛÀ¸¸é
+				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
 				if (1.0 / (double)gridsize * (i + 1) > particle_x) {
 					return i;
 				}
@@ -65,12 +65,12 @@ public:
 		}
 	}
 
-	// particleÀÇ world_y ÁÂÇ¥¸¦ cell ÁÂÇ¥·Î º¯°æ
+	// particleì˜ world_y ì¢Œí‘œë¥¼ cell ì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_j_from_world(double particle_y) {
 		for (int j = 0; j < gridsize; j++) {
-			//ex 0.6 º¸´Ù Å¬ ¶§,
+			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
 			if (1.0 / (double)gridsize * j < particle_y) {
-				//ex 0.7º¸´Ù ÀÛÀ¸¸é
+				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
 				if (1.0 / (double)gridsize * (j + 1) > particle_y) {
 					return j;
 				}
@@ -78,12 +78,12 @@ public:
 		}
 	}
 
-	// particleÀÇ world_z ÁÂÇ¥¸¦ cell ÁÂÇ¥·Î º¯°æ
+	// particleì˜ world_z ì¢Œí‘œë¥¼ cell ì¢Œí‘œë¡œ ë³€ê²½
 	int get_cell_k_from_world(double particle_z) {
 		for (int k = 0; k < gridsize; k++) {
-			//ex 0.6 º¸´Ù Å¬ ¶§,
+			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
 			if (1.0 / (double)gridsize * k < particle_z) {
-				//ex 0.7º¸´Ù ÀÛÀ¸¸é
+				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
 				if (1.0 / (double)gridsize * (k + 1) > particle_z) {
 					return k;
 				}
@@ -91,14 +91,14 @@ public:
 		}
 	}
 
-	//¿ùµåÁÂÇ¥¸¦ ¹Ş¾Æ¼­ ÇÑ¹ø¿¡ (i,j,k)¸¦ returnÇÏ´Â ÇÔ¼ö
+	//ì›”ë“œì¢Œí‘œë¥¼ ë°›ì•„ì„œ í•œë²ˆì— (i,j,k)ë¥¼ returní•˜ëŠ” í•¨ìˆ˜
 	Vector3D get_cell_i_j_k_from_world(Vector3D& particle) {
 		Vector3D result = Vector3D();
 
 		for (int i = 0; i < gridsize; i++) {
-			//ex 0.6 º¸´Ù Å¬ ¶§,
+			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
 			if (1.0 / (double)gridsize * i < particle.X) {
-				//ex 0.7º¸´Ù ÀÛÀ¸¸é
+				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
 				if (1.0 / (double)gridsize * (i + 1) > particle.X) {
 					result.X = (double)i;
 				}
@@ -106,9 +106,9 @@ public:
 		}
 
 		for (int j = 0; j < gridsize; j++) {
-			//ex 0.6 º¸´Ù Å¬ ¶§,
+			//ex 0.6 ë³´ë‹¤ í´ ë•Œ,
 			if (1.0 / (double)gridsize * j < particle.Y) {
-				//ex 0.7º¸´Ù ÀÛÀ¸¸é
+				//ex 0.7ë³´ë‹¤ ì‘ìœ¼ë©´
 				if (1.0 / (double)gridsize * (j + 1) > particle.Y) {
 					result.Y = (double)j;
 				}
@@ -127,7 +127,7 @@ public:
 
 	}
 
-	//cell ÁÂÇ¥°¡ ÇöÀç Á¤ÀÇµÈ cell ¾È¿¡ ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	//cell ì¢Œí‘œê°€ í˜„ì¬ ì •ì˜ëœ cell ì•ˆì— ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
 	double CLAMP(double d, double min, double max) {
 		double t = d < min ? min : d;
 		return t > max ? max : t;

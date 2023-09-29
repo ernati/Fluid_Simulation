@@ -65,10 +65,10 @@ public:
 		solver = quadratic_solver();
 	}
 
-	// À§Ä¡ = ÇöÀç À§Ä¡ + ¼ø°£ ¼Óµµ
+	// ìœ„ì¹˜ = í˜„ì¬ ìœ„ì¹˜ + ìˆœê°„ ì†ë„
 	void move(int t_1) {
 
-		//¼Óµµ °è»ê
+		//ì†ë„ ê³„ì‚°
 		Velocity.y = double(solver.calculate( t_1% 1000 )) / 1000000.0;
 
 		if (0 < t_1 % 1000 < 500) {
@@ -80,12 +80,12 @@ public:
 		}
 
 
-		// ´ÙÀ½ À§Ä¡ °è»ê
+		// ë‹¤ìŒ ìœ„ì¹˜ ê³„ì‚°
 		double next_Loc_x = Location.x + Velocity.x;
 		double next_Loc_y = Location.y + Velocity.y;
 
-		//boundary Á¶°Ç
-		// ±× À§Ä¡ °è»ê¿¡ µû¶ó ±×´ë·Î ¿òÁ÷ÀÏÁö, ¼Óµµ¸¦ ¹İ´ë·Î Àû¿ëÇÒÁö °è»ê
+		//boundary ì¡°ê±´
+		// ê·¸ ìœ„ì¹˜ ê³„ì‚°ì— ë”°ë¼ ê·¸ëŒ€ë¡œ ì›€ì§ì¼ì§€, ì†ë„ë¥¼ ë°˜ëŒ€ë¡œ ì ìš©í• ì§€ ê³„ì‚°
 		if (next_Loc_x < 0.0 || next_Loc_x > 1.0) {
 			Velocity.x = -1 * Velocity.x;
 		}

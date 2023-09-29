@@ -30,7 +30,7 @@
 //
 //void init(void) {
 //	
-//	// particles ¼±¾ğ
+//	// particles ì„ ì–¸
 //	srand((unsigned int)time(NULL));
 //	for (int i = 0; i < number; i++) {
 //		float a =  (float)(rand()  % Width) / Width;
@@ -38,14 +38,14 @@
 //		particles[i] = Particle(1.0, vec2(a, b), vec2(a / 1000 ,b / 1000));
 //	}
 //	
-//	//particles¿¡¼­ particleµéÀÇ À§Ä¡¸¸ •û¿Í¼­ pointsµé¿¡ ÀúÀå, color´Â black °íÁ¤
+//	//particlesì—ì„œ particleë“¤ì˜ ìœ„ì¹˜ë§Œ ëº´ì™€ì„œ pointsë“¤ì— ì €ì¥, colorëŠ” black ê³ ì •
 //	for (int i = 0; i < number; i++) {
 //		points[i] = particles[i].Location;
 //		color[i] = vec3( 0.0f, 0.0f, 0.0f );
 //		//printf("%f %f\n", points[i].x, points[i].y);
 //	}
 //
-//	//bbox ¼±¾ğ
+//	//bbox ì„ ì–¸
 //	bbox = Box(0.0, 1.0, 0.0, 1.0);
 //	box_line[0] = vec2(bbox.xmin, bbox.ymin);
 //	box_line[1] = vec2(bbox.xmax, bbox.ymin);
@@ -103,14 +103,14 @@
 //
 //void idle(void)
 //{
-//	////±¸ºĞ
+//	////êµ¬ë¶„
 //	//printf("\n__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //	//printf("__________________________________________________________________________________\n");
 //
-//	//ÀÔÀÚ ¿òÁ÷ÀÓ
+//	//ì…ì ì›€ì§ì„
 //	for (int i = 0; i < number; i++) {
 //		/*printf("%f %f -> ", points[i].x, points[i].y);*/
 //		particles[i].move();
@@ -127,11 +127,11 @@
 //	glClear(GL_COLOR_BUFFER_BIT);
 //
 //
-//	//È­¸é mapping 
-//	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // °î¼±ÀÌ ±×·ÁÁú Æò¸é
+//	//í™”ë©´ mapping 
+//	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // ê³¡ì„ ì´ ê·¸ë ¤ì§ˆ í‰ë©´
 //	glUniformMatrix4fv(projection, 1, GL_TRUE, p);
 //
-//	//¹Ù²ï ÁÂÇ¥ ´Ù½Ã ¸Ş¸ğ¸®¿¡ ³Ö±â
+//	//ë°”ë€ ì¢Œí‘œ ë‹¤ì‹œ ë©”ëª¨ë¦¬ì— ë„£ê¸°
 //	glBindVertexArray(vao);
 //	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(points), points);
 //	glBufferSubData(GL_ARRAY_BUFFER, sizeof(points), sizeof(box_line), box_line);
