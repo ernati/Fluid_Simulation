@@ -23,9 +23,9 @@
             - main.cpp : 시뮬레이션을 실행하는 파일
             - main_threadpool.cpp : ""멀티 스레드 시뮬레이션 헤더파일 및 프로그래밍을 적용한 실행 파일""
             - fshader_2dBezier.glsl : opengl 용 fshader
-            - fshader_2dBezier_test.glsl : opengl 용 fshader
+            - fshader_2dBezier_test.glsl : ""
             - vshader_2dBezier.glsl : opengl 용 vshader
-            - vshader_2dBezier.glsl : ""
+            - vshader_2dBezier_test.glsl : ""
             - quadratic_particle_simulation.cpp : opengl 용 fshader
     - 3D : 2D에서 3D로 옮겨오는 버전.
         - header_background
