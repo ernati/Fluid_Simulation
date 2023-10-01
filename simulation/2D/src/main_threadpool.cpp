@@ -212,151 +212,356 @@ void idle(void)
 
 			std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
-			//0. promise and future
-			promise<bool> myPromise;
-			auto theFuture = myPromise.get_future();
+			////0. promise and future
+			//promise<void> myPromise;
+			//auto theFuture = myPromise.get_future();
 
 
-			//1. 예상 위치 계산
-			simulation->temp_particles->clear();
-			thread collision_1{ &Fluid_Simulator_Grid::collision_detection_1, simulation, move(myPromise) };
-			thread collision_2_1{ &Fluid_Simulator_Grid::collision_detection_2, simulation, 0, number/2, move(myPromise) };
-			thread collision_2_2{ &Fluid_Simulator_Grid::collision_detection_2, simulation, number/2, number, move(myPromise) };
+			////1. 예상 위치 계산
+			//simulation->temp_particles->clear();
+			//thread collision_1{ &Fluid_Simulator_Grid::collision_detection_1, simulation, move(myPromise) };
+			//thread collision_2_1{ &Fluid_Simulator_Grid::collision_detection_2, simulation, 0, number/2, move(myPromise) };
+			//thread collision_2_2{ &Fluid_Simulator_Grid::collision_detection_2, simulation, number/2, number, move(myPromise) };
+			//collision_1.join();
+			//collision_2_1.join();
+			//collision_2_2.join();
+
+
+			//promise<void> myPromise2;
+			//auto theFuture2 = myPromise2.get_future();
+			//thread collision_3{ &Fluid_Simulator_Grid::collision_detection_3, simulation, move(myPromise2) };
+			//collision_3.join();
+
+
+			//simulation->temp_particles2->clear();
+			//promise<void> myPromise3;
+			//auto theFuture3 = myPromise3.get_future();
+			//thread collision_4{ &Fluid_Simulator_Grid::collision_detection_4, simulation, move(myPromise3) };
+			//collision_4.join();
+
+
+			//promise<void> myPromise4;
+			//auto theFuture4 = myPromise4.get_future();
+			//thread collision_5_1{ &Fluid_Simulator_Grid::collision_detection_5, simulation, 0, 
+			//	simulation->temp_particles2->size()/2, move(myPromise4) };
+			//thread collision_5_2{ &Fluid_Simulator_Grid::collision_detection_5, simulation, simulation->temp_particles2->size() / 2,
+			//	simulation->temp_particles2->size(), move(myPromise4) };
+			//collision_5_1.join();
+			//collision_5_2.join();
+
+
+			//promise<void> myPromise5;
+			//auto theFuture5 = myPromise5.get_future();
+			//thread boundary_particle_1_1 { &Fluid_Simulator_Grid::boundarycondition_particle_1, simulation, 0, number/2,move(myPromise5) };
+			//thread boundary_particle_1_2 { &Fluid_Simulator_Grid::boundarycondition_particle_1, simulation, number/2, number,move(myPromise5) };
+			//boundary_particle_1_1.join();
+			//boundary_particle_1_2.join();
+			//
+
+			//promise<void> myPromise6;
+			//auto theFuture6 = myPromise6.get_future();
+			//thread advection_1_1{ &Fluid_Simulator_Grid::advection_1, simulation, 0, number / 2,move(myPromise6) };
+			//thread advection_1_2{ &Fluid_Simulator_Grid::advection_1, simulation, number / 2, number,move(myPromise6) };
+			//advection_1_1.join();
+			//advection_1_2.join();
+
+
+			//promise<void> myPromise7;
+			//auto theFuture7 = myPromise7.get_future();
+			//thread transfer_velocity_to_grid_from_particle_1_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1, simulation, 0,
+			//	simulation->cell_number / 2,move(myPromise7) };
+			//thread transfer_velocity_to_grid_from_particle_1_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1, simulation, simulation->cell_number / 2,
+			//	simulation->cell_number,move(myPromise7) };
+			//transfer_velocity_to_grid_from_particle_1_1.join();
+			//transfer_velocity_to_grid_from_particle_1_2.join();
+
+
+			//promise<void> myPromise8;
+			//auto theFuture8 = myPromise8.get_future();
+			//thread transfer_velocity_to_grid_from_particle_2_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2, simulation, 0,
+			//	number / 2,move(myPromise8) };
+			//thread transfer_velocity_to_grid_from_particle_2_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2, simulation, number / 2,
+			//	number,move(myPromise8) };
+			//transfer_velocity_to_grid_from_particle_2_1.join();
+			//transfer_velocity_to_grid_from_particle_2_2.join();
+
+
+			//promise<void> myPromise9;
+			//auto theFuture9= myPromise9.get_future();
+			//thread transfer_velocity_to_grid_from_particle_3_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3, simulation, 0,
+			//	simulation->cell_number / 2,move(myPromise9) };
+			//thread transfer_velocity_to_grid_from_particle_3_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3, simulation, simulation->cell_number / 2,
+			//	simulation->cell_number,move(myPromise9) };
+			//transfer_velocity_to_grid_from_particle_3_1.join();
+			//transfer_velocity_to_grid_from_particle_3_2.join();
+			//
+
+			//promise<void> myPromise10;
+			//auto theFuture10 = myPromise10.get_future();
+			//thread transfer_velocity_to_grid_from_particle_4_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4, simulation, 0,
+			//	simulation->cell_number / 2,move(myPromise10) };
+			//thread transfer_velocity_to_grid_from_particle_4_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4, simulation, simulation->cell_number / 2,
+			//	simulation->cell_number,move(myPromise10) };
+			//transfer_velocity_to_grid_from_particle_4_1.join();
+			//transfer_velocity_to_grid_from_particle_4_2.join();
+			//
+
+			//promise<void> myPromise11;
+			//auto theFuture11 = myPromise11.get_future();
+			//thread classify_cell_type_1 { &Fluid_Simulator_Grid::classify_cell_type_1, simulation, move(myPromise11) };
+			//thread add_body_force_1 { &Fluid_Simulator_Grid::add_body_force_1, simulation, move(myPromise11) };
+			//classify_cell_type_1.join();
+			//add_body_force_1.join();
+			//
+
+			//promise<void> myPromise12;
+			//auto theFuture12 = myPromise12.get_future();
+			//thread Adjust_velocity_1_1 { &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1, simulation,0, simulation->cell_number / 2, move(myPromise12) };
+			//thread Adjust_velocity_1_2 { &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1, simulation,simulation->cell_number / 2, simulation->cell_number, move(myPromise12) };
+			//Adjust_velocity_1_1.join();
+			//Adjust_velocity_1_2.join();
+
+
+			//promise<void> myPromise121;
+			//auto theFuture121 = myPromise121.get_future();
+			//thread air_cell_center_point_clear_1 { &Fluid_Simulator_Grid::air_cell_center_point_clear_1 , simulation, move(myPromise121) };
+			//air_cell_center_point_clear_1.join();
+
+
+			//promise<void> myPromise13;
+			//auto theFuture13 = myPromise13.get_future();
+			//thread extrapolate_velocity_1_1 { &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1, simulation,0, 
+			//	simulation->cell_number / 2,  move(myPromise13) };
+			//thread extrapolate_velocity_1_2{ &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1, simulation,simulation->cell_number / 2, 
+			//	simulation->cell_number,  move(myPromise13) };
+			//extrapolate_velocity_1_1.join();
+			//extrapolate_velocity_1_2.join();
+
+
+			//promise<void> myPromise131;
+			//auto theFuture131 = myPromise131.get_future();
+			//thread A_setZero_1 { &Fluid_Simulator_Grid::A_setZero_1 ,simulation, move(myPromise131) };
+			//A_setZero_1.join();
+			//
+
+			//promise<void> myPromise14;
+			//auto theFuture14 = myPromise14.get_future();
+			//thread pressure_solve_1_1{ &Fluid_Simulator_Grid::pressure_solve_1, simulation,0,
+			//	simulation->cell_number / 2,  move(myPromise14) };
+			//thread pressure_solve_1_2{ &Fluid_Simulator_Grid::pressure_solve_1, simulation,simulation->cell_number / 2,
+			//	simulation->cell_number,  move(myPromise14) };
+			//pressure_solve_1_1.join();
+			//pressure_solve_1_2.join();
+
+
+			//promise<void> myPromise15;
+			//auto theFuture15 = myPromise15.get_future();
+			////simulation->pressure_solve_2( 0, simulation->cell_number, move(myPromise15) );
+			//thread pressure_solve_2_1{ &Fluid_Simulator_Grid::pressure_solve_2, simulation, 0,
+			//	simulation->cell_number / 2,  move(myPromise15) };
+			//thread pressure_solve_2_2{ &Fluid_Simulator_Grid::pressure_solve_2, simulation, simulation->cell_number / 2,
+			//	simulation->cell_number,  move(myPromise15) };
+			//pressure_solve_2_1.join();
+			//pressure_solve_2_2.join();
+
+
+			//promise<void> myPromise16;
+			//auto theFuture16 = myPromise16.get_future();
+			////simulation->pressure_solve_3( move(myPromise16) );
+			//thread pressure_solve_3{ &Fluid_Simulator_Grid::pressure_solve_3, simulation, move(myPromise16) };
+			//pressure_solve_3.join();
+
+
+			//promise<void> myPromise17;
+			//auto theFuture17 = myPromise17.get_future();
+			//thread pressure_solve_4_1{ &Fluid_Simulator_Grid::pressure_solve_4, simulation,0,
+			//	simulation->cell_number / 2,  move(myPromise17) };
+			//thread pressure_solve_4_2{ &Fluid_Simulator_Grid::pressure_solve_4, simulation,simulation->cell_number / 2,
+			//	simulation->cell_number,  move(myPromise17) };
+			//pressure_solve_4_1.join();
+			//pressure_solve_4_2.join();
+			//
+
+			//promise<void> myPromise18;
+			//auto theFuture18 = myPromise18.get_future();
+			//thread boundarycondition_grid_1_1{ &Fluid_Simulator_Grid::boundarycondition_grid_1, simulation,0,
+			//	simulation->cell_number / 2,  move(myPromise18) };
+			//thread boundarycondition_grid_1_2{ &Fluid_Simulator_Grid::boundarycondition_grid_1, simulation,simulation->cell_number / 2,
+			//	simulation->cell_number,  move(myPromise18) };
+			//boundarycondition_grid_1_1.join();
+			//boundarycondition_grid_1_2.join();
+			//
+
+			//promise<void> myPromise19;
+			//auto theFuture19 = myPromise19.get_future();
+			//thread transfer_velocity_to_particle_from_grid_1_1{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1, simulation,0,
+			//	number / 2,  move(myPromise19) };
+			//thread transfer_velocity_to_particle_from_grid_1_2{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1, simulation,number / 2,
+			//	number,  move(myPromise19) };
+			//transfer_velocity_to_particle_from_grid_1_1.join();
+			//transfer_velocity_to_particle_from_grid_1_2.join();
+			//
+
+			//promise<void> myPromise20;
+			//auto theFuture20 = myPromise20.get_future();
+			//thread t12{ &Fluid_Simulator_Grid::swap_buffer, simulation, move(myPromise20) };
+			//thread t13{ &Fluid_Simulator_Grid::rendering_fluid, simulation, move(myPromise20) };
+			//t12.join();
+			//t13.join();
+
+			//========================================================================================================
+			
+
+			thread collision_1{ &Fluid_Simulator_Grid::collision_detection_1_update, simulation };
+			thread collision_2_1{ &Fluid_Simulator_Grid::collision_detection_2_update, simulation, 0, number/2 };
+			thread collision_2_2{ &Fluid_Simulator_Grid::collision_detection_2_update, simulation, number/2, number };
 			collision_1.join();
 			collision_2_1.join();
 			collision_2_2.join();
 
 
-			promise<bool> myPromise2;
-			auto theFuture2 = myPromise2.get_future();
-			thread collision_3{ &Fluid_Simulator_Grid::collision_detection_3, simulation, move(myPromise2) };
+			thread collision_3{ &Fluid_Simulator_Grid::collision_detection_3_update, simulation };
 			collision_3.join();
 
-
-			simulation->temp_particles2->clear();
-			promise<bool> myPromise3;
-			auto theFuture3 = myPromise3.get_future();
-			thread collision_4{ &Fluid_Simulator_Grid::collision_detection_4, simulation, move(myPromise3) };
+			thread collision_4 { &Fluid_Simulator_Grid::collision_detection_4_update, simulation };
 			collision_4.join();
 
 
-			promise<bool> myPromise4;
-			auto theFuture4 = myPromise4.get_future();
-			thread collision_5_1{ &Fluid_Simulator_Grid::collision_detection_5, simulation, 0, 
-				simulation->temp_particles2->size()/2, move(myPromise4) };
-			thread collision_5_2{ &Fluid_Simulator_Grid::collision_detection_5, simulation, simulation->temp_particles2->size() / 2,
-				simulation->temp_particles2->size(), move(myPromise4) };
+			thread collision_5_1{ &Fluid_Simulator_Grid::collision_detection_5_update, simulation, 0,
+				simulation->temp_particles2->size()/2 };
+			thread collision_5_2{ &Fluid_Simulator_Grid::collision_detection_5_update, simulation, simulation->temp_particles2->size() / 2,
+				simulation->temp_particles2->size() };
 			collision_5_1.join();
 			collision_5_2.join();
 
 
-			promise<bool> myPromise5;
-			auto theFuture5 = myPromise5.get_future();
-			thread boundary_particle_1_1 { &Fluid_Simulator_Grid::boundarycondition_particle_1, simulation, 0, number/2,move(myPromise5) };
-			thread boundary_particle_1_2 { &Fluid_Simulator_Grid::boundarycondition_particle_1, simulation, number/2, number,move(myPromise5) };
+			thread boundary_particle_1_1 { &Fluid_Simulator_Grid::boundarycondition_particle_1_update, simulation, 0, number/2 };
+			thread boundary_particle_1_2 { &Fluid_Simulator_Grid::boundarycondition_particle_1_update, simulation, number/2, number };
 			boundary_particle_1_1.join();
 			boundary_particle_1_2.join();
-			
 
-			promise<bool> myPromise6;
-			auto theFuture6 = myPromise6.get_future();
-			thread advection_1_1{ &Fluid_Simulator_Grid::advection_1, simulation, 0, number / 2,move(myPromise6) };
-			thread advection_1_2{ &Fluid_Simulator_Grid::advection_1, simulation, number / 2, number,move(myPromise6) };
+
+			thread advection_1_1{ &Fluid_Simulator_Grid::advection_1_update, simulation, 0, number / 2 };
+			thread advection_1_2{ &Fluid_Simulator_Grid::advection_1_update, simulation, number / 2, number };
 			advection_1_1.join();
 			advection_1_2.join();
 
 
-			promise<bool> myPromise7;
-			auto theFuture7 = myPromise7.get_future();
-			thread transfer_velocity_to_grid_from_particle_1_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1, simulation, 0,
-				simulation->cell_number / 2,move(myPromise7) };
-			thread transfer_velocity_to_grid_from_particle_1_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1, simulation, simulation->cell_number / 2,
-				simulation->cell_number,move(myPromise7) };
+			thread transfer_velocity_to_grid_from_particle_1_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1_update, simulation, 0,
+				simulation->cell_number / 2 };
+			thread transfer_velocity_to_grid_from_particle_1_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1_update, simulation, simulation->cell_number / 2,
+				simulation->cell_number };
 			transfer_velocity_to_grid_from_particle_1_1.join();
 			transfer_velocity_to_grid_from_particle_1_2.join();
 
 
-			promise<bool> myPromise8;
-			auto theFuture8 = myPromise8.get_future();
-			thread transfer_velocity_to_grid_from_particle_2_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2, simulation, 0,
-				number / 2,move(myPromise8) };
-			thread transfer_velocity_to_grid_from_particle_2_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2, simulation, number / 2,
-				number,move(myPromise8) };
+			thread transfer_velocity_to_grid_from_particle_2_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2_update, simulation, 0,
+				number / 2 };
+			thread transfer_velocity_to_grid_from_particle_2_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2_update, simulation, number / 2,
+				number };
 			transfer_velocity_to_grid_from_particle_2_1.join();
 			transfer_velocity_to_grid_from_particle_2_2.join();
 
 
-			promise<bool> myPromise9;
-			auto theFuture9= myPromise9.get_future();
-			thread transfer_velocity_to_grid_from_particle_3_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3, simulation, 0,
-				number / 2,move(myPromise9) };
-			thread transfer_velocity_to_grid_from_particle_3_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3, simulation, number / 2,
-				number,move(myPromise9) };
+			thread transfer_velocity_to_grid_from_particle_3_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3_update, simulation, 0,
+				simulation->cell_number / 2 };
+			thread transfer_velocity_to_grid_from_particle_3_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3_update, simulation, simulation->cell_number / 2,
+				simulation->cell_number };
 			transfer_velocity_to_grid_from_particle_3_1.join();
 			transfer_velocity_to_grid_from_particle_3_2.join();
-			
 
-			promise<bool> myPromise10;
-			auto theFuture10 = myPromise10.get_future();
-			thread transfer_velocity_to_grid_from_particle_4_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4, simulation, 0,
-				simulation->cell_number / 2,move(myPromise10) };
-			thread transfer_velocity_to_grid_from_particle_4_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4, simulation, simulation->cell_number / 2,
-				simulation->cell_number,move(myPromise10) };
+
+			thread transfer_velocity_to_grid_from_particle_4_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4_update, simulation, 0,
+				simulation->cell_number / 2 };
+			thread transfer_velocity_to_grid_from_particle_4_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4_update, simulation, simulation->cell_number / 2,
+				simulation->cell_number };
 			transfer_velocity_to_grid_from_particle_4_1.join();
 			transfer_velocity_to_grid_from_particle_4_2.join();
-			
 
-			promise<bool> myPromise11;
-			auto theFuture11 = myPromise11.get_future();
-			thread classify_cell_type_1 { &Fluid_Simulator_Grid::classify_cell_type_1, simulation, move(myPromise11) };
-			thread add_body_force_1 { &Fluid_Simulator_Grid::add_body_force_1, simulation, move(myPromise11) };
+
+			thread classify_cell_type_1 { &Fluid_Simulator_Grid::classify_cell_type_1_update, simulation };
+			thread add_body_force_1 { &Fluid_Simulator_Grid::add_body_force_1_update, simulation };
 			classify_cell_type_1.join();
 			add_body_force_1.join();
-			
 
-			promise<bool> myPromise77;
-			auto theFuture77 = myPromise77.get_future();
-			thread t7{ &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce, simulation, move(myPromise77) };
-			t7.join();
-			
 
-			promise<bool> myPromise88;
-			auto theFuture88 = myPromise88.get_future();
-			thread t8{ &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell, simulation, move(myPromise88) };
-			t8.join();
-			
+			thread Adjust_velocity_1_1 { &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1_update, simulation,0, simulation->cell_number / 2 };
+			thread Adjust_velocity_1_2 { &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1_update, simulation,simulation->cell_number / 2, simulation->cell_number };
+			Adjust_velocity_1_1.join();
+			Adjust_velocity_1_2.join();
 
-			promise<bool> myPromise99;
-			auto theFuture99 = myPromise99.get_future();
-			thread t9{ &Fluid_Simulator_Grid::pressure_solve2, simulation, move(myPromise99) };
-			t9.join();
-			
 
-			promise<bool> myPromise100;
-			auto theFuture100 = myPromise100.get_future();
-			thread t10{ &Fluid_Simulator_Grid::boundarycondition_grid, simulation, move(myPromise100) };
-			t10.join();
-			
+			thread air_cell_center_point_clear_1 { &Fluid_Simulator_Grid::air_cell_center_point_clear_1_update , simulation };
+			air_cell_center_point_clear_1.join();
 
-			promise<bool> myPromise110;
-			auto theFuture110 = myPromise110.get_future();
-			thread t11{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid, simulation, move(myPromise110) };
-			t11.join();
-			
 
-			promise<bool> myPromise120;
-			auto theFuture120 = myPromise120.get_future();
-			thread t12{ &Fluid_Simulator_Grid::swap_buffer, simulation, move(myPromise120) };
+			thread extrapolate_velocity_1_1 { &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1_update, simulation,0,
+				simulation->cell_number / 2 };
+			thread extrapolate_velocity_1_2 { &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1_update, simulation,simulation->cell_number / 2,
+				simulation->cell_number };
+			extrapolate_velocity_1_1.join();
+			extrapolate_velocity_1_2.join();
+
+
+			thread A_setZero_1 { &Fluid_Simulator_Grid::A_setZero_1_update ,simulation };
+			A_setZero_1.join();
+
+
+			thread pressure_solve_1_1{ &Fluid_Simulator_Grid::pressure_solve_1_update, simulation,0,
+				simulation->cell_number / 2 };
+			thread pressure_solve_1_2{ &Fluid_Simulator_Grid::pressure_solve_1_update, simulation,simulation->cell_number / 2,
+				simulation->cell_number };
+			pressure_solve_1_1.join();
+			pressure_solve_1_2.join();
+
+
+			/*thread pressure_solve_2_1{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, 0,
+				simulation->cell_number / 2 };
+			thread pressure_solve_2_2{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, simulation->cell_number / 2,
+				simulation->cell_number };
+			pressure_solve_2_1.join();
+			pressure_solve_2_2.join();*/
+			thread pressure_solve_2{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, 0, simulation->cell_number };
+			pressure_solve_2.join();
+
+
+			thread pressure_solve_3{ &Fluid_Simulator_Grid::pressure_solve_3_update, simulation };
+			pressure_solve_3.join();
+
+
+			thread pressure_solve_4_1{ &Fluid_Simulator_Grid::pressure_solve_4_update, simulation,0,
+				simulation->cell_number / 2 };
+			thread pressure_solve_4_2{ &Fluid_Simulator_Grid::pressure_solve_4_update, simulation,simulation->cell_number / 2,
+				simulation->cell_number };
+			pressure_solve_4_1.join();
+			pressure_solve_4_2.join();
+
+
+			thread boundarycondition_grid_1_1{ &Fluid_Simulator_Grid::boundarycondition_grid_1_update, simulation,0,
+				simulation->cell_number / 2 };
+			thread boundarycondition_grid_1_2{ &Fluid_Simulator_Grid::boundarycondition_grid_1_update, simulation,simulation->cell_number / 2,
+				simulation->cell_number };
+			boundarycondition_grid_1_1.join();
+			boundarycondition_grid_1_2.join();
+
+
+			thread transfer_velocity_to_particle_from_grid_1_1{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1_update, simulation,0,
+				number / 2 };
+			thread transfer_velocity_to_particle_from_grid_1_2{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1_update, simulation,number / 2,
+				number };
+			transfer_velocity_to_particle_from_grid_1_1.join();
+			transfer_velocity_to_particle_from_grid_1_2.join();
+
+
+			thread t12{ &Fluid_Simulator_Grid::swap_buffer, simulation };
+			thread t13{ &Fluid_Simulator_Grid::rendering_fluid, simulation };
 			t12.join();
-			
-
-			promise<bool> myPromise130;
-			auto theFuture130 = myPromise130.get_future();
-			thread t13{ &Fluid_Simulator_Grid::rendering_fluid, simulation, move(myPromise130) };
 			t13.join();
+
 
 			std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
 			std::cout << "simulation 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;
+
 
 			Update_Points();
 		}

@@ -44,7 +44,7 @@
 //int n = 12;
 //
 ////number를 조절하면 particle 수가 바뀐다.
-//int number = 4000;
+//int number = 8000;
 //
 //vector<Vector2D>* points;
 //vector<vec3>* color;
