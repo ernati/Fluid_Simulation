@@ -14,15 +14,19 @@
         - practiceThings : 과거 연습한 내용들이 포함됨. 보지 않으셔도 됩니다.
             - 2D_particle_simulation.cpp
             - 2D_particle_simulation.h
-        - Simulation : 다양한 시뮬레이션들으 구현해 놓은 폴더
+        - Simulation : 다양한 시뮬레이션들 구현해 놓은 폴더
             - Constant_Acceleration_Simulation_2D.h : 등가속도 운동 시뮬레이션
             - fluid_grid_2D.h : particle과 grid system ( MAC grid ) 를 적용한 시뮬레이션
             - fluid_onlyParticle_2D.h : semi-Lagrangian만을 사용하는 only particle 시뮬레이션
+            - fluid_grid_2D_multithread : ""멀티 스레드 프로그래밍이 적용된 유체 시뮬레이션""
         - src
-            - main.cpp : 시뮬레이션을 실행 파일
+            - main.cpp : 시뮬레이션을 실행하는 파일
+            - main_threadpool.cpp : ""멀티 스레드 시뮬레이션 헤더파일 및 프로그래밍을 적용한 실행 파일""
             - fshader_2dBezier.glsl : opengl 용 fshader
+            - fshader_2dBezier_test.glsl : ""
             - vshader_2dBezier.glsl : opengl 용 vshader
-            - quadratic_particle_simulation.cpp
+            - vshader_2dBezier_test.glsl : ""
+            - quadratic_particle_simulation.cpp : opengl 용 fshader
     - 3D : 2D에서 3D로 옮겨오는 버전.
         - header_background
             - box.h
