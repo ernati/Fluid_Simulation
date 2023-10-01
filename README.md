@@ -47,6 +47,7 @@
 ## 실행파일 관련 정보
 - main.cpp ~ fluid_grid_2D.h : 유체 시뮬레이션 완성본 입니다.
 - main_threadpool.cpp ~ fluid_grid_2D_multithread.h : 완성본을 멀티스레드 프로그래밍으로 구현한 실행파일입니다.
+- 시작 직후 오류가 발생할 수 있습니다. 다시 실행해주시면 감사드리겠습니다.
 
 
 ## 데이터 구조
