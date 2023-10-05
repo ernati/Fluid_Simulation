@@ -51,4 +51,81 @@
 
 
 ## 데이터 구조
-- 시뮬레이션 과정 정상
+- 시뮬레이션 과정 정리
+    - 1. collision detection
+        1. collision_check ( bool vector ) 선언 및 초기화
+            - 단순 반복문 - 병렬가능
+        2. 입자들의 속도를 이용해서 예상 위치 계산
+            1. 단순 반복문 - 병렬가능
+        - 1과 2 전체가 병렬가능
+        1. 예상 위치 sort
+            1. 병렬 불가
+        2. 그것을 이용해서 particle들을 구분 및 충돌 가능 여부 판정
+            1. 병렬 불가
+        3. 충돌 가능한 입자들의 속도 update
+            1. 병렬 가능
+        
+    - 2. boundary_particle
+        - 병렬 가능
+
+- 3. advection
+    - 병렬 가능
+
+1. transfer_velocity_to_grid_from_particle
+    1. cell_particle_number, previous_velocity_grid 초기화
+        1. 병렬가능
+        2. 이전 단계와 병렬 불가
+    2. particle들이 속한 셀에 particle의 정보들 합하기
+        1. 병렬가능
+        2. 이전 단계와 병렬 불가능
+    3. cell에 포함된 particle의 속도 평균내기
+        1. 병렬가능
+        2. 이전단계와 병렬 불가능
+    4. cell에 포함된 속도로 velocity_difference_grid 값 채우기
+        1. 병렬 가능
+        2. 이전 단계와 병렬 불가
+
+1. classify_cell_type()
+    1. 병렬가능
+
+1. add_body_force()
+    1. 병렬가능
+    2. 5단계와 병렬가능
+
+1. Adjust_velocity_from_bodyforce()
+    1. 병렬가능
+2. extrapolate_velocity_to_air_cell
+    1. 병렬가능
+    2. 이전 단계와 병렬 불가
+3. pressure_solve
+    1. matrix A,b
+        1. 병렬가능
+    2. solve Ax=b
+        1. 병렬불가
+    3. velocity update
+        1. 병렬가능
+4. boundarycondition_grid
+    1. 병렬가능
+    2. 이전단계와 병렬 불가
+5. transfer_Velocity_to_particle_from_grid()
+    1. 병렬가능
+    2. 이전단계와 병렬 불가
+6. swap_buffer()
+    1. 메인스레드에서 처리 
+7. rendering_fluid()
+    1. 병렬가능
+    2. 이전단계와 병렬 가능
+
+
+
+## 개발시 주요 사항
+SparseMatrix가 포함된 연산에서
+
+- 자동 메모리 관리하는 함수에서 free할 때 오류가 난다
+    - → free를 했는데 누군가 참조한다
+    - 즉, 멀티스레드로 해버리면, 한 스레드는 아직 수행 중인데 다른 스레드에서 free해버릴 수 있다
+    - → 실행 결과가 어떻게 될지 모른다.
+
+즉 외부라이브러리를 사용한 함수를 멀티스레드에 넣을 때, 예상 못한 수많은 오류가 발생할 수 있다.
+
+
