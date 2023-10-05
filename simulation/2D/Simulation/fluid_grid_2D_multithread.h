@@ -1,6 +1,6 @@
 #pragma once
 
-#define TEST 0
+//#define TEST 0
 
 #include "../header_background/myVector2D.h"
 #include "../header_background/particle.h"
