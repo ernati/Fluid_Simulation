@@ -130,7 +130,7 @@ SparseMatrix가 포함된 연산에서
 
 
 
-## 실행 영상
+## 실행 영상 - 4 windows
 <p align="center">
 <img src="https://github.com/ernati/Fluid_Simulation/assets/31719912/d4c458de-10e7-4b3e-ba8c-2b78a01657ac">
 </p>
