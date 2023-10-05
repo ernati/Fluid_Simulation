@@ -129,3 +129,8 @@ SparseMatrix가 포함된 연산에서
 즉 외부라이브러리를 사용한 함수를 멀티스레드에 넣을 때, 예상 못한 수많은 오류가 발생할 수 있다.
 
 
+
+## 실행 영상
+<p align="center">
+<img src="https://github.com/ernati/Fluid_Simulation/assets/31719912/d4c458de-10e7-4b3e-ba8c-2b78a01657ac">
+</p>
