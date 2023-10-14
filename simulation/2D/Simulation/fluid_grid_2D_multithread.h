@@ -134,22 +134,22 @@ public:
     void clear();
     void delete_vectors();
     void particle_simulation();
-    void collision_detection(std::promise<void> a);
-    void boundarycondition_grid(std::promise<void> a);
-    void boundarycondition_particle(std::promise<void> a);
+    void collision_detection();
+    void boundarycondition_grid();
+    void boundarycondition_particle();
     int check_location_for_boundary(Vector2D location);
     void boundary_work(int check, Vector2D& Velocity);
     void reupdate_velocity_cell_values();
-    void advection(std::promise<void> a);
+    void advection();
     int check_particle_on_the_edge(Vector2D Location, double threshold);
-    void transfer_velocity_to_grid_from_particle(std::promise<void> a);
-    void classify_cell_type(std::promise<void> a);
-    void add_body_force(std::promise<void> a);
-    void Adjust_velocity_from_bodyforce(std::promise<void> a);
-    void extrapolate_velocity_to_air_cell(std::promise<void> a);
+    void transfer_velocity_to_grid_from_particle();
+    void classify_cell_type();
+    void add_body_force();
+    void Adjust_velocity_from_bodyforce();
+    void extrapolate_velocity_to_air_cell();
     void pressure_solve();
-    void pressure_solve2(std::promise<void> a);
-    void transfer_Velocity_to_particle_from_grid(std::promise<void> a);
+    void pressure_solve2();
+    void transfer_Velocity_to_particle_from_grid();
     void transfer_Velocity_to_particle_from_grid_PICFLIP(double, double);
     void swap_buffer();
     void rendering_fluid();
@@ -157,30 +157,10 @@ public:
     void pressure_solve2_reupdate();
     void Adjust_velocity_from_bodyforce_reupdate();
 
-    void collision_detection_1(std::promise<void> a);
-    void collision_detection_2(int start, int end, std::promise<void> a);
-    void collision_detection_3(std::promise<void> a);
-    void collision_detection_4(std::promise<void> a);
-    void collision_detection_5(int start, int end, std::promise<void> a);
-    void boundarycondition_particle_1(int start, int end, std::promise<void> a);
-    void advection_1(int start, int end, std::promise<void> a);
-    void transfer_velocity_to_grid_from_particle_1(int start, int end, std::promise<void> a);
-    void transfer_velocity_to_grid_from_particle_2(int start, int end, std::promise<void> a);
-    void transfer_velocity_to_grid_from_particle_3(int start, int end, std::promise<void> a);
-    void transfer_velocity_to_grid_from_particle_4(int start, int end, std::promise<void> a);
-    void classify_cell_type_1(std::promise<void> a);
-    void add_body_force_1(std::promise<void> a);
-    void Adjust_velocity_from_bodyforce_1(int start, int end, std::promise<void> a);
-    void air_cell_center_point_clear_1(std::promise<void> a);
-    void extrapolate_velocity_to_air_cell_1(int start, int end, std::promise<void> a);
-    void A_setZero_1(std::promise<void> a);
-    void pressure_solve_1(int start, int end, std::promise<void> a);
-    void pressure_solve_2(int start, int end, std::promise<void> a);
-    void pressure_solve_3(std::promise<void> a);
-    void pressure_solve_4(int start, int end, std::promise<void> a);
-    void boundarycondition_grid_1(int start, int end, std::promise<void> a);
-    void transfer_Velocity_to_particle_from_grid_1(int start, int end, std::promise<void> a);
 
+    //fluid_grid_2D의 함수들을 바탕으로, multithread를 적용한 함수들
+    //1,2,3,4,... 는 한 함수를 여러스레드에 분할 할당하기 위해 반복문을 나눈 함수들이다.
+    //미리 결과를 말하자면, 이렇게 잘게 분할하는 것은, 컨텍스트 스위치의 오버헤드가 너무 커서 오히려 속도가 느려졌다.
     void collision_detection_1_update();
     void collision_detection_2_update(int start, int end );
     void collision_detection_3_update();
@@ -410,78 +390,78 @@ void Fluid_Simulator_Grid::delete_vectors() {
 
 void Fluid_Simulator_Grid::particle_simulation() {
 
-    //std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+    std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
-    ////0. collision detection
-    //collision_detection();
+    //0. collision detection
+    collision_detection();
 
-    //cout << "==========================================================" << endl;
+    cout << "==========================================================" << endl;
 
-    //cout << " boundarycondition start " << endl;
+    cout << " boundarycondition start " << endl;
 
-    ////1. boundarycondition
-    //boundarycondition_particle();
+    //1. boundarycondition
+    boundarycondition_particle();
 
-    //cout << " advection start " << endl;
+    cout << " advection start " << endl;
 
-    ////2. advection
-    //advection();
+    //2. advection
+    advection();
 
-    //cout << "==============================================================================" << endl;
+    cout << "==============================================================================" << endl;
 
-    //cout << " transfer_velocity_to_grid_from_particle start " << endl;
+    cout << " transfer_velocity_to_grid_from_particle start " << endl;
 
-    ////3. transfer_velocity_to_grid_from_particle
-    //transfer_velocity_to_grid_from_particle(); // 여기서 difference도 채움.
+    //3. transfer_velocity_to_grid_from_particle
+    transfer_velocity_to_grid_from_particle(); // 여기서 difference도 채움.
 
-    ////3.5 reupdate velocity cell values by using difference
-    ////reupdate_velocity_cell_values();
+    //3.5 reupdate velocity cell values by using difference
+    //reupdate_velocity_cell_values();
 
-    ////4. cell 성질 분류
-    //classify_cell_type();
+    //4. cell 성질 분류
+    classify_cell_type();
 
-    //cout << " bodyforce start " << endl;
+    cout << " bodyforce start " << endl;
 
-    ////4. bodyforce cell에 추가
-    //add_body_force();
+    //4. bodyforce cell에 추가
+    add_body_force();
 
-    //cout << " Adjust_velocity_from_bodyforce start " << endl;
+    cout << " Adjust_velocity_from_bodyforce start " << endl;
 
-    ////5. bodyforce 적용
-    //Adjust_velocity_from_bodyforce();
-    ////Adjust_velocity_from_bodyforce_reupdate();
+    //5. bodyforce 적용
+    Adjust_velocity_from_bodyforce();
+    //Adjust_velocity_from_bodyforce_reupdate();
 
-    ////7. 유체주변 셀에 보간
-    //extrapolate_velocity_to_air_cell();
-    ////extrapolate_velocity_to_air_cell_reupdate();
-
-
-    //cout << " pressureSolve start " << endl;
-
-    ////8. 압력 계산
-    ////pressure_solve();
-    //pressure_solve2();
-    ////pressure_solve2_reupdate();
-
-    //cout << " transfer_velocity_to_particle_from_grid start " << endl;
-
-    ////9. boundarycondition for grid
-    //boundarycondition_grid();
-
-    ////10. transfer_velocity_to_grid_from_particle
-    //transfer_Velocity_to_particle_from_grid();
-
-    ////11. swap buffer
-    //cout << " swapbuffer start " << endl;
-
-    //swap_buffer();
+    //7. 유체주변 셀에 보간
+    extrapolate_velocity_to_air_cell();
+    //extrapolate_velocity_to_air_cell_reupdate();
 
 
-    ////12. 유체가 있는 cell들 색칠
-    //rendering_fluid();
+    cout << " pressureSolve start " << endl;
 
-    //std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
-    //std::cout << "simulation 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;
+    //8. 압력 계산
+    //pressure_solve();
+    pressure_solve2();
+    //pressure_solve2_reupdate();
+
+    cout << " transfer_velocity_to_particle_from_grid start " << endl;
+
+    //9. boundarycondition for grid
+    boundarycondition_grid();
+
+    //10. transfer_velocity_to_grid_from_particle
+    transfer_Velocity_to_particle_from_grid();
+
+    //11. swap buffer
+    cout << " swapbuffer start " << endl;
+
+    swap_buffer();
+
+
+    //12. 유체가 있는 cell들 색칠
+    rendering_fluid();
+
+    std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+    std::cout << "simulation 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;
 
 }
 
@@ -500,523 +480,9 @@ void Fluid_Simulator_Grid::particle_simulation() {
 //====================================================================================================
 //====================================================================================================
 
-//========================================multithread=============================================
 
-void Fluid_Simulator_Grid::collision_detection_1(std::promise<void> a) {
-    //1. 초기화
-    collision_check->clear();
 
-    for (int i = 0; i < particles.size(); i++) {
-        collision_check->push_back(false);
-    }
 
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::collision_detection_2(int start, int end, std::promise<void> a) {
-
-    for (int p = start; p < end; p++) {
-        Vector2D expecting_Location = this->particles[p].Location + this->particles[p].Velocity * timestep;
-        temp_particles->push_back(make_tuple(expecting_Location, p));
-    }
-    
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::collision_detection_3(std::promise<void> a) {
-
-    //3. particle들을 sort
-    sort(temp_particles->begin(), temp_particles->end(), compare3);
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::collision_detection_4(std::promise<void> a) {
-
-    //4. 충돌 가능성 있는 particle들을 구분 - sweep and prune
-    for (int i = 0; i < temp_particles->size(); i++) {
-        //3-1. 앞에서 하나씩 훑는데, 자기 다음 particle과의 거리가 radius보다 작으면 충돌 가능성이 있음.
-        //이미 분류된 particle이면 pass
-        if ((*collision_check)[std::get<1>((*temp_particles)[i])]) { continue; }
-        //i가 마지막 particle이면 break
-        else if (i == temp_particles->size() - 1) { break; }
-
-        //현재 particle과 다음 particle의 거리가 0이상 2*radius 이하이면 충돌 가능성이 있음.
-        else {
-            double distance = sqrt(pow(get<0>((*temp_particles)[i]).X - get<0>((*temp_particles)[i + 1]).X, 2)
-                + pow(get<0>((*temp_particles)[i]).Y - get<0>((*temp_particles)[i + 1]).Y, 2));
-            if (distance <= 2 * particle_radius) {
-                //충돌 가능성이 있는 particle들을 저장
-                temp_particles2->push_back(make_tuple(get<1>((*temp_particles)[i]), get<1>((*temp_particles)[i + 1])));
-                //충돌 가능성이 있는 particle들은 true로 바꿔줌
-                (*collision_check)[std::get<1>((*temp_particles)[i])] = true;
-                (*collision_check)[std::get<1>((*temp_particles)[i + 1])] = true;
-            }
-        }
-    }
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::collision_detection_5(int start, int end, std::promise<void> a) {
-
-    // 4. 충돌 가능성 있는 particle들끼리 모멘텀 보존을 통한 충돌 후 속도 update를 적용
-    for (int i = start; i < end; i++) {
-        tuple<int, int> tmp = (*temp_particles2)[i];
-        Vector2D v1 = this->particles[get<0>(tmp)].Velocity;
-        Vector2D v2 = this->particles[get<1>(tmp)].Velocity;
-
-        //두 입자의 질량이 같으므로 뺄셈 생략
-        Vector2D new_v1 = (v2 * 2 * this->particles[get<1>(tmp)].mass) / (this->particles[get<0>(tmp)].mass + this->particles[get<1>(tmp)].mass);
-        Vector2D new_v2 = (v1 * 2 * this->particles[get<0>(tmp)].mass) / (this->particles[get<0>(tmp)].mass + this->particles[get<1>(tmp)].mass);
-
-        //속도 update
-        this->particles[get<0>(tmp)].Velocity = new_v1;
-        this->particles[get<1>(tmp)].Velocity = new_v2;
-    }
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::boundarycondition_particle_1(int start, int end, std::promise<void> a) {
-    for (int i = start; i < end; i++) {
-        Vector2D expecting_Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
-
-        int check = check_location_for_boundary(expecting_Location);
-
-        boundary_work(check, particles[i].Velocity);
-    }
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-//입자들의 위치를 모두 update
-void Fluid_Simulator_Grid::advection_1(int start, int end, std::promise<void> a) {
-    for (int i = start; i < end; i++) {
-        this->particles[i].Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
-
-        //boundary condition : 입자 위치 강제 이동 추가
-        if (check_location_for_boundary(this->particles[i].Location)) {
-            srand((unsigned int)time(NULL));
-
-            // x 는 0.15~0.85 사이의 랜덤값 , y는 0.15 ~ 0.35 사이의 랜덤값
-            double random_x = (rand() % 70 + 15) / 100.0;
-            double random_y = (rand() % 20 + 15) / 100.0;
-
-            this->particles[i].Location = Vector2D(random_x, random_y);
-        }
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1(int start, int end, std::promise<void> a) {
-    //0. cell_particle_number,previous_velocity_grid 초기화
-    for (int i = start; i < end; i++) {
-        cell_particle_number->cell_values[i] = 0.0;
-        previous_velocity_grid->cell_values[i] = Vector2D();
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2(int start, int end, std::promise<void> a) {
-    for (int p = start; p < end; p++) {
-        //1. particle cell좌표 찾기
-        Vector2D i_j = tool->get_cell_i_j_from_world(particles[p].Location);
-
-        //cell 내부 particle이 15개 초과일 경우 밑의 과정 생략
-        if (cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] > 15) { continue; }
-
-        //2. cell에 포함된 particle 수 세기
-        cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] + 1.0;
-
-        //3. cell에 포함된 particle의 속도 더하기 - edge처리 포함
-        double check = check_particle_on_the_edge(particles[p].Location, 0.01);
-
-        mtx.lock();
-
-        //3-0. edge에 없는 경우
-        if (check == 0) {
-            previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity;
-        }
-
-        //edge에 있는 경우
-
-
-        else {
-            //3-1. up edge에 있는 경우
-            if (check == 1) {
-                Vector2D i_j_plus_1 = Vector2D(i_j.X, i_j.Y + 1);
-                //cell_particle_number (i,j)에는 0.5 빼주고, (i,j+1)에는 0.5 더해주기
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] - 0.5;
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1)] + 0.5;
-
-                //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus_1)] + particles[p].Velocity * 0.5;
-            }
-
-            //3-2. down edge에 있는 경우
-            else if (check == 2) {
-                Vector2D i_j_minus_1 = Vector2D(i_j.X, i_j.Y - 1);
-                //cell_particle_number (i,j)에는 0.5 빼주고, (i,j-1)에는 0.5 더해주기
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] - 0.5;
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1)] + 0.5;
-
-                //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_minus_1)] + particles[p].Velocity * 0.5;
-            }
-            //3-3. left edge에 있는 경우
-            else if (check == 3) {
-                Vector2D i_minus_1_j = Vector2D(i_j.X - 1, i_j.Y);
-                //cell_particle_number (i,j)에는 0.5 빼주고, (i-1,j)에는 0.5 더해주기
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] - 0.5;
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j)] + 0.5;
-
-                //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_minus_1_j)] + particles[p].Velocity * 0.5;
-            }
-
-            //3-4. right edge에 있는 경우
-            else { //check==4
-                Vector2D i_plus_1_j = Vector2D(i_j.X + 1, i_j.Y);
-                //cell_particle_number (i,j)에는 0.5 빼주고, (i+1,j)에는 0.5 더해주기
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_j)] - 0.5;
-                cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j)] = cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j)] + 0.5;
-
-                //previous_velocity_grid 에다가 각각 velocity의 0.5배씩 더해주기
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] + particles[p].Velocity * 0.5;
-                previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus_1_j)] + particles[p].Velocity * 0.5;
-            }
-        }
-
-        mtx.unlock();
-
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-
-}
-void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3(int start, int end, std::promise<void> a) {
-    //4. cell에 포함된 particle의 속도 평균내기
-    for (int i = start; i < end; i++) {
-        if (cell_particle_number->cell_values[i] != 0) {
-            previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] / cell_particle_number->cell_values[i];
-        }
-        else {
-            previous_velocity_grid->cell_values[i] = Vector2D();
-        }
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4(int start, int end, std::promise<void> a) {
-    //5. cell에 포함된 속도로 velocity_difference_grid 값 채우기
-    for (int c = start; c < end; c++) {
-        //
-        int i = tool->get_cell_i_from_VectorIndex(c);
-        int j = tool->get_cell_j_from_VectorIndex(c);
-
-        Vector2D i_j = Vector2D(i, j);
-
-        Vector2D i_plus1_j = Vector2D(i + 1, j);
-        Vector2D i_j_plus1 = Vector2D(i, j + 1);
-
-        //발산 구하기 - 속도의 공간 변화량 구하기
-        velocity_difference_X_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = (previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_plus1_j)].X - previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)].X);
-        if (i == gridsize - 1) {
-            velocity_difference_X_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)].X;
-        }
-        velocity_difference_Y_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = (previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j_plus1)].Y - previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)].Y);
-        if (j == gridsize - 1) {
-            velocity_difference_Y_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)] = previous_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)].Y;
-        }
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::classify_cell_type_1(std::promise<void> a) {
-    for (int i = 0; i < cell_number; i++) {
-        //cell 좌표 구하기
-        Vector2D i_j = Vector2D(tool->get_cell_i_from_VectorIndex(i), tool->get_cell_j_from_VectorIndex(i));
-
-        //셀이 벽쪽이라면 solid
-        if (i_j.X == 0 || i_j.X == gridsize - 1 || i_j.Y == 0 || i_j.Y == gridsize - 1) {
-            cell_type_grid->cell_values[i] = CellType::SOLID;
-        }
-        else {
-            //particle이 존재하는 cell이라면 fluid
-            if (cell_particle_number->cell_values[i] > 0) {
-                cell_type_grid->cell_values[i] = CellType::FLUID;
-            }
-            //particle이 존재하지 않는 cell이라면 air
-            else {
-                cell_type_grid->cell_values[i] = CellType::AIR;
-            }
-        }
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::add_body_force_1(std::promise<void> a) {
-    for (int i = 0; i < cell_number; i++) {
-        bodyforce->cell_values[i] = Vector2D(0.0, -9.8);
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1(int start, int end, std::promise<void> a) {
-    for (int i = start; i < end; i++) {
-        previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + bodyforce->cell_values[i] * timestep;
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::air_cell_center_point_clear_1(std::promise<void> a) {
-    air_cell_center_point->clear();
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1(int start, int end, std::promise<void> a) {
-
-    for (int i = start; i < end; i++) {
-        //1. i_j 선언
-        Vector2D i_j = Vector2D(cell_type_grid->get_cell_i_from_VectorIndex(i), cell_type_grid->get_cell_j_from_VectorIndex(i));
-
-        //2. i_j 셀이 공기셀이라면
-        if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j)] == CellType::AIR) {
-            int n_fluid_cells = 0;
-
-            Vector2D i_plus1_j = Vector2D(i_j.X + 1, i_j.Y);
-            Vector2D i_minus1_j = Vector2D(i_j.X - 1, i_j.Y);
-            Vector2D i_j_plus1 = Vector2D(i_j.X, i_j.Y + 1);
-            Vector2D i_j_minus1 = Vector2D(i_j.X, i_j.Y - 1);
-
-            //3. 인접한 유체셀의 속도를 더한다.
-            //3-1. i+1, j
-            if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_plus1_j)] == CellType::FLUID) {
-                previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_plus1_j)];
-                n_fluid_cells++;
-            }
-            //3-2. i-1, j
-            if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_minus1_j)] == CellType::FLUID) {
-                previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_minus1_j)];
-                n_fluid_cells++;
-            }
-            //3-3. i, j+1
-            if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_plus1)] == CellType::FLUID) {
-                previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_plus1)];
-                n_fluid_cells++;
-            }
-            //3-4. i, j-1
-            if (cell_type_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_minus1)] == CellType::FLUID) {
-                previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + previous_velocity_grid->cell_values[cell_type_grid->get_VectorIndex_from_cell(i_j_minus1)];
-                n_fluid_cells++;
-            }
-
-            //4. 인접한 유체셀의 속도의 평균을 구한다.
-            if (n_fluid_cells > 0) {
-                //속도 평균내기
-                previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] / (double)n_fluid_cells;
-
-                //extrapolation 받은 cell을 air_cell에 넣는다.
-                air_cell_center_point->push_back(cell_center_point->cell_values[i]);
-            }
-
-        }
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::A_setZero_1(std::promise<void> a) {
-    A->setZero();
-    b.setZero();
-    x.setZero();
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::pressure_solve_1(int start, int end, std::promise<void> a) {
-
-    //1.Ax=b에서 A 작성 - diagonal 요소들도 작성
-    for (int i = start; i < end; i++) {
-        double neighbor_sum = 0.0;
-        Vector2D i_j = tool->get_cell_i_j_from_VectorIndex(i);
-        //Vector2D i_j = Vector2D(tool->get_cell_i_from_VectorIndex(i), tool->get_cell_j_from_VectorIndex(i));
-
-        if (cell_particle_number->cell_values[i] == 0.0) { continue; }
-        else {
-            //현재 셀의 좌표 구하기
-            Vector2D i_minus1_j = i_j + Vector2D(-1, 0);
-            Vector2D i_plus1_j = i_j + Vector2D(1, 0);
-            Vector2D i_j_minus1 = i_j + Vector2D(0, -1);
-            Vector2D i_j_plus1 = i_j + Vector2D(0, 1);
-
-
-            //셀좌표에 대응되는 vectorIndex좌표 구하기
-
-            mtx.lock();
-
-            //i-1,j
-            if (i_j.X > 0) {
-                int cell_i_minus1_j = tool->get_VectorIndex_from_cell(i_minus1_j);
-                if (cell_particle_number->cell_values[cell_i_minus1_j] > 0) {
-                    A->insert(i, cell_i_minus1_j) -= pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_minus1_j, i) -= pressure_coefficient / (delta_x * delta_x);
-                }
-                /*else if (cell_type_grid->cell_values[cell_i_minus1_j] == SOLID) {
-                    A->insert(i, cell_i_minus1_j) +=  pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_minus1_j, i) +=  pressure_coefficient / (delta_x * delta_x);
-                }*/
-            }
-            //i+1,j
-            if (i_j.X < gridsize - 1) {
-                int cell_i_plus1_j = tool->get_VectorIndex_from_cell(i_plus1_j);
-                if (cell_particle_number->cell_values[cell_i_plus1_j] > 0) {
-                    A->insert(i, cell_i_plus1_j) -= pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_plus1_j, i) -= pressure_coefficient / (delta_x * delta_x);
-                }
-                /*else if (cell_type_grid->cell_values[cell_i_plus1_j] == SOLID) {
-                    A->insert(i, cell_i_plus1_j) +=  pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_plus1_j, i) += pressure_coefficient / (delta_x * delta_x);
-                }*/
-            }
-            //i,j-1
-            if (i_j.Y > 0) {
-                int cell_i_j_minus1 = tool->get_VectorIndex_from_cell(i_j_minus1);
-                if (cell_particle_number->cell_values[cell_i_j_minus1] > 0) {
-                    A->insert(i, cell_i_j_minus1) -= pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_j_minus1, i) -= pressure_coefficient / (delta_x * delta_x);
-                }
-                /*else if (cell_type_grid->cell_values[cell_i_j_minus1] == SOLID) {
-                    A->insert(i, cell_i_j_minus1) += pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_j_minus1, i) += pressure_coefficient / (delta_x * delta_x);
-                }*/
-            }
-            //i,j+1
-            if (i_j.Y > 0) {
-                int cell_i_j_plus1 = tool->get_VectorIndex_from_cell(i_j_plus1);
-                if (cell_particle_number->cell_values[cell_i_j_plus1] > 0) {
-                    A->insert(i, cell_i_j_plus1) -= pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_j_plus1, i) -= pressure_coefficient / (delta_x * delta_x);
-                }
-                /*else if (cell_type_grid->cell_values[cell_i_j_plus1] == SOLID) {
-                    A->insert(i, cell_i_j_plus1) +=  pressure_coefficient / (delta_x * delta_x);
-                    A->insert(cell_i_j_plus1, i) +=  pressure_coefficient / (delta_x * delta_x);
-                }*/
-            }
-
-            mtx.unlock();
-
-        }
-    }
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-
-}
-
-void Fluid_Simulator_Grid::pressure_solve_2(int start, int end, std::promise<void> a) {
-
-    //diagonal 요소들도 작성
-    for (int i = start; i < end; i++) {
-        A->insert(i, i) = 4 * pressure_coefficient / (delta_x * delta_x);
-    }
-
-    for (int k = start; k < end; k++) {
-        b(k) = -1.0 * (velocity_difference_X_grid->cell_values[k] + velocity_difference_Y_grid->cell_values[k]);
-    }
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::pressure_solve_3(std::promise<void> a) {
-
-    //3. x solve
-    cg_solver.compute(*A);
-    x = cg_solver.solve(b);
-
-
-    std::cout << "#iterations:     " << cg_solver.iterations() << std::endl;
-    std::cout << "estimated error: " << cg_solver.error() << std::endl;
-
-    cout << " solver_done " << endl;
-
-    cout << "=======================================================\n";
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::pressure_solve_4(int start, int end, std::promise<void> a) {
-
-    //4. x 값( 압력 )을 통해 cell들의 속도 계산
-    for (int i = start; i < end; i++) {
-        //4-1. 새로운 속도 계산 - 압력 그대로 사용 - PIC
-        double new_vel_x = previous_velocity_grid->cell_values[i].X - timestep / density * x(i);
-        double new_vel_y = previous_velocity_grid->cell_values[i].Y - timestep / density * x(i);
-
-        //4-2. new vel에다가 입력하기
-        next_velocity_grid->cell_values[i] = Vector2D(new_vel_x, new_vel_y);
-    }
-
-    /**/
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
-
-void Fluid_Simulator_Grid::boundarycondition_grid_1(int start, int end, std::promise<void> a) {
-    for (int i = start; i < end; i++) {
-        Vector2D expecting_Location = this->cell_center_point->cell_values[i] + this->next_velocity_grid->cell_values[i] * timestep;
-
-        int check = check_location_for_boundary(expecting_Location);
-
-        boundary_work(check, this->next_velocity_grid->cell_values[i]);
-    }
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
 
 
 
@@ -1033,33 +499,6 @@ void Fluid_Simulator_Grid::boundarycondition_grid_1(int start, int end, std::pro
 //====================================================================================================
 //====================================================================================================
 
-void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1(int start, int end, std::promise<void> a) {
-    for (int p = start; p < end; p++) {
-        //1. particle이 속한 cell 찾기
-        Vector2D i_j = tool->get_cell_i_j_from_world(particles[p].Location);
-
-        //2. cell 정보를 particle에게 전달
-        particles[p].Velocity = next_velocity_grid->cell_values[tool->get_VectorIndex_from_cell(i_j)];
-
-        //난수 준비
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> theta(0, 360);
-
-        //3. 랜덤 벡터 생성 - 크기 1
-        int angle = theta(gen);
-        Vector2D randomvector = Vector2D(cos(angle), sin(angle));
-
-        double scale = sqrt(pow(particles[p].Velocity.X, 2) + pow(particles[p].Velocity.Y, 2)) * 0.05;
-
-        particles[p].Velocity = particles[p].Velocity + (randomvector * scale);
-
-    }
-
-#ifdef TEST
-    cout << __func__ << " end\n";
-#endif
-}
 
 //==========================
 
@@ -1614,7 +1053,7 @@ void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1_update(int 
 //====================================================================================================
 
 //collision detection
-void Fluid_Simulator_Grid::collision_detection(std::promise<void> a) {
+void Fluid_Simulator_Grid::collision_detection() {
 
     collision_check->clear();
     temp_particles->clear();
@@ -1678,7 +1117,7 @@ void Fluid_Simulator_Grid::collision_detection(std::promise<void> a) {
 //==============================boundary 관련 함수==============================
 
 //압력 계산 후의 속도가 boundarycondition을 벗어나는 경우 속도를 적당한 조건으로 변경함.
-void Fluid_Simulator_Grid::boundarycondition_grid(std::promise<void> a) {
+void Fluid_Simulator_Grid::boundarycondition_grid() {
     for (int i = 0; i < cell_number; i++) {
         Vector2D expecting_Location = this->cell_center_point->cell_values[i] + this->next_velocity_grid->cell_values[i] * timestep;
 
@@ -1691,7 +1130,7 @@ void Fluid_Simulator_Grid::boundarycondition_grid(std::promise<void> a) {
 }
 
 //속도에 따른 위치 예상 결과값이 boundarycondition을 벗어나는 경우 속도를 적당한 조건으로 변경함.
-void Fluid_Simulator_Grid::boundarycondition_particle(std::promise<void> a) {
+void Fluid_Simulator_Grid::boundarycondition_particle() {
     for (int i = 0; i < particles.size(); i++) {
         Vector2D expecting_Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
 
@@ -1829,7 +1268,7 @@ void Fluid_Simulator_Grid::reupdate_velocity_cell_values() {
 
 
 //입자들의 위치를 모두 update
-void Fluid_Simulator_Grid::advection(std::promise<void> a) {
+void Fluid_Simulator_Grid::advection() {
     for (int i = 0; i < particles.size(); i++) {
         this->particles[i].Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
 
@@ -1876,7 +1315,7 @@ int Fluid_Simulator_Grid::check_particle_on_the_edge(Vector2D Location, double t
 
 
 //particle의 value를 모든 grid로 전달하는 함수
-void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle(std::promise<void> a) {
+void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle() {
 
     //0. cell_particle_number,previous_velocity_grid 초기화
     for (int i = 0; i < cell_number; i++) {
@@ -1989,7 +1428,7 @@ void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle(std::promise<
 
 }
 
-void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid(std::promise<void> a) {
+void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid() {
     for (int p = 0; p < particles.size(); p++) {
         //1. particle이 속한 cell 찾기
         Vector2D i_j = tool->get_cell_i_j_from_world(particles[p].Location);
@@ -2069,7 +1508,7 @@ void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_PICFLIP(doubl
 }
 
 //유체 속도값을 인접 공기셀에 보간
-void Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell(std::promise<void> a) {
+void Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell() {
     //air_cell_center_point 초기화
     air_cell_center_point->clear();
 
@@ -2178,7 +1617,7 @@ void Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_reupdate() {
 
 //==============================cell type 분류==================================
 
-void Fluid_Simulator_Grid::classify_cell_type(std::promise<void> a) {
+void Fluid_Simulator_Grid::classify_cell_type() {
     for (int i = 0; i < cell_number; i++) {
         //cell 좌표 구하기
         Vector2D i_j = Vector2D(tool->get_cell_i_from_VectorIndex(i), tool->get_cell_j_from_VectorIndex(i));
@@ -2208,7 +1647,7 @@ void Fluid_Simulator_Grid::classify_cell_type(std::promise<void> a) {
 //==============================bodyforce 관련 함수==============================
 
 //bodyforce에 적용하고 싶은 외력 추가 - 중력
-void Fluid_Simulator_Grid::add_body_force(std::promise<void> a) {
+void Fluid_Simulator_Grid::add_body_force() {
     for (int i = 0; i < cell_number; i++) {
         bodyforce->cell_values[i] = Vector2D(0.0, -9.8);
     }
@@ -2217,7 +1656,7 @@ void Fluid_Simulator_Grid::add_body_force(std::promise<void> a) {
 }
 
 //bodyforce를 grid의 velocity에 적용
-void Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce(std::promise<void> a) {
+void Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce() {
     for (int i = 0; i < cell_number; i++) {
         previous_velocity_grid->cell_values[i] = previous_velocity_grid->cell_values[i] + bodyforce->cell_values[i] * timestep;
     }
@@ -2336,7 +1775,7 @@ void Fluid_Simulator_Grid::pressure_solve() {
 
 }
 
-void Fluid_Simulator_Grid::pressure_solve2(std::promise<void> a) {
+void Fluid_Simulator_Grid::pressure_solve2() {
 
     //올바른 참조를 위해 0으로 초기화
     A->setZero();

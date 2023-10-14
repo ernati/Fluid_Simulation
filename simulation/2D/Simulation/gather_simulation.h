@@ -27,29 +27,45 @@ public:
 	Vector2D center;
 	vector<Particle2D> particles;
 
+	//기본생성자
 	GatherSimulation();
+	//입자 수를 인자로 받는 생성자
 	GatherSimulation(int number);
 
 	//simulation
+	//시뮬레이션 함수
 	void particle_simulation();
+
+	//입자들의 가속도를 업데이트하는 함수
 	void Update_Acceleration();
+
+	//입자들의 속도를 업데이트하는 함수
 	void Update_Velocity();
+
+	//입자들의 위치를 업데이트하는 함수
 	void Update_Location();
+
+	//입자가 boundary를 넘어갔을 때를 체크하는 함수
 	bool check_location_for_boundary(Vector2D& location);
+
+	//입자가 boundary 체크일 때 처리 함수
 	void boundary_work( Particle2D& particle );
 
 	//multithread
+	//1,2,3,4,... 는 한 함수를 여러스레드에 분할 할당하기 위해 반복문을 나눈 함수들이다.
+	//미리 결과를 말하자면, 이렇게 잘게 분할하는 것은, 컨텍스트 스위치의 오버헤드가 너무 커서 오히려 속도가 느려졌다.
 	void Update_Acceleration_thread(int start, int end);
 	void Update_Velocity_thread(int start, int end);
 	void Update_Location_thread(int start, int end);
 };
 
-
+//기본생성자
 GatherSimulation::GatherSimulation()
 {
 	;
 }
 
+//입자 수를 인자로 받는 생성자
 GatherSimulation::GatherSimulation(int number) {
 	timestep = 0.06;
 	center_radius = 0.05;
@@ -89,6 +105,7 @@ GatherSimulation::GatherSimulation(int number) {
 	}
 }
 
+//입자들의 가속도를 업데이트하는 함수
 void GatherSimulation::Update_Acceleration()
 {
 	for (int i = 0; i < particles.size(); i++)
@@ -98,12 +115,14 @@ void GatherSimulation::Update_Acceleration()
 	}
 }
 
+//입자들의 속도를 업데이트하는 함수
 void GatherSimulation::Update_Velocity() {
 	for (int i = 0; i < particles.size(); i++) {
 		particles[i].Velocity = particles[i].Velocity + particles[i].Acceleration * timestep;
 	}
 }
 
+//입자들의 위치를 업데이트하는 함수
 void GatherSimulation::Update_Location() {
 	for (int i = 0; i < particles.size(); i++) {
 		particles[i].Location = particles[i].Location + particles[i].Velocity * timestep;
@@ -116,6 +135,7 @@ void GatherSimulation::Update_Location() {
 	}
 }
 
+//입자가 boundary를 넘어갔을 때를 체크하는 함수
 bool GatherSimulation::check_location_for_boundary(Vector2D& location) {
 	double distance = sqrt(pow(location.X - center.X, 2) + pow(location.Y - center.Y, 2));
 	if (distance < center_radius) { return true; }
@@ -126,6 +146,7 @@ bool GatherSimulation::check_location_for_boundary(Vector2D& location) {
 
 
 //boundary condition
+//입자가 boundary 체크일 때 처리 함수
 void GatherSimulation::boundary_work( Particle2D& particle ) {
 	Vector2D vector_C_to_A = Vector2D(particle.Location.X - center.X, particle.Location.Y - center.Y);
 
@@ -144,6 +165,7 @@ void GatherSimulation::boundary_work( Particle2D& particle ) {
 	particle.Velocity.Y = 0.0;
 }
 
+//시뮬레이션 함수
 void GatherSimulation::particle_simulation() {
 
 	Update_Acceleration();

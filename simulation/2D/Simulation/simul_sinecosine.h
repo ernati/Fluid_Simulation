@@ -31,12 +31,18 @@ public:
 
 	double pi = 3.141592;
 
-
-
+	//기본 생성자
 	Simul_SineCosine();
+	//입자 수를 인자로 받는 생성자
 	Simul_SineCosine(int number);
+	
+	//시뮬레이션 함수
 	void particle_simulation();
+
+	//시간 누적 함수
 	void accumulation_time();
+
+	//sine, cosine 계산 함수
 	void calculate_sine();
 	void calculate_cosine();
 
@@ -45,10 +51,12 @@ public:
 	void calculate_cosine_thread(int start, int end);
 };
 
+//기본 생성자
 Simul_SineCosine::Simul_SineCosine() {
 	;
 }
 
+//입자 수를 인자로 받는 생성자
 Simul_SineCosine::Simul_SineCosine(int number) {
 
 	sine_particles = new vector<Vector2D>;
@@ -65,24 +73,25 @@ Simul_SineCosine::Simul_SineCosine(int number) {
 	}
 }
 
+//시간 누적 함수
 void Simul_SineCosine::accumulation_time() {
 	accumulate_timestep += timestep;
 }
 
-//  4/10 * Sine( 2pi *x + 0.12 * pi )
+//sine, cosine 계산 함수
 void Simul_SineCosine::calculate_sine() {
 	for (int i = 0; i < sine_particles->size(); i++) {
 		(*sine_particles)[i].Y = 4.0 / 10.0 * sin(2.0 * pi * (*sine_particles)[i].X + 2.0 * accumulate_timestep * pi) + 0.5 ;
 	}
 }
 
-//  4/10 * Cosine( 2pi *x + 0.12 * pi )
 void Simul_SineCosine::calculate_cosine() {
 	for (int i = 0; i < sine_particles->size(); i++) {
 		(*cosine_particles)[i].Y = 4.0 / 10.0 * cos(2.0 * pi * (*cosine_particles)[i].X + 2.0 * accumulate_timestep * pi) + 0.5;
 	}
 }
 
+//시뮬레이션 함수
 void Simul_SineCosine::particle_simulation() {
 	
 	accumulation_time();
@@ -92,15 +101,13 @@ void Simul_SineCosine::particle_simulation() {
 
 }
 
-
-//  4/10 * Sine( 2pi *x + 0.12 * pi )
+//multithread
 void Simul_SineCosine::calculate_sine_thread(int start, int end) {
 	for (int i = start; i < end; i++) {
 		(*sine_particles)[i].Y = 4.0 / 10.0 * sin(2.0 * pi * (*sine_particles)[i].X + 2.0 * accumulate_timestep * pi) + 0.5;
 	}
 }
 
-//  4/10 * Cosine( 2pi *x + 0.12 * pi )
 void Simul_SineCosine::calculate_cosine_thread( int start, int end ) {
 	for (int i = start; i < end; i++) {
 		(*cosine_particles)[i].Y = 4.0 / 10.0 * cos(2.0 * pi * (*cosine_particles)[i].X + 2.0 * accumulate_timestep * pi) + 0.5;

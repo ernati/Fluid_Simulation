@@ -14,6 +14,8 @@
 #include <thread>
 #include <chrono>
 
+//#define DEBUG
+
 //난수 생성
 #include<cstdlib> //rand(), srand()
 #include<ctime>
@@ -103,42 +105,86 @@ public:
     //사용할 행렬 변수들
     Eigen::SparseMatrix<double>* A;
 
-    //함수들
-    Fluid_Simulator_Grid();
-    Fluid_Simulator_Grid(int particle_number, int grid_N);
+//함수들
+//기본생성자
+Fluid_Simulator_Grid();
+//입자 수와 gridsize를 받는 생성자
+Fluid_Simulator_Grid(int particle_number, int grid_N);
+
+//생성자를 실행하는 함수, simulation을 켰다 껐다 할 때 메모리 관리 및 재 초기화를 위해 이 함수 사용
 void init(int particle_number, int grid_N);
+
+//모든 정보를 초기화하는 함수, simulation을 켰다 껐다 할 때 메모리 관리 및 재 초기화를 위해 이 함수 사용
 void clear_and_ReInit();
+
+//사용한 vector들을 clear하는 함수
 void clear();
+
+//사용한 vector들을 delete하는 함수
 void delete_vectors();
+
+//시뮬레이션 함수
 void particle_simulation();
+
+//입자 간 충돌 감지 함수
 void collision_detection();
+
+//grid의 boundary condition 함수
 void boundarycondition_grid();
+
+//particle의 boundary condition 함수
 void boundarycondition_particle();
+
+//예상 위치에 따른 boundary condition 함수
 int check_location_for_boundary(Vector2D location);
+
+//boundary condition에 따른 속도 조정 함수
 void boundary_work(int check, Vector2D& Velocity);
-void reupdate_velocity_cell_values();
+
+//입자 위치 update 함수
 void advection();
+
+//입자가 grid의 어떤 edge에 가까운지 판정하는 함수
 int check_particle_on_the_edge(Vector2D Location, double threshold);
+
+//particle의 속도를 grid로 옮기는 함수
 void transfer_velocity_to_grid_from_particle();
+
+//grid의 cell들의 성질을 분류하는 함수
 void classify_cell_type();
+
+//bodyforce를 cell에 추가하는 함수
 void add_body_force();
+
+//bodyforce를 적용해서 grid 속도를 변경하는 함수
 void Adjust_velocity_from_bodyforce();
+
+//유체 주변의 공기 cell들에 속도를 보간하는 함수
 void extrapolate_velocity_to_air_cell();
+
+//압력을 계산하는 함수
 void pressure_solve();
 void pressure_solve2();
+
+//grid의 속도를 particle로 옮기는 함수
 void transfer_Velocity_to_particle_from_grid();
 void transfer_Velocity_to_particle_from_grid_PICFLIP(double, double);
+
+//버퍼를 바꾸는 함수
 void swap_buffer();
+
+//유체가 있는 cell들을 색칠하는 함수
 void rendering_fluid();
+
+//새로운 속도 공식이 적용된 함수들 - reupdate
+void reupdate_velocity_cell_values();
 void extrapolate_velocity_to_air_cell_reupdate();
 void pressure_solve2_reupdate();
 void Adjust_velocity_from_bodyforce_reupdate();
 
-
-
 };
 
-
+//기본생성자
 Fluid_Simulator_Grid::Fluid_Simulator_Grid() {
     //timestep의 default = 0.06
     timestep = 0.06;
@@ -152,12 +198,14 @@ Fluid_Simulator_Grid::Fluid_Simulator_Grid() {
     }
 }
 
+//입자 수와 gridsize를 받는 생성자
 Fluid_Simulator_Grid::Fluid_Simulator_Grid(int particle_number, int grid_N) {
     this->particle_number = particle_number;
     init(this->particle_number, grid_N);
 }
 
 //===========================================init and clear===========================================
+//생성자를 실행하는 함수, simulation을 켰다 껐다 할 때 메모리 관리 및 재 초기화를 위해 이 함수 사용
 void Fluid_Simulator_Grid::init(int particle_number, int grid_N) {
     //timestep의 default = 0.06
 
@@ -276,13 +324,14 @@ void Fluid_Simulator_Grid::init(int particle_number, int grid_N) {
     //============================================
 }
 
-//모든 정보를 초기화
+//모든 정보를 초기화하는 함수, simulation을 켰다 껐다 할 때 메모리 관리 및 재 초기화를 위해 이 함수 사용
 void Fluid_Simulator_Grid::clear_and_ReInit() {
     clear();
 
     init(particle_number, gridsize);
 }
 
+//사용한 vector들을 clear하는 함수
 void Fluid_Simulator_Grid::clear() {
 	//vector들을 clear
 	previous_velocity_grid->cell_values.clear();
@@ -302,6 +351,7 @@ void Fluid_Simulator_Grid::clear() {
 
 }
 
+//사용한 vector들을 delete하는 함수
 void Fluid_Simulator_Grid::delete_vectors() {
     delete previous_velocity_grid;
     delete next_velocity_grid;
@@ -320,30 +370,33 @@ void Fluid_Simulator_Grid::delete_vectors() {
 //================================================================================================
 
 //========================================simulation=============================================
-
+//시뮬레이션 함수
 void Fluid_Simulator_Grid::particle_simulation() {
-
-    std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
     //0. collision detection
     collision_detection();
 
+#ifdef DEBUG
     cout << "==========================================================" << endl;
 
     cout << " boundarycondition start " << endl;
+#endif
 
     //1. boundarycondition
     boundarycondition_particle();
 
+#ifdef DEBUG
     cout << " advection start " << endl;
+#endif
 
     //2. advection
     advection();
 
+#ifdef DEBUG
     cout << "==============================================================================" << endl;
         
     cout << " transfer_velocity_to_grid_from_particle start " << endl;
-
+#endif
     //3. transfer_velocity_to_grid_from_particle
     transfer_velocity_to_grid_from_particle(); // 여기서 difference도 채움.
 
@@ -352,14 +405,14 @@ void Fluid_Simulator_Grid::particle_simulation() {
 
     //4. cell 성질 분류
     classify_cell_type();
-
+#ifdef DEBUG
     cout << " bodyforce start " << endl;
-
+#endif
     //4. bodyforce cell에 추가
     add_body_force();
-
+#ifdef DEBUG
     cout << " Adjust_velocity_from_bodyforce start " << endl;
-
+#endif
     //5. bodyforce 적용
     Adjust_velocity_from_bodyforce();
     //Adjust_velocity_from_bodyforce_reupdate();
@@ -368,33 +421,31 @@ void Fluid_Simulator_Grid::particle_simulation() {
     extrapolate_velocity_to_air_cell();
     //extrapolate_velocity_to_air_cell_reupdate();
 
-
+#ifdef DEBUG
     cout << " pressureSolve start " << endl;
-
+#endif
     //8. 압력 계산
     //pressure_solve();
     pressure_solve2();
     //pressure_solve2_reupdate();
-
+#ifdef DEBUG
     cout << " transfer_velocity_to_particle_from_grid start " << endl;
-
+#endif
     //9. boundarycondition for grid
     boundarycondition_grid();
 
     //10. transfer_velocity_to_grid_from_particle
     transfer_Velocity_to_particle_from_grid();
-
+#ifdef DEBUG
     //11. swap buffer
     cout << " swapbuffer start " << endl;
-
+#endif
     swap_buffer();
 
 
     //12. 유체가 있는 cell들 색칠
     rendering_fluid();
 
-    std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
-    std::cout << "simulation 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;
 
 }
 
@@ -403,17 +454,8 @@ void Fluid_Simulator_Grid::particle_simulation() {
 //========================================collision detection=============================================
 
 //collision detection
+//입자 간 충돌 감지 함수
 void Fluid_Simulator_Grid::collision_detection() {
-    //   //0. 멀티스레드 초기화
-    //   vector<thread> threads;
-    //   for (int i = 0; i < 6; i++) {
-		// threads.push_back(thread(std::push_back, ref(model), ref(vec_tmp_X[i]), ref(vec_tmp_Y[i]), 0.4, 10000));
-	//}
-
-    //   for (int i = 0; i < 6; i++) {
-	//    threads[i].join();
-    //   }
-
 
     vector< tuple<Vector2D, int> >*  temp_particles = new vector< tuple<Vector2D, int> >;
     vector< tuple<int, int>  >* temp_particles2 = new vector< tuple<int, int>  >;
@@ -482,6 +524,7 @@ void Fluid_Simulator_Grid::collision_detection() {
 //==============================boundary 관련 함수==============================
 
 //압력 계산 후의 속도가 boundarycondition을 벗어나는 경우 속도를 적당한 조건으로 변경함.
+//grid의 boundary condition 함수
 void Fluid_Simulator_Grid::boundarycondition_grid() {
     for (int i = 0; i < cell_number; i++) {
         Vector2D expecting_Location = this->cell_center_point->cell_values[i] + this->next_velocity_grid->cell_values[i] * timestep;
@@ -493,6 +536,7 @@ void Fluid_Simulator_Grid::boundarycondition_grid() {
 }
 
 //속도에 따른 위치 예상 결과값이 boundarycondition을 벗어나는 경우 속도를 적당한 조건으로 변경함.
+//particle의 boundary condition 함수
 void Fluid_Simulator_Grid::boundarycondition_particle() {
     for (int i = 0; i < particles.size(); i++) {
         Vector2D expecting_Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
@@ -503,6 +547,7 @@ void Fluid_Simulator_Grid::boundarycondition_particle() {
     }
 }
 
+//예상 위치에 따른 boundary condition 함수
 int Fluid_Simulator_Grid::check_location_for_boundary(Vector2D location) {
     if (location.X < delta_x) { return 1; }
     if (location.X > delta_x * (gridsize-1)) { return 2; }
@@ -512,6 +557,7 @@ int Fluid_Simulator_Grid::check_location_for_boundary(Vector2D location) {
     return 0;
 }
 
+//boundary condition에 따른 속도 조정 함수
 void Fluid_Simulator_Grid::boundary_work(int check, Vector2D& Velocity) {
     if (check == 1) {
         Velocity.X *= -0.95;
@@ -539,6 +585,7 @@ void Fluid_Simulator_Grid::boundary_work(int check, Vector2D& Velocity) {
 
 //========================reupdate velcity cell values============================
 
+//새로운 속도 공식이 적용된 함수들 - reupdate
 void Fluid_Simulator_Grid::reupdate_velocity_cell_values() {
 
     //0. reupdate velocity 초기화
@@ -628,7 +675,7 @@ void Fluid_Simulator_Grid::reupdate_velocity_cell_values() {
 //==============================advection=================================
 
 
-//입자들의 위치를 모두 update
+//입자 위치 update 함수
 void Fluid_Simulator_Grid::advection() {
     for (int i = 0; i < particles.size(); i++) {
         this->particles[i].Location = this->particles[i].Location + this->particles[i].Velocity * timestep;
@@ -651,6 +698,7 @@ void Fluid_Simulator_Grid::advection() {
 
 //==============================transferVelocity=================================
 
+//입자가 grid의 어떤 edge에 가까운지 판정하는 함수
 int Fluid_Simulator_Grid::check_particle_on_the_edge( Vector2D Location, double threshold ) {
     //0. edge들과의 거리 체크
     Vector2D i_j = tool->get_cell_i_j_from_world(Location);
@@ -671,9 +719,8 @@ int Fluid_Simulator_Grid::check_particle_on_the_edge( Vector2D Location, double 
     return 0;
 }
 
-
-
-//particle의 value를 모든 grid로 전달하는 함수
+//particle의 속도를 grid로 옮기는 함수
+//grid의 cell에 속한 입자들의 속도를 cell의 속도로 변환하는 함수
 void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle() {
 
     //0. cell_particle_number,previous_velocity_grid 초기화
@@ -785,6 +832,7 @@ void Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle() {
     }
 }
 
+//grid의 속도를 particle로 옮기는 함수
 void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid() {
     for (int p = 0; p < particles.size(); p++) {
         //1. particle이 속한 cell 찾기
@@ -809,6 +857,7 @@ void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid() {
     }
 }
 
+//grid의 속도를 particle로 옮기는 함수
 void Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_PICFLIP(double PIC_ratio, double FLIP_ratio) {
     //0. cell에 포함된 속도로 velocity_difference_grid 값 update하기
     for (int i = 0; i < gridsize; i++) {
@@ -969,7 +1018,7 @@ void Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_reupdate() {
 }
 
 //==============================cell type 분류==================================
-
+//grid의 cell들의 성질을 분류하는 함수
 void Fluid_Simulator_Grid::classify_cell_type() {
     for (int i = 0; i < cell_number; i++) {
         //cell 좌표 구하기
@@ -1018,21 +1067,11 @@ void Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_reupdate() {
     }
 }
 
-////일괄적으로 같은 값을 전달받아도 되지만, 일단 포함된 cell의 정보를 받을 수 있게 해놓음.
-//void transfer_bodyforce_to_particle_from_grid() {
-//    for (int p = 0; p < particles.size(); p++) {
-//        //1. particle이 어디 cell인지 파악
-//        Vector2D i_j = bodyforce.get_cell_i_j_from_world(particles[p].Location);
-
-//        //2. bodyforce cell값을 Accceleration에 전달
-//        particles[p].Acceleration = bodyforce.cell_values[bodyforce.get_VectorIndex_from_cell(i_j)];
-//    }
-//}
-
 //==============================================================================
 
 
 //==============================pressure_solve=================================
+//압력을 계산하는 함수
 void Fluid_Simulator_Grid::pressure_solve() {
 
     //solver
@@ -1056,12 +1095,13 @@ void Fluid_Simulator_Grid::pressure_solve() {
 
         if (cell_particle_number->cell_values[i] == 0) { A->insert( (int)i_j.X, (int)i_j.Y ) = 0.0;  }
         else {
-            //현재 셀의 좌표 구하기
+            //현재 셀좌표를 통해 인접한 셀 좌표를 구함.
             Vector2D i_minus1_j = i_j + Vector2D(-1, 0);
             Vector2D i_plus1_j = i_j + Vector2D(1, 0);
             Vector2D i_j_minus1 = i_j + Vector2D(0, -1);
             Vector2D i_j_plus1 = i_j + Vector2D(0, 1);
 
+            //현재 셀과 인접한 셀이 모두 유체셀이라면, 압력 계수를 더한다.
             //i-1,j
             if (i_j.X > 0) {
                 if (cell_particle_number->cell_values[tool->get_VectorIndex_from_cell(i_minus1_j)] > 0) {
@@ -1095,12 +1135,7 @@ void Fluid_Simulator_Grid::pressure_solve() {
         A->insert(i, i) = pressure_coefficient / (delta_x * delta_x) ;
     }
 
-    ////2. Ax=b에서 b 작성 - 벡터의 발산 - 그냥 요소를 다 더하자.
-    //for (int i = 0; i < cell_number; i++) {
-    //    b(i) = previous_velocity_grid.cell_values[i].X + previous_velocity_grid.cell_values[i].Y;
-    //}
-
-    //2. Ax=b에서 b 작성 - 벡터의 발산 - 제대로...?
+    //2. Ax=b에서 b 작성 - 벡터의 발산값을 b에 넣는다.
     for(int k=0; k < cell_number; k++) {            
         b(k) = velocity_difference_X_grid->cell_values[k] + velocity_difference_Y_grid->cell_values[k];
     }
@@ -1133,6 +1168,7 @@ void Fluid_Simulator_Grid::pressure_solve() {
 
 }
 
+//압력을 계산하는 함수
 void Fluid_Simulator_Grid::pressure_solve2() {
 
     //solver
@@ -1158,7 +1194,7 @@ void Fluid_Simulator_Grid::pressure_solve2() {
 
         if (cell_particle_number->cell_values[i] == 0) { continue; }
         else {
-            //현재 셀의 좌표 구하기
+            //현재 셀의 좌표를 통해 인접한 셀좌표 구하기
             Vector2D i_minus1_j = i_j + Vector2D(-1, 0);
             Vector2D i_plus1_j = i_j + Vector2D(1, 0);
             Vector2D i_j_minus1 = i_j + Vector2D(0, -1);
@@ -1166,7 +1202,7 @@ void Fluid_Simulator_Grid::pressure_solve2() {
 
 
             //셀좌표에 대응되는 vectorIndex좌표 구하기
-
+            //현재 셀과 인접한 셀이 모두 유체셀이라면, 압력 계수를 더한다.
             //i-1,j
             if (i_j.X > 0) {
                 int cell_i_minus1_j = tool->get_VectorIndex_from_cell(i_minus1_j);
@@ -1267,7 +1303,7 @@ void Fluid_Simulator_Grid::pressure_solve2() {
     //3. x solve
     cg_solver.compute(*A);
     x = cg_solver.solve(b);
-
+#ifdef DEBUG
     std::cout << "#iterations:     " << cg_solver.iterations() << std::endl;
     std::cout << "estimated error: " << cg_solver.error() << std::endl;
 
@@ -1303,7 +1339,7 @@ void Fluid_Simulator_Grid::pressure_solve2() {
     //cout << b << endl;
 
     cout << " solver_done " << endl;
-
+#endif
     //4. x 값( 압력 )을 통해 cell들의 속도 계산
     for (int i = 0; i < cell_number; i++) {
         //4-1. 새로운 속도 계산 - 압력 그대로 사용 - PIC
@@ -1320,6 +1356,7 @@ void Fluid_Simulator_Grid::pressure_solve2() {
 
 }
 
+//압력을 계산하는 함수
 void Fluid_Simulator_Grid::pressure_solve2_reupdate() {
 
     //solver
@@ -1497,7 +1534,7 @@ void Fluid_Simulator_Grid::pressure_solve2_reupdate() {
 
 //previous와 next_velocity 맞바꾸기
 
-
+//버퍼를 바꾸는 함수
 void Fluid_Simulator_Grid::swap_buffer() {
     MAC_Grid<Vector2D>* tmp = new MAC_Grid<Vector2D>(gridsize);
     *tmp = *previous_velocity_grid;
@@ -1512,6 +1549,7 @@ void Fluid_Simulator_Grid::swap_buffer() {
 
 //==============================rendering fluid================================
 
+//유체가 있는 cell들을 색칠하는 함수
 void Fluid_Simulator_Grid::rendering_fluid() {
     //1. fluid center grid clear()
     fluid_cell_center_point->clear();

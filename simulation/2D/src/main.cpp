@@ -74,18 +74,21 @@
 //
 //}
 //
+////color를 초기화하는 함수
 //void pushback_color() {
 //	color->clear();
 //
+//	//입자들
 //	for (int i = 0; i < number; i++) {
 //		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 //	}
 //
+//	//box와 grid
 //	for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
 //		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 //	}
 //
-//	//fluid mode는 blue
+//	//fluid(pixel)
 //	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
 //		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 //	}
@@ -171,7 +174,7 @@
 //	pushback_color();
 //	//pushback_Circle_color();
 //
-//	//bbox 선언
+//	//bbox 선언 및 초기화
 //	bbox = Box(0.0, 1.0, 0.0, 1.0);
 //	box_line.push_back( Vector2D(bbox.xmin, bbox.ymin) );
 //	box_line.push_back(Vector2D(bbox.xmax, bbox.ymin));
