@@ -15,13 +15,17 @@
             - 2D_particle_simulation.cpp
             - 2D_particle_simulation.h
         - Simulation : 다양한 시뮬레이션들 구현해 놓은 폴더
-            - Constant_Acceleration_Simulation_2D.h : 등가속도 운동 시뮬레이션
-            - fluid_grid_2D.h : particle과 grid system ( MAC grid ) 를 적용한 시뮬레이션
-            - fluid_onlyParticle_2D.h : semi-Lagrangian만을 사용하는 only particle 시뮬레이션
-            - fluid_grid_2D_multithread : ""멀티 스레드 프로그래밍이 적용된 유체 시뮬레이션""
+            - Constant_Acceleration_Simulation_2D.h : 등가속도 운동 시뮬레이션 헤더파일
+	        - gather_simulation.h : 입자가 원형 파동처럼 중심을 향해 가는 시뮬레이션 헤더파일
+            - simul_sinecosine.h : 입자가 사인함수와 코사인함수 형태로 움직이는 시뮬레이션 헤더파일
+            - fluid_grid_2D.h : particle과 grid system ( MAC grid ) 를 적용한 시뮬레이션 헤더파일
+            - fluid_onlyParticle_2D.h : semi-Lagrangian만을 사용하는 only particle 시뮬레이션 헤더파일
+            - fluid_grid_2D_multithread : 멀티 스레드 프로그래밍이 적용된 유체 시뮬레이션     
         - src
-            - main.cpp : 시뮬레이션을 실행하는 파일
-            - main_threadpool.cpp : ""멀티 스레드 시뮬레이션 헤더파일 및 프로그래밍을 적용한 실행 파일""
+            - ""main.cpp : 시뮬레이션을 실행하는 파일""
+            - ""main_4window.cpp : 4개의 시뮬레이션을 실행하는 소스 파일""
+	        - ""main_4window_multithread.cpp : 4개의 시뮬레이션을 멀티스레드로 실행하는 소스파일""
+            - main_threadpool.cpp : 멀티 스레드 시뮬레이션 헤더파일 및 프로그래밍을 적용한 실행 파일
             - fshader_2dBezier.glsl : opengl 용 fshader
             - fshader_2dBezier_test.glsl : ""
             - vshader_2dBezier.glsl : opengl 용 vshader
