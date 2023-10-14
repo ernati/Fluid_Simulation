@@ -22,9 +22,9 @@
             - fluid_onlyParticle_2D.h : semi-Lagrangian만을 사용하는 only particle 시뮬레이션 헤더파일
             - fluid_grid_2D_multithread : 멀티 스레드 프로그래밍이 적용된 유체 시뮬레이션     
         - src
-            - ""main.cpp : 시뮬레이션을 실행하는 파일""
-            - ""main_4window.cpp : 4개의 시뮬레이션을 실행하는 소스 파일""
-	        - ""main_4window_multithread.cpp : 4개의 시뮬레이션을 멀티스레드로 실행하는 소스파일""
+            - main.cpp : 시뮬레이션을 실행하는 파일
+            - main_4window.cpp : 4개의 시뮬레이션을 실행하는 소스 파일
+	    - main_4window_multithread.cpp : 4개의 시뮬레이션을 멀티스레드로 실행하는 소스파일
             - main_threadpool.cpp : 멀티 스레드 시뮬레이션 헤더파일 및 프로그래밍을 적용한 실행 파일
             - fshader_2dBezier.glsl : opengl 용 fshader
             - fshader_2dBezier_test.glsl : ""
