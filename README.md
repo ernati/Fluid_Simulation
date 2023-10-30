@@ -3,6 +3,14 @@
 ## 구현을 위한 학습 내용
 1. [논문1 - Animating Explosions - Gary D Yngve, James F O'Bri 1fe97d11e62d48ba988bb5172cf3b189.pdf](https://github.com/ernati/Fluid_Simulation/files/13201146/1.-.Animating.Explosions.-.Gary.D.Yngve.James.F.O.Bri.1fe97d11e62d48ba988bb5172cf3b189.pdf)
 
+2. [논문2 - A material point method for snow simulation - 2013 fc4b233625c94613a1a7ca14488361d8.pdf](https://github.com/ernati/Fluid_Simulation/files/13201147/2.-.A.material.point.method.for.snow.simulation.-.2013.fc4b233625c94613a1a7ca14488361d8.pdf)
+
+3. [학습교재 1 - Fluid Simulation.pdf](https://github.com/ernati/Fluid_Simulation/files/13201149/1.-.Fluid.Simulation.pdf)
+
+### 각 논문 간단 설명
+논문1 : 폭발을 표현하기 위한 물리적 요소 및 구현 모델
+논문2 : MPM - 고체와 비슷한 성질을 가지는 유체인 눈을 표현하기 위한 새로운 기법 - particle 기법과 grid 기법의 혼합
+학습교재 1 - 유체를 시뮬레이션 하기 위한 구현 방법 및 다양한 유체 구현 소개 교재
 
 ## 폴더 구조
 - simulation
@@ -48,14 +56,6 @@
             - main_3D.cpp
             - fshader_2dBezier.glsl
             - vshader_2dBezier.glsl
-
-
-
-## 실행파일 관련 정보
-- main.cpp ~ fluid_grid_2D.h : 유체 시뮬레이션 완성본 입니다.
-- main_threadpool.cpp ~ fluid_grid_2D_multithread.h : 완성본을 멀티스레드 프로그래밍으로 구현한 실행파일입니다.
-- 시작 직후 오류가 발생할 수 있습니다. 다시 실행해주시면 감사드리겠습니다.
-
 
 ## 유체 시뮬레이션의 목적
 입자들을 유체( 여기서는 물입니다.)처럼 움직이게 하기 위해 물리 공식들을 이산화 및 적용해서 구현하는 과정입니다.
