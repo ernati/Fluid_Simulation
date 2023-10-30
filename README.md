@@ -1,5 +1,8 @@
 # Fluid_Simulation
 
+## 구현을 위한 학습 내용
+1. [논문1 - Animating Explosions - Gary D Yngve, James F O'Bri 1fe97d11e62d48ba988bb5172cf3b189.pdf](https://github.com/ernati/Fluid_Simulation/files/13201146/1.-.Animating.Explosions.-.Gary.D.Yngve.James.F.O.Bri.1fe97d11e62d48ba988bb5172cf3b189.pdf)
+
 
 ## 폴더 구조
 - simulation
@@ -54,72 +57,24 @@
 - 시작 직후 오류가 발생할 수 있습니다. 다시 실행해주시면 감사드리겠습니다.
 
 
-## 데이터 구조
-- 시뮬레이션 과정 정리
-    - 1. collision detection
-        1. collision_check ( bool vector ) 선언 및 초기화
-            - 단순 반복문 - 병렬가능
-        2. 입자들의 속도를 이용해서 예상 위치 계산
-            1. 단순 반복문 - 병렬가능
-        - 1과 2 전체가 병렬가능
-        1. 예상 위치 sort
-            1. 병렬 불가
-        2. 그것을 이용해서 particle들을 구분 및 충돌 가능 여부 판정
-            1. 병렬 불가
-        3. 충돌 가능한 입자들의 속도 update
-            1. 병렬 가능
-        
-    - 2. boundary_particle
-        - 병렬 가능
+## 유체 시뮬레이션의 목적
+입자들을 유체( 여기서는 물입니다.)처럼 움직이게 하기 위해 물리 공식들을 이산화 및 적용해서 구현하는 과정입니다.
+particle에서 계산 후, 연산량 및 성능을 위해 grid로 옮겨서 계산하는 과정을 반복합니다.
 
-- 3. advection
-    - 병렬 가능
-
-1. transfer_velocity_to_grid_from_particle
-    1. cell_particle_number, previous_velocity_grid 초기화
-        1. 병렬가능
-        2. 이전 단계와 병렬 불가
-    2. particle들이 속한 셀에 particle의 정보들 합하기
-        1. 병렬가능
-        2. 이전 단계와 병렬 불가능
-    3. cell에 포함된 particle의 속도 평균내기
-        1. 병렬가능
-        2. 이전단계와 병렬 불가능
-    4. cell에 포함된 속도로 velocity_difference_grid 값 채우기
-        1. 병렬 가능
-        2. 이전 단계와 병렬 불가
-
-1. classify_cell_type()
-    1. 병렬가능
-
-1. add_body_force()
-    1. 병렬가능
-    2. 5단계와 병렬가능
-
-1. Adjust_velocity_from_bodyforce()
-    1. 병렬가능
-2. extrapolate_velocity_to_air_cell
-    1. 병렬가능
-    2. 이전 단계와 병렬 불가
-3. pressure_solve
-    1. matrix A,b
-        1. 병렬가능
-    2. solve Ax=b
-        1. 병렬불가
-    3. velocity update
-        1. 병렬가능
-4. boundarycondition_grid
-    1. 병렬가능
-    2. 이전단계와 병렬 불가
-5. transfer_Velocity_to_particle_from_grid()
-    1. 병렬가능
-    2. 이전단계와 병렬 불가
-6. swap_buffer()
-    1. 메인스레드에서 처리 
-7. rendering_fluid()
-    1. 병렬가능
-    2. 이전단계와 병렬 가능
-
+## 유체 시뮬레이션 순서
+1. collision detection - 입자간의 충돌 감지 및 충돌 처리 - 운동량 보존법칙
+2. boundary_particle - 입자 속도 계산 때, boundary를 넘어가지 않게 하는 경계값처리
+3. advection - 입자의 속도를 통한 위치 update - forward euler 적용
+4. transfer_velocity_to_to_grid_from_particle - 입자의 속도를 입자가 속한 cell들로 옮김. 즉 particle의 정보를 grid로 옮김
+5. classify_cell_type : particle이 속한 cell을 FLUID, 시뮬레이션 boundary를 SOLID, 나머지 cell을 AIR로 분류
+6. add_body_force : 셀에 가속도(중력) 추가
+7. Adjust_velocity_from_bodyforce : 가속도를 통한 속도값 업데이트 - forward euler 적용
+8. extrapolate_velocity_to_air_cell : FLUID cell의 주변 AIR들에 속도값 전이
+9. pressure_solve : 시뮬레이션의 메인. 각 cell들의 압력 계산 및 압력을 통한 새로운 속도 계산.
+10. boundarycondition_grid : 각 셀들의 속도 계산 때, boundary를 넘어가지 않게 하는 경계값 처리
+11. transfer_Velocity_to_particle_from_grid : cell의 속도를, 그 셀에 있는 particle들에 전달
+12. swap_buffer : 속도 값 버퍼의 포인터를 서로 맞바꿈
+13. rendering_fluid : FLUID cell의 중심점을 vector에 담음
 
 
 ## 개발시 주요 사항
