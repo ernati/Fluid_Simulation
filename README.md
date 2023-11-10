@@ -36,7 +36,7 @@
             - main.cpp : 시뮬레이션을 실행하는 파일
             - main_4window.cpp : 4개의 시뮬레이션을 실행하는 소스 파일
 	    - main_4window_multithread.cpp : 4개의 시뮬레이션을 멀티스레드로 실행하는 소스파일
-            - main_threadpool.cpp : 멀티 스레드 시뮬레이션 헤더파일 및 프로그래밍을 적용한 실행 파일
+            - main_threadpool.cpp : 구버전 실행파일 - 미사용
             - fshader_2dBezier.glsl : opengl 용 fshader
             - fshader_2dBezier_test.glsl : ""
             - vshader_2dBezier.glsl : opengl 용 vshader
