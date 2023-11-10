@@ -23,8 +23,8 @@ class Simul_SineCosine {
 public:
 
 	int particle_num;
-	vector<Vector2D>* sine_particles;
-	vector<Vector2D>* cosine_particles;
+	std::unique_ptr<vector<Vector2D>> sine_particles;
+	std::unique_ptr<vector<Vector2D>> cosine_particles;
 
 	double timestep;
 	double accumulate_timestep;
@@ -59,8 +59,9 @@ Simul_SineCosine::Simul_SineCosine() {
 //입자 수를 인자로 받는 생성자
 Simul_SineCosine::Simul_SineCosine(int number) {
 
-	sine_particles = new vector<Vector2D>;
-	cosine_particles = new vector<Vector2D>;
+	//sine_particles = new vector<Vector2D>;
+	sine_particles = std::make_unique<vector<Vector2D>>();
+	cosine_particles = std::make_unique<vector<Vector2D>>();
 
 	particle_num = number;
 	timestep = 0.06;

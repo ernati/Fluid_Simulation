@@ -74,42 +74,49 @@ public:
     double particle_radius;
 
     //cell들의 속도를 담을 grid
-    MAC_Grid<Vector2D>* previous_velocity_grid;
-    MAC_Grid<Vector2D>* next_velocity_grid;
+    unique_ptr<MAC_Grid<Vector2D>> previous_velocity_grid;
+    unique_ptr<MAC_Grid<Vector2D>> next_velocity_grid;
 
     //cell들의 가속도를 담을 grid - 외력
-    MAC_Grid<Vector2D>* bodyforce;
+    unique_ptr<MAC_Grid<Vector2D>> bodyforce;
 
     //cell 안의 포함된 particle 수를 담을 grid
-    MAC_Grid<double>* cell_particle_number;
+    unique_ptr<MAC_Grid<double>> cell_particle_number;
 
     //divergence 계산을 위한 velocity 차 grid
-    MAC_Grid<double>* velocity_difference_X_grid;
-    MAC_Grid<double>* velocity_difference_Y_grid;
+    unique_ptr<MAC_Grid<double>> velocity_difference_X_grid;
+    unique_ptr<MAC_Grid<double>> velocity_difference_Y_grid;
+
 
     //==============test========================
 
-    MAC_Grid<Vector2D>* reupdate_velocity_grid;
-    MAC_Grid<Vector2D>* halfway_velocity_X_grid;
-    MAC_Grid<Vector2D>* halfway_velocity_Y_grid;
+    unique_ptr<MAC_Grid<Vector2D>> reupdate_velocity_grid;
+    unique_ptr<MAC_Grid<Vector2D>> halfway_velocity_X_grid;
+    unique_ptr<MAC_Grid<Vector2D>> halfway_velocity_Y_grid;
 
     //==========================================
     //grid 좌표 함수들을 위한 tool
-    MAC_Grid<bool>* tool;
+    //MAC_Grid<bool>* tool;
+    unique_ptr<MAC_Grid<bool>> tool;
 
     //cell들의 중심좌표를 담을 grid
-    MAC_Grid<Vector2D>* cell_center_point;
+    //MAC_Grid<Vector2D>* cell_center_point;
+    unique_ptr<MAC_Grid<Vector2D>> cell_center_point;
 
     //유체가 들어있는 cell들의 위치를 담을 grid
-    MAC_Grid<CellType>* cell_type_grid;
+    //MAC_Grid<CellType>* cell_type_grid;
+    unique_ptr<MAC_Grid<CellType>> cell_type_grid;
 
     //유체가 들어있는 cell들의 중심좌표를 담을 vector
-    vector<Vector2D>* fluid_cell_center_point;
+    //vector<Vector2D>* fluid_cell_center_point;
+    unique_ptr<vector<Vector2D>> fluid_cell_center_point;
     //fluid로부터 속도를 extrapolation 받은 AIR cell들의 중심좌표를 담을 vector
-    vector<Vector2D>* air_cell_center_point;
+    //vector<Vector2D>* air_cell_center_point;
+    unique_ptr<vector<Vector2D>> air_cell_center_point;
 
     //사용할 행렬 변수들
-    Eigen::SparseMatrix<double>* A;
+    //Eigen::SparseMatrix<double>* A;
+    unique_ptr<Eigen::SparseMatrix<double>> A;
 
     //solver
     Eigen::BiCGSTAB<Eigen::SparseMatrix<double>> cg_solver;
@@ -194,7 +201,8 @@ Fluid_Simulator_Grid::Fluid_Simulator_Grid() {
     gridsize = 10;
 
     //velocity grid 초기화
-    previous_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
+    //previous_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
+    previous_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < (gridsize) * (gridsize); n++) {
         previous_velocity_grid->cell_values.push_back(Vector2D());
     }
@@ -235,46 +243,46 @@ void Fluid_Simulator_Grid::init(int particle_number, int grid_N) {
 
     particle_radius = 0.05;
 
-    tool = new MAC_Grid<bool>(gridsize);
+    //tool = new MAC_Grid<bool>(gridsize);
+    tool = make_unique<MAC_Grid<bool>>(gridsize);
 
     //previous_velocity grid 초기화
-    previous_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
+    previous_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         previous_velocity_grid->cell_values.push_back(Vector2D());
     }
 
     //next_velocity grid 초기화
-    next_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
+    next_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         next_velocity_grid->cell_values.push_back(Vector2D());
     }
 
     //body force 초기화
-    bodyforce = new MAC_Grid<Vector2D>(gridsize);
+    bodyforce = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         bodyforce->cell_values.push_back(Vector2D());
     }
 
     //cell_particle_number 초기화
-    cell_particle_number = new MAC_Grid<double>(gridsize);
+    cell_particle_number = make_unique<MAC_Grid<double>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         cell_particle_number->cell_values.push_back(0.0);
     }
 
     //velocity_difference_grid 초기화
-    velocity_difference_X_grid = new MAC_Grid<double>(gridsize);
-    velocity_difference_Y_grid = new MAC_Grid<double>(gridsize);
+    velocity_difference_X_grid = make_unique<MAC_Grid<double>>(gridsize);
+    velocity_difference_Y_grid = make_unique<MAC_Grid<double>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         velocity_difference_X_grid->cell_values.push_back(0.0);
         velocity_difference_Y_grid->cell_values.push_back(0.0);
     }
 
     // 행렬 초기화
-    A = new Eigen::SparseMatrix<double>(cell_number, cell_number);
-    //A = Eigen::SparseMatrix<double>(cell_number, cell_number);
+    A = make_unique<Eigen::SparseMatrix<double>>(cell_number, cell_number);
 
     //cell_center_grid 초기화
-    cell_center_point = new MAC_Grid<Vector2D>(gridsize);
+    cell_center_point = make_unique<MAC_Grid<Vector2D>>(gridsize);
     //cell들에다가 cell_point정보 삽입
     //1. cell의 갯수는 gridsize의 제곱
     for (int v = 0; v < cell_number; v++) {
@@ -294,30 +302,30 @@ void Fluid_Simulator_Grid::init(int particle_number, int grid_N) {
     }
 
     //cell_type_grid 초기화
-    cell_type_grid = new MAC_Grid<CellType>(gridsize);
+    cell_type_grid = make_unique<MAC_Grid<CellType>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         cell_type_grid->cell_values.push_back(CellType::AIR);
     }
 
     //fluid_cell_center_point 초기화
-    fluid_cell_center_point = new vector<Vector2D>;
+    fluid_cell_center_point = make_unique<vector<Vector2D>>();
 
     //air_cell_center_point 초기화
-    air_cell_center_point = new vector<Vector2D>;
+    air_cell_center_point = make_unique<vector<Vector2D>>();
 
     //================test=======================
 
-    reupdate_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
+    reupdate_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         reupdate_velocity_grid->cell_values.push_back(Vector2D());
     }
 
-    halfway_velocity_X_grid = new MAC_Grid<Vector2D>(gridsize);
+    halfway_velocity_X_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         halfway_velocity_X_grid->cell_values.push_back(Vector2D());
     }
 
-    halfway_velocity_Y_grid = new MAC_Grid<Vector2D>(gridsize);
+    halfway_velocity_Y_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         halfway_velocity_Y_grid->cell_values.push_back(Vector2D());
     }
@@ -367,8 +375,8 @@ void Fluid_Simulator_Grid::clear() {
 }
 
 void Fluid_Simulator_Grid::delete_vectors() {
-    delete previous_velocity_grid;
-    delete next_velocity_grid;
+    //delete previous_velocity_grid;
+    /*delete next_velocity_grid;
     delete bodyforce;
     delete cell_particle_number;
     delete velocity_difference_X_grid;
@@ -381,7 +389,7 @@ void Fluid_Simulator_Grid::delete_vectors() {
     delete A;
     delete collision_check;
     delete temp_particles;
-    delete temp_particles2;
+    delete temp_particles2;*/
 }
 
 //================================================================================================
@@ -1183,7 +1191,8 @@ void Fluid_Simulator_Grid::reupdate_velocity_cell_values() {
     //0. reupdate velocity 초기화
     reupdate_velocity_grid->cell_values.clear();
 
-    reupdate_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
+    //reupdate_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
+    reupdate_velocity_grid.reset(new MAC_Grid<Vector2D>(gridsize));
     for (int n = 0; n < cell_number; n++) {
         reupdate_velocity_grid->cell_values.push_back(Vector2D());
     }

@@ -40,11 +40,22 @@ GLuint vbo;
 //time
 int time_idle;
 
+unique_ptr<vector<Vector2D>> fluids_points;
+unique_ptr<vector<Vector2D>> constant_acceleration_points;
+unique_ptr<vector<Vector2D>> cosine_points;
+unique_ptr<vector<Vector2D>> sine_points;
+unique_ptr<vector<Vector2D>> gather_points;
+unique_ptr<vector<vec3>> color;
+
 //simulation 선언
 Fluid_Simulator_Grid* simulation;
 Constant_Acceleration_Simulator* constant_acceleration_simulation;
 Simul_SineCosine* sinecosine_simulation;
 GatherSimulation* gather_simulation;
+
+//unique_ptr<Constant_Acceleration_Simulator> constant_acceleration_simulation;
+//unique_ptr<Simul_SineCosine> sinecosine_simulation;
+//unique_ptr<GatherSimulation> gather_simulation;
 
 //n각형
 int n = 12;
@@ -52,13 +63,6 @@ int n = 12;
 //number를 조절하면 particle 수가 바뀐다.
 int number = 4000;
 
-vector<Vector2D>* fluids_points;
-vector<Vector2D>* constant_acceleration_points;
-vector<Vector2D>* cosine_points;
-vector<Vector2D>* sine_points;
-vector<Vector2D>* gather_points;
-
-vector<vec3>* color;
 Box bbox;
 vector<Vector2D> grid_line;
 vector<Vector2D> box_line;
@@ -73,159 +77,6 @@ bool isStart = false;
 bool isPixelMode = false;
 bool isParticleMode = true;
 //bool isExtrapolationCell = false;
-
-//==============================simulation - multithread===================================//
-
-//예시로 남겨놓는 과거의 흔적. 현재는 사용하지 않는다.
-//함수를 너무 많이 분할해서 스레드에 할당하면, 컨텍스트 스위치가 너무 많이 일어난다.
-void fluid_simulation() {
-	thread collision_1{ &Fluid_Simulator_Grid::collision_detection_1_update, simulation };
-	thread collision_2_1{ &Fluid_Simulator_Grid::collision_detection_2_update, simulation, 0, number / 2 };
-	thread collision_2_2{ &Fluid_Simulator_Grid::collision_detection_2_update, simulation, number / 2, number };
-	collision_1.join();
-	collision_2_1.join();
-	collision_2_2.join();
-
-
-	thread collision_3{ &Fluid_Simulator_Grid::collision_detection_3_update, simulation };
-	collision_3.join();
-
-	thread collision_4{ &Fluid_Simulator_Grid::collision_detection_4_update, simulation };
-	collision_4.join();
-
-
-	thread collision_5_1{ &Fluid_Simulator_Grid::collision_detection_5_update, simulation, 0,
-		simulation->temp_particles2->size() / 2 };
-	thread collision_5_2{ &Fluid_Simulator_Grid::collision_detection_5_update, simulation, simulation->temp_particles2->size() / 2,
-		simulation->temp_particles2->size() };
-	collision_5_1.join();
-	collision_5_2.join();
-
-
-	thread boundary_particle_1_1{ &Fluid_Simulator_Grid::boundarycondition_particle_1_update, simulation, 0, number / 2 };
-	thread boundary_particle_1_2{ &Fluid_Simulator_Grid::boundarycondition_particle_1_update, simulation, number / 2, number };
-	boundary_particle_1_1.join();
-	boundary_particle_1_2.join();
-
-
-	thread advection_1_1{ &Fluid_Simulator_Grid::advection_1_update, simulation, 0, number / 2 };
-	thread advection_1_2{ &Fluid_Simulator_Grid::advection_1_update, simulation, number / 2, number };
-	advection_1_1.join();
-	advection_1_2.join();
-
-
-	thread transfer_velocity_to_grid_from_particle_1_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1_update, simulation, 0,
-		simulation->cell_number / 2 };
-	thread transfer_velocity_to_grid_from_particle_1_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1_update, simulation, simulation->cell_number / 2,
-		simulation->cell_number };
-	transfer_velocity_to_grid_from_particle_1_1.join();
-	transfer_velocity_to_grid_from_particle_1_2.join();
-
-
-	thread transfer_velocity_to_grid_from_particle_2_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2_update, simulation, 0,
-		number / 2 };
-	thread transfer_velocity_to_grid_from_particle_2_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2_update, simulation, number / 2,
-		number };
-	transfer_velocity_to_grid_from_particle_2_1.join();
-	transfer_velocity_to_grid_from_particle_2_2.join();
-
-
-	thread transfer_velocity_to_grid_from_particle_3_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3_update, simulation, 0,
-		simulation->cell_number / 2 };
-	thread transfer_velocity_to_grid_from_particle_3_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3_update, simulation, simulation->cell_number / 2,
-		simulation->cell_number };
-	transfer_velocity_to_grid_from_particle_3_1.join();
-	transfer_velocity_to_grid_from_particle_3_2.join();
-
-
-	thread transfer_velocity_to_grid_from_particle_4_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4_update, simulation, 0,
-		simulation->cell_number / 2 };
-	thread transfer_velocity_to_grid_from_particle_4_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4_update, simulation, simulation->cell_number / 2,
-		simulation->cell_number };
-	transfer_velocity_to_grid_from_particle_4_1.join();
-	transfer_velocity_to_grid_from_particle_4_2.join();
-
-
-	thread classify_cell_type_1{ &Fluid_Simulator_Grid::classify_cell_type_1_update, simulation };
-	thread add_body_force_1{ &Fluid_Simulator_Grid::add_body_force_1_update, simulation };
-	classify_cell_type_1.join();
-	add_body_force_1.join();
-
-
-	thread Adjust_velocity_1_1{ &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1_update, simulation,0, simulation->cell_number / 2 };
-	thread Adjust_velocity_1_2{ &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1_update, simulation,simulation->cell_number / 2, simulation->cell_number };
-	Adjust_velocity_1_1.join();
-	Adjust_velocity_1_2.join();
-
-
-	thread air_cell_center_point_clear_1{ &Fluid_Simulator_Grid::air_cell_center_point_clear_1_update , simulation };
-	air_cell_center_point_clear_1.join();
-
-
-	thread extrapolate_velocity_1_1{ &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1_update, simulation,0,
-		simulation->cell_number / 2 };
-	thread extrapolate_velocity_1_2{ &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1_update, simulation,simulation->cell_number / 2,
-		simulation->cell_number };
-	extrapolate_velocity_1_1.join();
-	extrapolate_velocity_1_2.join();
-
-
-	thread A_setZero_1{ &Fluid_Simulator_Grid::A_setZero_1_update ,simulation };
-	A_setZero_1.join();
-
-
-	thread pressure_solve_1_1{ &Fluid_Simulator_Grid::pressure_solve_1_update, simulation,0,
-		simulation->cell_number / 2 };
-	thread pressure_solve_1_2{ &Fluid_Simulator_Grid::pressure_solve_1_update, simulation,simulation->cell_number / 2,
-		simulation->cell_number };
-	pressure_solve_1_1.join();
-	pressure_solve_1_2.join();
-
-
-	/*thread pressure_solve_2_1{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, 0,
-		simulation->cell_number / 2 };
-	thread pressure_solve_2_2{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, simulation->cell_number / 2,
-		simulation->cell_number };
-	pressure_solve_2_1.join();
-	pressure_solve_2_2.join();*/
-	thread pressure_solve_2{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, 0, simulation->cell_number };
-	pressure_solve_2.join();
-
-
-	thread pressure_solve_3{ &Fluid_Simulator_Grid::pressure_solve_3_update, simulation };
-	pressure_solve_3.join();
-
-
-	thread pressure_solve_4_1{ &Fluid_Simulator_Grid::pressure_solve_4_update, simulation,0,
-		simulation->cell_number / 2 };
-	thread pressure_solve_4_2{ &Fluid_Simulator_Grid::pressure_solve_4_update, simulation,simulation->cell_number / 2,
-		simulation->cell_number };
-	pressure_solve_4_1.join();
-	pressure_solve_4_2.join();
-
-
-	thread boundarycondition_grid_1_1{ &Fluid_Simulator_Grid::boundarycondition_grid_1_update, simulation,0,
-		simulation->cell_number / 2 };
-	thread boundarycondition_grid_1_2{ &Fluid_Simulator_Grid::boundarycondition_grid_1_update, simulation,simulation->cell_number / 2,
-		simulation->cell_number };
-	boundarycondition_grid_1_1.join();
-	boundarycondition_grid_1_2.join();
-
-
-	thread transfer_velocity_to_particle_from_grid_1_1{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1_update, simulation,0,
-		number / 2 };
-	thread transfer_velocity_to_particle_from_grid_1_2{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1_update, simulation,number / 2,
-		number };
-	transfer_velocity_to_particle_from_grid_1_1.join();
-	transfer_velocity_to_particle_from_grid_1_2.join();
-
-
-	thread t12{ &Fluid_Simulator_Grid::swap_buffer, simulation };
-	thread t13{ &Fluid_Simulator_Grid::rendering_fluid, simulation };
-	t12.join();
-	t13.join();
-
-}
 
 //============================================================================================================================
 
@@ -383,18 +234,22 @@ void pushback_Circle_color() {
 
 void init(void) {
 
-	fluids_points = new vector<Vector2D>();
-	constant_acceleration_points = new vector<Vector2D>();
-	cosine_points = new vector<Vector2D>();
-	sine_points = new vector<Vector2D>();
-	gather_points = new vector<Vector2D>();
-	color = new vector<vec3>();
+	fluids_points = make_unique<vector<Vector2D>>();
+	constant_acceleration_points = make_unique<vector<Vector2D>>();
+	cosine_points = make_unique<vector<Vector2D>>();
+	sine_points = make_unique<vector<Vector2D>>();
+	gather_points = make_unique<vector<Vector2D>>();
+	color = make_unique<vector<vec3>>();
 
 	//simulation 실행 및 입자들 생성
 	simulation = new Fluid_Simulator_Grid(number, grid_N);
 	constant_acceleration_simulation = new Constant_Acceleration_Simulator(number, grid_N);
 	sinecosine_simulation = new Simul_SineCosine(number);
 	gather_simulation = new GatherSimulation(number);
+
+	//constant_acceleration_simulation = make_unique<Constant_Acceleration_Simulator>(number, grid_N);
+	//sinecosine_simulation = make_unique<Simul_SineCosine>(number);
+	//gather_simulation = make_unique<GatherSimulation>(number);
 
 	//fluid
 	pushback_SimulationPoints_to_Points();
@@ -580,7 +435,6 @@ void idle(void)
 			//t15.join();
 
 			//과거의 멀티스레드 코드
-          //기록을 남겨둔다.
 			//==========================================================================================
 			//오히려 단순하게 코딩한 이쪽이 컨텍스트 스위칭이 적어서 더 좋다..!
 			//위의 코드는 메인 스레드가 너무 왔다갔다하는 단점이 있다.
@@ -801,6 +655,7 @@ void Menu(int Option) {
 	case 3:
 		isStart = false;
 		simulation->clear_and_ReInit();
+
 		break;
 
 		//extra_visible
@@ -840,3 +695,157 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
+
+////==============================simulation - multithread===================================//
+//
+////예시로 남겨놓는 과거의 흔적. 현재는 사용하지 않는다.
+////함수를 너무 많이 분할해서 스레드에 할당하면, 컨텍스트 스위치가 너무 많이 일어난다.
+//void fluid_simulation() {
+//	thread collision_1{ &Fluid_Simulator_Grid::collision_detection_1_update, simulation };
+//	thread collision_2_1{ &Fluid_Simulator_Grid::collision_detection_2_update, simulation, 0, number / 2 };
+//	thread collision_2_2{ &Fluid_Simulator_Grid::collision_detection_2_update, simulation, number / 2, number };
+//	collision_1.join();
+//	collision_2_1.join();
+//	collision_2_2.join();
+//
+//
+//	thread collision_3{ &Fluid_Simulator_Grid::collision_detection_3_update, simulation };
+//	collision_3.join();
+//
+//	thread collision_4{ &Fluid_Simulator_Grid::collision_detection_4_update, simulation };
+//	collision_4.join();
+//
+//
+//	thread collision_5_1{ &Fluid_Simulator_Grid::collision_detection_5_update, simulation, 0,
+//		simulation->temp_particles2->size() / 2 };
+//	thread collision_5_2{ &Fluid_Simulator_Grid::collision_detection_5_update, simulation, simulation->temp_particles2->size() / 2,
+//		simulation->temp_particles2->size() };
+//	collision_5_1.join();
+//	collision_5_2.join();
+//
+//
+//	thread boundary_particle_1_1{ &Fluid_Simulator_Grid::boundarycondition_particle_1_update, simulation, 0, number / 2 };
+//	thread boundary_particle_1_2{ &Fluid_Simulator_Grid::boundarycondition_particle_1_update, simulation, number / 2, number };
+//	boundary_particle_1_1.join();
+//	boundary_particle_1_2.join();
+//
+//
+//	thread advection_1_1{ &Fluid_Simulator_Grid::advection_1_update, simulation, 0, number / 2 };
+//	thread advection_1_2{ &Fluid_Simulator_Grid::advection_1_update, simulation, number / 2, number };
+//	advection_1_1.join();
+//	advection_1_2.join();
+//
+//
+//	thread transfer_velocity_to_grid_from_particle_1_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1_update, simulation, 0,
+//		simulation->cell_number / 2 };
+//	thread transfer_velocity_to_grid_from_particle_1_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_1_update, simulation, simulation->cell_number / 2,
+//		simulation->cell_number };
+//	transfer_velocity_to_grid_from_particle_1_1.join();
+//	transfer_velocity_to_grid_from_particle_1_2.join();
+//
+//
+//	thread transfer_velocity_to_grid_from_particle_2_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2_update, simulation, 0,
+//		number / 2 };
+//	thread transfer_velocity_to_grid_from_particle_2_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_2_update, simulation, number / 2,
+//		number };
+//	transfer_velocity_to_grid_from_particle_2_1.join();
+//	transfer_velocity_to_grid_from_particle_2_2.join();
+//
+//
+//	thread transfer_velocity_to_grid_from_particle_3_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3_update, simulation, 0,
+//		simulation->cell_number / 2 };
+//	thread transfer_velocity_to_grid_from_particle_3_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_3_update, simulation, simulation->cell_number / 2,
+//		simulation->cell_number };
+//	transfer_velocity_to_grid_from_particle_3_1.join();
+//	transfer_velocity_to_grid_from_particle_3_2.join();
+//
+//
+//	thread transfer_velocity_to_grid_from_particle_4_1{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4_update, simulation, 0,
+//		simulation->cell_number / 2 };
+//	thread transfer_velocity_to_grid_from_particle_4_2{ &Fluid_Simulator_Grid::transfer_velocity_to_grid_from_particle_4_update, simulation, simulation->cell_number / 2,
+//		simulation->cell_number };
+//	transfer_velocity_to_grid_from_particle_4_1.join();
+//	transfer_velocity_to_grid_from_particle_4_2.join();
+//
+//
+//	thread classify_cell_type_1{ &Fluid_Simulator_Grid::classify_cell_type_1_update, simulation };
+//	thread add_body_force_1{ &Fluid_Simulator_Grid::add_body_force_1_update, simulation };
+//	classify_cell_type_1.join();
+//	add_body_force_1.join();
+//
+//
+//	thread Adjust_velocity_1_1{ &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1_update, simulation,0, simulation->cell_number / 2 };
+//	thread Adjust_velocity_1_2{ &Fluid_Simulator_Grid::Adjust_velocity_from_bodyforce_1_update, simulation,simulation->cell_number / 2, simulation->cell_number };
+//	Adjust_velocity_1_1.join();
+//	Adjust_velocity_1_2.join();
+//
+//
+//	thread air_cell_center_point_clear_1{ &Fluid_Simulator_Grid::air_cell_center_point_clear_1_update , simulation };
+//	air_cell_center_point_clear_1.join();
+//
+//
+//	thread extrapolate_velocity_1_1{ &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1_update, simulation,0,
+//		simulation->cell_number / 2 };
+//	thread extrapolate_velocity_1_2{ &Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell_1_update, simulation,simulation->cell_number / 2,
+//		simulation->cell_number };
+//	extrapolate_velocity_1_1.join();
+//	extrapolate_velocity_1_2.join();
+//
+//
+//	thread A_setZero_1{ &Fluid_Simulator_Grid::A_setZero_1_update ,simulation };
+//	A_setZero_1.join();
+//
+//
+//	thread pressure_solve_1_1{ &Fluid_Simulator_Grid::pressure_solve_1_update, simulation,0,
+//		simulation->cell_number / 2 };
+//	thread pressure_solve_1_2{ &Fluid_Simulator_Grid::pressure_solve_1_update, simulation,simulation->cell_number / 2,
+//		simulation->cell_number };
+//	pressure_solve_1_1.join();
+//	pressure_solve_1_2.join();
+//
+//
+//	/*thread pressure_solve_2_1{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, 0,
+//		simulation->cell_number / 2 };
+//	thread pressure_solve_2_2{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, simulation->cell_number / 2,
+//		simulation->cell_number };
+//	pressure_solve_2_1.join();
+//	pressure_solve_2_2.join();*/
+//	thread pressure_solve_2{ &Fluid_Simulator_Grid::pressure_solve_2_update, simulation, 0, simulation->cell_number };
+//	pressure_solve_2.join();
+//
+//
+//	thread pressure_solve_3{ &Fluid_Simulator_Grid::pressure_solve_3_update, simulation };
+//	pressure_solve_3.join();
+//
+//
+//	thread pressure_solve_4_1{ &Fluid_Simulator_Grid::pressure_solve_4_update, simulation,0,
+//		simulation->cell_number / 2 };
+//	thread pressure_solve_4_2{ &Fluid_Simulator_Grid::pressure_solve_4_update, simulation,simulation->cell_number / 2,
+//		simulation->cell_number };
+//	pressure_solve_4_1.join();
+//	pressure_solve_4_2.join();
+//
+//
+//	thread boundarycondition_grid_1_1{ &Fluid_Simulator_Grid::boundarycondition_grid_1_update, simulation,0,
+//		simulation->cell_number / 2 };
+//	thread boundarycondition_grid_1_2{ &Fluid_Simulator_Grid::boundarycondition_grid_1_update, simulation,simulation->cell_number / 2,
+//		simulation->cell_number };
+//	boundarycondition_grid_1_1.join();
+//	boundarycondition_grid_1_2.join();
+//
+//
+//	thread transfer_velocity_to_particle_from_grid_1_1{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1_update, simulation,0,
+//		number / 2 };
+//	thread transfer_velocity_to_particle_from_grid_1_2{ &Fluid_Simulator_Grid::transfer_Velocity_to_particle_from_grid_1_update, simulation,number / 2,
+//		number };
+//	transfer_velocity_to_particle_from_grid_1_1.join();
+//	transfer_velocity_to_particle_from_grid_1_2.join();
+//
+//
+//	thread t12{ &Fluid_Simulator_Grid::swap_buffer, simulation };
+//	thread t13{ &Fluid_Simulator_Grid::rendering_fluid, simulation };
+//	t12.join();
+//	t13.join();
+//
+//}
