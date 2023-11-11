@@ -47,15 +47,10 @@ unique_ptr<vector<Vector2D>> sine_points;
 unique_ptr<vector<Vector2D>> gather_points;
 unique_ptr<vector<vec3>> color;
 
-//simulation 선언
-Fluid_Simulator_Grid* simulation;
-Constant_Acceleration_Simulator* constant_acceleration_simulation;
-Simul_SineCosine* sinecosine_simulation;
-GatherSimulation* gather_simulation;
-
-//unique_ptr<Constant_Acceleration_Simulator> constant_acceleration_simulation;
-//unique_ptr<Simul_SineCosine> sinecosine_simulation;
-//unique_ptr<GatherSimulation> gather_simulation;
+unique_ptr<Fluid_Simulator_Grid> simulation;
+unique_ptr<Constant_Acceleration_Simulator> constant_acceleration_simulation;
+unique_ptr<Simul_SineCosine> sinecosine_simulation;
+unique_ptr<GatherSimulation> gather_simulation;
 
 //n각형
 int n = 12;
@@ -242,14 +237,10 @@ void init(void) {
 	color = make_unique<vector<vec3>>();
 
 	//simulation 실행 및 입자들 생성
-	simulation = new Fluid_Simulator_Grid(number, grid_N);
-	constant_acceleration_simulation = new Constant_Acceleration_Simulator(number, grid_N);
-	sinecosine_simulation = new Simul_SineCosine(number);
-	gather_simulation = new GatherSimulation(number);
-
-	//constant_acceleration_simulation = make_unique<Constant_Acceleration_Simulator>(number, grid_N);
-	//sinecosine_simulation = make_unique<Simul_SineCosine>(number);
-	//gather_simulation = make_unique<GatherSimulation>(number);
+	simulation = make_unique<Fluid_Simulator_Grid>(number, grid_N);
+	constant_acceleration_simulation = make_unique<Constant_Acceleration_Simulator>(number, grid_N);
+	sinecosine_simulation = make_unique<Simul_SineCosine>(number);
+	gather_simulation = make_unique<GatherSimulation>(number);
 
 	//fluid
 	pushback_SimulationPoints_to_Points();
@@ -357,8 +348,6 @@ void reshape(int width, int height)
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 	case 'q':
-		simulation->delete_vectors();
-		delete simulation;
 		exit(EXIT_SUCCESS);
 		break;
 
@@ -441,9 +430,9 @@ void idle(void)
 
 			//메인스레드 + 다른 스레드의 시뮬레이션	
 			simulation->particle_simulation();
-			thread t2{ &Constant_Acceleration_Simulator::particle_simulation, constant_acceleration_simulation };
-			thread t3{ &Simul_SineCosine::particle_simulation, sinecosine_simulation };
-			thread t4{ &GatherSimulation::particle_simulation, gather_simulation };
+			thread t2{ &Constant_Acceleration_Simulator::particle_simulation, constant_acceleration_simulation.get()};
+			thread t3{ &Simul_SineCosine::particle_simulation, sinecosine_simulation.get()};
+			thread t4{ &GatherSimulation::particle_simulation, gather_simulation.get() };
 
 			t2.join();
 			t3.join();

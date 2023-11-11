@@ -96,26 +96,20 @@ public:
 
     //==========================================
     //grid 좌표 함수들을 위한 tool
-    //MAC_Grid<bool>* tool;
     unique_ptr<MAC_Grid<bool>> tool;
 
     //cell들의 중심좌표를 담을 grid
-    //MAC_Grid<Vector2D>* cell_center_point;
     unique_ptr<MAC_Grid<Vector2D>> cell_center_point;
 
     //유체가 들어있는 cell들의 위치를 담을 grid
-    //MAC_Grid<CellType>* cell_type_grid;
     unique_ptr<MAC_Grid<CellType>> cell_type_grid;
 
     //유체가 들어있는 cell들의 중심좌표를 담을 vector
-    //vector<Vector2D>* fluid_cell_center_point;
     unique_ptr<vector<Vector2D>> fluid_cell_center_point;
     //fluid로부터 속도를 extrapolation 받은 AIR cell들의 중심좌표를 담을 vector
-    //vector<Vector2D>* air_cell_center_point;
     unique_ptr<vector<Vector2D>> air_cell_center_point;
 
     //사용할 행렬 변수들
-    //Eigen::SparseMatrix<double>* A;
     unique_ptr<Eigen::SparseMatrix<double>> A;
 
     //solver
@@ -201,7 +195,6 @@ Fluid_Simulator_Grid::Fluid_Simulator_Grid() {
     gridsize = 10;
 
     //velocity grid 초기화
-    //previous_velocity_grid = new MAC_Grid<Vector2D>(gridsize);
     previous_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < (gridsize) * (gridsize); n++) {
         previous_velocity_grid->cell_values.push_back(Vector2D());

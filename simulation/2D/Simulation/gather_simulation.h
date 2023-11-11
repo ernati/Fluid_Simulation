@@ -51,6 +51,9 @@ public:
 	//입자가 boundary 체크일 때 처리 함수
 	void boundary_work( Particle2D& particle );
 
+	void clear_and_ReInit();
+	void clear();
+
 	//multithread
 	//1,2,3,4,... 는 한 함수를 여러스레드에 분할 할당하기 위해 반복문을 나눈 함수들이다.
 	//미리 결과를 말하자면, 이렇게 잘게 분할하는 것은, 컨텍스트 스위치의 오버헤드가 너무 커서 오히려 속도가 느려졌다.
@@ -103,6 +106,11 @@ GatherSimulation::GatherSimulation(int number) {
 
 		particles.push_back( Particle2D(  1.0 + 1.0 / static_cast<double>( randomLocation), static_cast<double>(randomLocation2) / (number / 4) , 0.0, 0.0, 0.0, 0.0) ) ;
 	}
+}
+
+void GatherSimulation::clear_and_ReInit() {
+	particles.clear();
+	GatherSimulation( particles.size() );
 }
 
 //입자들의 가속도를 업데이트하는 함수

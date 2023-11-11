@@ -42,10 +42,10 @@ GLuint vbo;
 int time_idle;
 
 //simulation 선언
-Fluid_Simulator_Grid* simulation;
-Constant_Acceleration_Simulator* constant_acceleration_simulation;
-Simul_SineCosine* sinecosine_simulation;
-GatherSimulation* gather_simulation;
+unique_ptr<Fluid_Simulator_Grid> simulation;
+unique_ptr<Constant_Acceleration_Simulator> constant_acceleration_simulation;
+unique_ptr<Simul_SineCosine> sinecosine_simulation;
+unique_ptr<GatherSimulation> gather_simulation;
 
 //n각형
 int n = 12;
@@ -53,12 +53,12 @@ int n = 12;
 //number를 조절하면 particle 수가 바뀐다.
 int number = 4000;
 
-vector<Vector2D>* fluids_points;
-vector<Vector2D>* constant_acceleration_points;
-vector<Vector2D>* cosine_points;
-vector<Vector2D>* sine_points;
-vector<Vector2D>* gather_points;
-vector<vec3>* color;
+unique_ptr<vector<Vector2D>> fluids_points;
+unique_ptr<vector<Vector2D>> constant_acceleration_points;
+unique_ptr<vector<Vector2D>> cosine_points;
+unique_ptr<vector<Vector2D>> sine_points;
+unique_ptr<vector<Vector2D>> gather_points;
+unique_ptr<vector<vec3>> color;
 
 Box bbox;
 vector<Vector2D> grid_line;
@@ -229,18 +229,18 @@ void pushback_Circle_color() {
 
 void init(void) {
 
-	fluids_points = new vector<Vector2D>();
-	constant_acceleration_points = new vector<Vector2D>();
-	cosine_points = new vector<Vector2D>();
-	sine_points = new vector<Vector2D>();
-	gather_points = new vector<Vector2D>();
-	color = new vector<vec3>();
+	fluids_points = make_unique<vector<Vector2D>>();
+	constant_acceleration_points = make_unique<vector<Vector2D>>();
+	cosine_points = make_unique<vector<Vector2D>>();
+	sine_points = make_unique<vector<Vector2D>>();
+	gather_points = make_unique<vector<Vector2D>>();
+	color = make_unique<vector<vec3>>();
 
 	//simulation 실행 및 입자들 생성
-	simulation = new Fluid_Simulator_Grid(number, grid_N);
-	constant_acceleration_simulation = new Constant_Acceleration_Simulator(number, grid_N);
-	sinecosine_simulation = new Simul_SineCosine(number);
-	gather_simulation = new GatherSimulation(number);
+	simulation = make_unique<Fluid_Simulator_Grid>(number, grid_N);
+	constant_acceleration_simulation = make_unique<Constant_Acceleration_Simulator>(number, grid_N);
+	sinecosine_simulation = make_unique<Simul_SineCosine>(number);
+	gather_simulation = make_unique<GatherSimulation>(number);
 
 	//fluid
 	pushback_SimulationPoints_to_Points();
@@ -348,8 +348,6 @@ void reshape(int width, int height)
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 	case 'q':
-		simulation->delete_vectors();
-		delete simulation;
 		exit(EXIT_SUCCESS);
 		break;
 
@@ -426,9 +424,9 @@ void display() {
 	glBindVertexArray(vao);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * fluids_points->size(), &((*fluids_points)[0]));
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) 
- * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
+* simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) 
- * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * constant_acceleration_points->size(), &((*constant_acceleration_points)[0]));
+* simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * constant_acceleration_points->size(), &((*constant_acceleration_points)[0]));
 	/*glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) *
 		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));*/
 		//sinecosine point 렌더링
