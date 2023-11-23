@@ -26,6 +26,10 @@ public :
     }
 
     //scalar와의 연산
+    //다만, Vector2D에서만 scalar와의 연산을 정의하고,
+    //scalar에서는 따로 정의를 안하면,
+    //Vector2D + Scalar 는 컴파일이 제대로 되지만,
+    //Scalar + Vector2D 는 컴파일 에러가 뜬다...!
     Vector2D operator+ (const double& c)
     {
         Vector2D tmp = Vector2D();
