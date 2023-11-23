@@ -183,8 +183,11 @@ void GatherSimulation::boundary_work( Particle2D& particle ) {
 //시뮬레이션 함수
 void GatherSimulation::particle_simulation() {
 
+	//가속도를 update합니다.
 	Update_Acceleration();
+	//속도를 update합니다
 	Update_Velocity();
+	//위치를 update합니다.
 	Update_Location();
 
 }
