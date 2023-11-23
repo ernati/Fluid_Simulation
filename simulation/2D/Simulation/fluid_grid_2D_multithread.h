@@ -28,6 +28,7 @@ std::mutex mtx;
 
 using namespace std;
 
+//원래라면 FLUID 대신 WATER가 맞으나, 구현 우선순위가 있으므로 내버려 둔다.
 enum class CellType {
 FLUID,
 AIR,
