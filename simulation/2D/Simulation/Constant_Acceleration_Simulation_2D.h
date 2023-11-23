@@ -115,6 +115,8 @@ void Constant_Acceleration_Simulator::Update_particles_Location() {
 	//위치 = 위치 + timestep * 속도 <-forward euler
         this->particles[i].Update_particle_Location(timestep);
 
+	//경계처리
+	//입자가 정해진 범위를 벗어나면, Y좌표와 속도를 정해진 값으로 변경한다. 
         if (particles[i].Location.Y < 0.0) {
             particles[i].Location.Y = 0.5;
             particles[i].Velocity.Y = 0;
