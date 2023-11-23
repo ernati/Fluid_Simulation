@@ -23,8 +23,12 @@ class GatherSimulation
 {
 public:
 	double timestep;
+	//중심의 범위가 될 반지름
 	double center_radius;
+
+	//입자들이 모일 center 좌표
 	Vector2D center;
+	//particle들을 담을 vector
 	vector<Particle2D> particles;
 
 	//기본생성자
@@ -75,7 +79,7 @@ GatherSimulation::GatherSimulation(int number) {
 	center = Vector2D(0.5, 0.5);
 
 	srand((unsigned int)time(NULL));
-	//xmin
+	//xmin - box의 xmin쪽에 가까운 좌표들을 랜덤하게 생성
 	for (int i = 0; i < number / 4; i++) {
 		int randomLocation = rand() % 400 - 200; // -200 ~ 200
 		int randomLocation2 = rand() % (number / 4);
@@ -83,7 +87,7 @@ GatherSimulation::GatherSimulation(int number) {
 		particles.push_back( Particle2D(  static_cast<double>( randomLocation2 ) / (number / 4)  , 1.0 / static_cast<double>(randomLocation), 0.0, 0.0, 0.0, 0.0) ) ;
 	}
 
-	//xmax
+	//xmax - box의 xmax쪽에 가까운 좌표들을 랜덤하게 생성 
 	for (int i = number/4; i < number / 4 * 2; i++) {
 		int randomLocation = rand() % 400 - 200; // -200 ~ 200
 		int randomLocation2 = rand() % (number / 4);
@@ -91,7 +95,7 @@ GatherSimulation::GatherSimulation(int number) {
 		particles.push_back( Particle2D(  static_cast<double>( randomLocation2 ) / (number / 4)  , 1.0 + 1.0 / static_cast<double>(randomLocation), 0.0, 0.0, 0.0, 0.0) ) ;
 	}
 
-	//ymin
+	//ymin - box의 ymin쪽에 가까운 좌표들을 랜덤하게 생성 
 	for (int i = number/4*2; i < number / 4 * 3; i++) {
 		int randomLocation = rand() % 400 - 200; // -200 ~ 200
 		int randomLocation2 = rand() % (number / 4);
@@ -99,7 +103,7 @@ GatherSimulation::GatherSimulation(int number) {
 		particles.push_back( Particle2D( 1.0 / static_cast<double>( randomLocation), static_cast<double>(randomLocation2) / (number / 4) , 0.0, 0.0, 0.0, 0.0) ) ;
 	}
 
-	//ymax
+	//ymax - box의 ymax쪽에 가까운 좌표들을 랜덤하게 생성
 	for (int i = number / 4 * 3; i < number; i++) {
 		int randomLocation = rand() % 400 - 200; // -200 ~ 200
 		int randomLocation2 = rand() % (number / 4);
@@ -144,6 +148,7 @@ void GatherSimulation::Update_Location() {
 }
 
 //입자가 boundary를 넘어갔을 때를 체크하는 함수
+//입자와 center의 거리와 반지름을 비교
 bool GatherSimulation::check_location_for_boundary(Vector2D& location) {
 	double distance = sqrt(pow(location.X - center.X, 2) + pow(location.Y - center.Y, 2));
 	if (distance < center_radius) { return true; }
@@ -155,6 +160,8 @@ bool GatherSimulation::check_location_for_boundary(Vector2D& location) {
 
 //boundary condition
 //입자가 boundary 체크일 때 처리 함수
+//입자가 중심 좌표 근처로 가면, 중심좌표 -> 입자 방향벡터를 구한 후, 벡터의 크기를 1로 늘린 후, 충돌한 시점의 입자에 위치에 이 벡터를 더해준다.
+//그러면, 입자는 중심 -> 원래 위치 방향벡터를 따라 연장선의 길이가 1인 지점으로 옮겨지게 된다.
 void GatherSimulation::boundary_work( Particle2D& particle ) {
 	Vector2D vector_C_to_A = Vector2D(particle.Location.X - center.X, particle.Location.Y - center.Y);
 
@@ -182,6 +189,7 @@ void GatherSimulation::particle_simulation() {
 
 }
 
+//=============================================multithread===============================================================
 
 void GatherSimulation::Update_Acceleration_thread(int start, int end) {
 	for (int i = start; i < end; i++)
