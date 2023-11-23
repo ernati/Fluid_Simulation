@@ -5,7 +5,9 @@
 
 using namespace std;
 
-
+//뷰포트에 n에 따른 grid 선분들을 구성하는 끝 점들을 생성하는 함수
+//n=10이면, 그리드 칸이 10x10이므로, 가로 선분 11개, 세로선분 11개가 생성된다.
+//즉 끝점은 44개가 된다.
 void make_Points_of_grids( vector<Vector2D> &grid, int n ) {
 
 	double j = 1;
