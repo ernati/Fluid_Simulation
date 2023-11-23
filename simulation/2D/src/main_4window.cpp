@@ -47,7 +47,7 @@ unique_ptr<Constant_Acceleration_Simulator> constant_acceleration_simulation;
 unique_ptr<Simul_SineCosine> sinecosine_simulation;
 unique_ptr<GatherSimulation> gather_simulation;
 
-//n각형
+//n각형 - 미사용
 int n = 12;
 
 //number를 조절하면 particle 수가 바뀐다.
@@ -143,6 +143,7 @@ void pushback_color() {
 
 }
 
+//시뮬레이션 결과에 따라 입자들의 값을 Update함.
 void Update_Points() {
 	for (int i = 0; i < simulation->particles.size(); i++) {
 		(*fluids_points)[i] = simulation->particles[i].Location;
@@ -173,7 +174,7 @@ void Update_gather_Points() {
 
 
 //========================================================circle mode========================================================//
-//정 n각형의 좌표 생성
+//정 n각형의 좌표 생성 - 미사용
 
 void pushback_Circle_points() {
 	Vector2D location;
