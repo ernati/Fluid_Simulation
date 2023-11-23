@@ -1,6 +1,6 @@
 #pragma once
 
-
+//box를 나타내는 x,y 최소 최대 좌표를 담는 클래스
 class Box {
 public:
 	float xmin;
