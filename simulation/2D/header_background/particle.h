@@ -4,7 +4,7 @@
 
 #include "myVector2D.h"
 
-//위치, 속도를 가지고 있는 입자 클래스
+//위치, 속도, 가속도, 반지름, 질량을 가지고 있는 입자 클래스
 class Particle2D {
 
 public:
@@ -49,7 +49,9 @@ public:
 
 
     //=================등가속도======================================
-    //입자 하나의 속도를 update
+    //객체지향 원리에 따르면, 이 함수들은 등가속도 운동 시뮬레이터 함수 안에 있는게 맞을 것 같다.
+    //다만, 이미 구현해놓은 것이 있으므로 그대로 둔다.
+    //입자 하나의 속도를 update - euler
     void Update_particle_Velocity(double timestep) {
         this->Velocity = this->Velocity + this->Acceleration * timestep;
     }
