@@ -40,7 +40,7 @@ int time_idle;
 //simulation 선언
 Fluid_Simulator_Grid* simulation;
 
-//n각형
+//n각형 - 미사용
 int n = 12;
 
 //number를 조절하면 particle 수가 바뀐다.
@@ -55,7 +55,7 @@ vector<Vector2D> box_line;
 //grid_N을 조절하면 grid 수가 바뀐다.
 int grid_N = 40;
 
-//시뮬레이션 상태를 조절할 option
+//시뮬레이션 상태를 조절할 option - 실행 후 마우스 우클릭을 누르면 나오는 메뉴를 통해 조절할 수 있다.
 int Option = 3;
 
 bool isStart = false;
@@ -106,7 +106,7 @@ void Update_Points() {
 
 
 //========================================================circle mode========================================================//
-//정 n각형의 좌표 생성
+//정 n각형의 좌표 생성 - 미사용
 
 void pushback_Circle_points() {
 	Vector2D location;
