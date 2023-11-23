@@ -23,7 +23,10 @@ class Simul_SineCosine {
 public:
 
 	int particle_num;
+
+	//sine 함수를 따라 움직이는 입자들을 넣을 vector
 	std::unique_ptr<vector<Vector2D>> sine_particles;
+	//cosine 함수를 따라 움직이는 입자들을 넣을 vector
 	std::unique_ptr<vector<Vector2D>> cosine_particles;
 
 	double timestep;
@@ -94,9 +97,12 @@ void Simul_SineCosine::calculate_cosine() {
 
 //시뮬레이션 함수
 void Simul_SineCosine::particle_simulation() {
-	
+	//0초부터 시간이 timestep만큼 늘어나고,
 	accumulation_time();
 
+	//timestep이 변하면 sine함수. cosine함수의 식이 변합니다. -> 식이 평행이동합니다.
+	//그 식에 정해진 각 입자들의 x좌표를 대입하면, y좌표가 나오고,
+	//그래프가 그려집니다.
 	calculate_sine();
 	calculate_cosine();
 
