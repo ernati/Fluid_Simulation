@@ -87,6 +87,9 @@ particle에서 계산 후, 연산량 및 성능을 위해 grid로 옮겨서 계�
 
 
 ## 실행 영상 - 4 windows
+- 몇초정도 기다리시면 나옵니다!
+- 왼쪽 아래가 Fluid Simulation입니다.
+
 <p align="center">
 <img src="https://github.com/ernati/Fluid_Simulation/assets/31719912/d4c458de-10e7-4b3e-ba8c-2b78a01657ac">
 </p>
