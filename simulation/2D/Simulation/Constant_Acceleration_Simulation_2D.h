@@ -104,6 +104,7 @@ void Constant_Acceleration_Simulator::particle_simulation() {
 //입자들의 속도를 모두 update
 void Constant_Acceleration_Simulator::Update_particles_Velocity() {
     for (int i = 0; i < particles.size(); i++) {
+	//속도 = 속도 + timestep * 가속도 <- forward euler
         this->particles[i].Update_particle_Velocity(timestep);
     }
 }
@@ -111,6 +112,7 @@ void Constant_Acceleration_Simulator::Update_particles_Velocity() {
 //입자들의 위치를 모두 update
 void Constant_Acceleration_Simulator::Update_particles_Location() {
     for (int i = 0; i < particles.size(); i++) {
+	//위치 = 위치 + timestep * 속도 <-forward euler
         this->particles[i].Update_particle_Location(timestep);
 
         if (particles[i].Location.Y < 0.0) {
@@ -120,11 +122,14 @@ void Constant_Acceleration_Simulator::Update_particles_Location() {
     }
 }
 
+//=============================multithread=============================
+// 기존 함수의 for문을 start부터 end까지 할당
+// 스레드의 개수에 따라 입자수를 n분의 1로 분배한다.
 
 void Constant_Acceleration_Simulator::Update_particles_Velocity_Thread(int start, int end) {
     for (int i = start; i < end; i++) {
-		this->particles[i].Update_particle_Velocity(timestep);
-	}
+	this->particles[i].Update_particle_Velocity(timestep);
+    }
 }
 
 void Constant_Acceleration_Simulator::Update_particles_Location_Thread(int start, int end) {
