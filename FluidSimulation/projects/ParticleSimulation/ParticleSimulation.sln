@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Gather_Simulation", "Gather
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SineCosine_Simulation", "SineCosine_Simulation\SineCosine_Simulation.vcxproj", "{8916DCE4-F9A4-4D8C-BFB3-C63469C10CA4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FluidSimulation_OpenGL", "FluidSimulation_OpenGL\FluidSimulation_OpenGL.vcxproj", "{57F7C1E2-0958-43ED-A337-A417C51CBDC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{8916DCE4-F9A4-4D8C-BFB3-C63469C10CA4}.Release|x64.Build.0 = Release|x64
 		{8916DCE4-F9A4-4D8C-BFB3-C63469C10CA4}.Release|x86.ActiveCfg = Release|Win32
 		{8916DCE4-F9A4-4D8C-BFB3-C63469C10CA4}.Release|x86.Build.0 = Release|Win32
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Debug|x64.ActiveCfg = Debug|x64
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Debug|x64.Build.0 = Debug|x64
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Debug|x86.ActiveCfg = Debug|Win32
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Debug|x86.Build.0 = Debug|Win32
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Release|x64.ActiveCfg = Release|x64
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Release|x64.Build.0 = Release|x64
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Release|x86.ActiveCfg = Release|Win32
+		{57F7C1E2-0958-43ED-A337-A417C51CBDC9}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,12 +12,11 @@
 #include <iostream>
 #include <Windows.h>
 
-#include "../../threadpool/threadpool.h"
+#include "../../grid/grid.h"
+#include "../../grid/drawgrid.h"
+#include "../../Simulation/fluid_grid_2D.h"
+#include "../../box/box.h"
 
-#include "../header_background/grid.h"
-#include "../header_background/drawgrid.h"
-#include "../Simulation/fluid_grid_2D.h"
-#include "../header_background/box.h"
 
 
 using namespace std;
@@ -215,7 +214,7 @@ void init(void) {
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D)* grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() , sizeof(Vector2D) * color->size(), &( (*color)[0]) );
 
 	//load shaders
-	GLuint program = InitShader("simulation/2D/src/vshader_2dBezier_test.glsl", "simulation/2D/src/fshader_2dBezier_test.glsl");
+	GLuint program = InitShader("vshader_2dBezier_test.glsl", "fshader_2dBezier_test.glsl");
 	glUseProgram(program);
 
 	//points memory position ( points and box )
