@@ -1,3 +1,6 @@
 ##folders
 FluidSimulation/projects/ParticleSimulation/.vs
+!FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/.suo
+!FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/Browse.vc
+
 FluidSimulation/projects/ParticleSimulation/x64/Release/*.exe
