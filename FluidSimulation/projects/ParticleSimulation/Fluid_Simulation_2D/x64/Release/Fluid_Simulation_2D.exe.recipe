@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\dev\repos\FluidSimulation\projects\ParticleSimulation\x64\Release\Fluid_Simulation_2D.exe</FullPath>
+      <FullPath>D:\dev\repos\Fluid_Simulation\FluidSimulation\projects\ParticleSimulation\x64\Release\Fluid_Simulation_2D.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
