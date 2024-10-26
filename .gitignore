@@ -2,4 +2,4 @@
 FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/ipch/
 
 # 실행파일 제거
-*.exe
+FluidSimulation/projects/ParticleSimulation/x64/
