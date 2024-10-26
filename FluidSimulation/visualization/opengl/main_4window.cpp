@@ -11,17 +11,14 @@
 #include <chrono>
 #include <iostream>
 #include <Windows.h>
-#include <thread>
 
-#include "../../threadpool/threadpool.h"
-
-#include "../header_background/grid.h"
-#include "../header_background/drawgrid.h"
-#include "../Simulation/fluid_grid_2D.h"
-#include "../Simulation/Constant_Acceleration_Simulation_2D.h"
-#include "../Simulation/gather_simulation.h"
-#include "../Simulation/simul_sinecosine.h"
-#include "../header_background/box.h"
+#include "../../grid/grid.h"
+#include "../../grid/drawgrid.h"
+#include "../../Simulation/fluid_grid_2D.h"
+#include "../../box/box.h"
+#include "../../Simulation/Constant_Acceleration_Simulation_2D.h"
+#include "../../Simulation/gather_simulation.h"
+#include "../../Simulation/simul_sinecosine.h"
 
 
 using namespace std;
@@ -317,7 +314,7 @@ void init(void) {
 		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) * sine_points->size() + sizeof(Vector2D) * gather_points->size(), sizeof(vec3) * color->size(), &((*color)[0]));
 
 	//load shaders
-	GLuint program = InitShader("simulation/2D/src/vshader_2dBezier_test.glsl", "simulation/2D/src/fshader_2dBezier_test.glsl");
+	GLuint program = InitShader("vshader_2dBezier_test.glsl", "fshader_2dBezier_test.glsl");
 	glUseProgram(program);
 
 	//points memory position ( points and box )
@@ -371,7 +368,7 @@ void idle(void)
 	//0.06초 마다 particle 위치 update
 	if (time_idle % 120 == 0) {
 		if (isStart) {
-			auto start = std::chrono::system_clock::now();
+			//auto start = std::chrono::system_clock::now();
 
 			//particle
 			simulation->particle_simulation();
@@ -391,8 +388,8 @@ void idle(void)
 
 			//=====================================================================================================
 
-			std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
-			std::cout << "simulation 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;
+			/*std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+			std::cout << "simulation 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;*/
 
 			Update_Points();
 			Update_constant_Points();

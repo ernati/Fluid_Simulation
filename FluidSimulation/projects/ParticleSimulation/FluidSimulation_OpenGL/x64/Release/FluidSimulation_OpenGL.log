@@ -55,8 +55,8 @@ D:\dev\repos\Fluid_Simulation\FluidSimulation\grid\grid.h(31,16): warning C4244:
               'Fluid_Simulator_Grid::extrapolate_velocity_to_air_cell'에서 'MAC_Grid<CellType>::get_VectorIndex_from_cell'에 대한 첫 번째 참조를 확인하세요.
   
   코드를 생성하고 있습니다.
-  2 of 1639 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+  0 of 1639 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    3 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   FluidSimulation_OpenGL.vcxproj -> D:\dev\repos\Fluid_Simulation\FluidSimulation\projects\ParticleSimulation\x64\Release\FluidSimulation_OpenGL.exe
