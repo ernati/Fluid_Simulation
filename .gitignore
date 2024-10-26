@@ -1,7 +1,5 @@
 # folders
-FluidSimulation/projects/ParticleSimulation/.vs/
-!FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/.suo
-!FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/Browse.vc
+FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/ipch/
 
 # 실행파일 제거
 *.exe
