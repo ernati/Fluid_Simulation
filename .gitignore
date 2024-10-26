@@ -1,6 +1,7 @@
-##folders
-FluidSimulation/projects/ParticleSimulation/.vs/*
+# folders
+FluidSimulation/projects/ParticleSimulation/.vs/
 !FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/.suo
 !FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulation/v17/Browse.vc
 
-FluidSimulation/projects/ParticleSimulation/x64/Release
+# 실행파일 제거
+*.exe
