@@ -1,2 +1,6 @@
 PlatformToolSet=v143:VCToolArchitecture=Native64Bit:VCToolsVersion=14.38.33130:TargetPlatformVersion=10.0.22621.0:
+<<<<<<< HEAD
 Release|x64|D:\dev\repos\Fluid_Simulation\FluidSimulation\projects\ParticleSimulation\|
+=======
+Release|x64|C:\Users\ernati\Downloads\Fluid_Simulation\FluidSimulation\projects\ParticleSimulation\|
+>>>>>>> 2c108bd0af6d280324468256b6b384e14a4c422f
