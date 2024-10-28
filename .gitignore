@@ -1,5 +1,4 @@
-# folders
-FluidSimulation/projects/ParticleSimulation/.vs/ParticleSimulatiom/v17/ipch/
-
 # 실행파일 제거
 FluidSimulation/projects/ParticleSimulation/x64/Release
+*.vsidx
+*.ipch

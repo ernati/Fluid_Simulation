@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\visualization\opengl\main.cpp">
+    <ClCompile Include="FluidSimulation_OpenGL.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
