@@ -7,6 +7,9 @@
    - 하단 4 windows 프로젝트는 "Simulation_4windows_OpenGL" 입니다. 해당 프로젝트를 시작 프로젝트로 설정 후, 컴파일 및 실행, 빌드 하시면 됩니다.
    - 다른 프로젝트도 모두 실행 및 빌드 가능한 상태로 repo 구성하였습니다.
 
+P.S 1 - 혹시 zip으로 다운로드 받으신다면, 모든 파일이 Unix(LF) 형식으로 다운로드되니 참고바랍니다.
+P.S 2 - Simulation과 관련된 소스코드는 FluidSimulation 폴더 내에 있습니다. 특히, 메인 클래스인 Simulation 클래스들은 FluidSimulation/Simulation에 위치합니다.
+
 ## 구현을 위한 학습 내용
 1. [논문1 - Animating Explosions - Gary D Yngve, James F O'Bri 1fe97d11e62d48ba988bb5172cf3b189.pdf](https://github.com/ernati/Fluid_Simulation/files/13201146/1.-.Animating.Explosions.-.Gary.D.Yngve.James.F.O.Bri.1fe97d11e62d48ba988bb5172cf3b189.pdf)
 
