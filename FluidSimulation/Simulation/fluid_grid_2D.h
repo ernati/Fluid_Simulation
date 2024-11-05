@@ -3,6 +3,7 @@
 #include "../myVector/myVector2D.h"
 #include "../particle/particle.h"
 #include "../grid/grid.h"
+#include "ParticleSimulator.h"
 #include <vector>
 #include <math.h>
 #include <iostream>
@@ -47,15 +48,15 @@ bool compare3(tuple<Vector2D, int>& a, tuple<Vector2D, int>& b) {
 
 
 
-class Fluid_Simulator_Grid {
+class Fluid_Simulator_Grid : public Particle_Simulator_2D {
 
 public:
 
     //particle들을 담을 vector
-    vector<Particle2D> particles;
+    //vector<Particle2D> particles;
 
     int particle_number;
-    double timestep;
+    //double timestep;
     int gridsize;
 
     double density;

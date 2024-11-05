@@ -3,6 +3,7 @@
 #include "../myVector/myVector2D.h"
 #include "../particle/particle.h"
 #include "../grid/grid.h"
+#include "ParticleSimulator.h"
 #include <vector>
 #include <cmath>
 #include <iostream>
@@ -19,7 +20,7 @@
 #include<ctime>
 
 
-class Simul_SineCosine {
+class Simul_SineCosine : Particle_Simulator_2D {
 public:
 
 	int particle_num;
@@ -29,7 +30,7 @@ public:
 	//cosine 함수를 따라 움직이는 입자들을 넣을 vector
 	std::unique_ptr<vector<Vector2D>> cosine_particles;
 
-	double timestep;
+	//double timestep;
 	double accumulate_timestep;
 
 	double pi = 3.141592;

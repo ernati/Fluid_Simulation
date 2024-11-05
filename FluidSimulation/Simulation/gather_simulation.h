@@ -3,6 +3,7 @@
 #include "../myVector/myVector2D.h"
 #include "../particle/particle.h"
 #include "../grid/grid.h"
+#include "ParticleSimulator.h"
 #include <vector>
 #include <cmath>
 #include <iostream>
@@ -19,17 +20,17 @@
 #include<ctime>
 
 
-class GatherSimulation
+class GatherSimulation : public Particle_Simulator_2D
 {
 public:
-	double timestep;
+	//double timestep;
 	//중심의 범위가 될 반지름
 	double center_radius;
 
 	//입자들이 모일 center 좌표
 	Vector2D center;
 	//particle들을 담을 vector
-	vector<Particle2D> particles;
+	//vector<Particle2D> particles;
 
 	//기본생성자
 	GatherSimulation();

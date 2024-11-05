@@ -3,6 +3,7 @@
 #include "../myVector/myVector2D.h"
 #include "../particle/particle.h"
 #include "../grid/grid.h"
+#include "ParticleSimulator.h"
 #include <vector>
 #include <math.h>
 #include <iostream>
@@ -19,15 +20,15 @@
 
 using namespace std;
 
-class Constant_Acceleration_Simulator {
+class Constant_Acceleration_Simulator : public Particle_Simulator_2D {
 
 public:
 
-    //particle들을 담을 vector
-    vector<Particle2D> particles;
-    float timestep;
+    ////particle들을 담을 vector
+    //vector<Particle2D> particles;
+    //float timestep;
 
-    MAC_Grid<Vector2D> velocity_grid;
+    //MAC_Grid<Vector2D> velocity_grid;
 
     //기본 생성자
     Constant_Acceleration_Simulator();
