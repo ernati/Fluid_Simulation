@@ -53,9 +53,4 @@ particle에서 계산 후, 연산량 및 성능을 위해 grid로 옮겨서 계�
 </p>
 
 
-### 다른 포트폴리오들 
-- 게임 분야라면 게임 포트폴리오, 그래픽스 분야라면 객체 지향을 경험한 포트폴리오가 되겠습니다.
-
-게임 포트폴리오(ppt) 구글드라이브 주소 : https://docs.google.com/presentation/d/1c2pjuWhBw2z4wi7SkzCHnZoQi1-Y7UvT/edit?usp=drive_link&ouid=103736708326537874746&rtpof=true&sd=true
-게임 포트폴리어(pdf) 구글드라이브 주소 : https://drive.google.com/file/d/1Hs2oozFPPrbR6G6aC5oQxnDZpBKaIe5e/view?usp=drive_link
 타워 디펜스 + 1인칭 FPS 게임: https://github.com/ernati/Defense_3D
