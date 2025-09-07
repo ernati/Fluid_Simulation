@@ -663,7 +663,13 @@ void log_fluid_cell_center_point() {
 // Ensure pushback_color is called after fluid_cell_center_point is updated
 void update_simulation_and_colors() {
     // Update simulation data
-    simulation->update(); // Assuming `update` is the function that updates fluid_cell_center_point
+    simulation->particle_simulation(); // Assuming this updates particle data
+
+    // Classify cell types
+    simulation->classify_cell_type();
+
+    // Update fluid cell center points
+    simulation->rendering_fluid();
 
     // Log the updated fluid_cell_center_point
     log_fluid_cell_center_point();
