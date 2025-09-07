@@ -38,16 +38,16 @@ GLuint vbo;
 //time
 int time_idle;
 
-//simulation ¼±¾ð
+//simulation ï¿½ï¿½ï¿½ï¿½
 unique_ptr<Fluid_Simulator_Grid> simulation;
 unique_ptr<Constant_Acceleration_Simulator> constant_acceleration_simulation;
 unique_ptr<Simul_SineCosine> sinecosine_simulation;
 unique_ptr<GatherSimulation> gather_simulation;
 
-//n°¢Çü - ¹Ì»ç¿ë
+//nï¿½ï¿½ï¿½ï¿½ - ï¿½Ì»ï¿½ï¿½
 int n = 12;
 
-//number¸¦ Á¶ÀýÇÏ¸é particle ¼ö°¡ ¹Ù²ï´Ù.
+//numberï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ particle ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½.
 int number = 4000;
 
 unique_ptr<vector<Vector2D>> fluids_points;
@@ -61,10 +61,10 @@ Box bbox;
 vector<Vector2D> grid_line;
 vector<Vector2D> box_line;
 
-//grid_NÀ» Á¶ÀýÇÏ¸é grid ¼ö°¡ ¹Ù²ï´Ù.
+//grid_Nï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ grid ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½.
 int grid_N = 40;
 
-//½Ã¹Ä·¹ÀÌ¼Ç »óÅÂ¸¦ Á¶ÀýÇÒ option
+//ï¿½Ã¹Ä·ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ option
 int Option = 3;
 
 bool isStart = false;
@@ -74,7 +74,7 @@ bool isParticleMode = true;
 
 //========================================================particle mode ========================================================//
 
-//simulationÀÇ particleµéÀÇ À§Ä¡¸¦ points¿¡ ÀúÀå
+//simulationï¿½ï¿½ particleï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ pointsï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 void pushback_SimulationPoints_to_Points() {
 	fluids_points->clear();
 	for (int i = 0; i < number; i++) {
@@ -108,39 +108,39 @@ void pushback_gather_SimulationPoints_to_Points() {
 void pushback_color() {
 	color->clear();
 
-	//fluid
+	// Fluid particles - blue
 	for (int i = 0; i < number; i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(0.0f, 0.0f, 1.0f));
 	}
 
-	//constant
+	// Constant acceleration particles - green
 	for (int i = 0; i < number; i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(0.0f, 1.0f, 0.0f));
 	}
 
+	// Grid lines - gray
 	for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(0.5f, 0.5f, 0.5f));
 	}
 
-	//fluid mode´Â blue
+	// Fluid mode cell centers - cyan
 	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(0.0f, 1.0f, 1.0f));
 	}
 
-	//sinecosine
+	// Sine and cosine particles - red and yellow
 	for (int i = 0; i < sinecosine_simulation->particle_num; i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(1.0f, 0.0f, 0.0f)); // Sine particles
+		color->push_back(vec3(1.0f, 1.0f, 0.0f)); // Cosine particles
 	}
 
-	//gather
+	// Gather particles - magenta
 	for (int i = 0; i < number; i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
+		color->push_back(vec3(1.0f, 0.0f, 1.0f));
 	}
-
 }
 
-//½Ã¹Ä·¹ÀÌ¼Ç °á°ú¿¡ µû¶ó ÀÔÀÚµéÀÇ °ªÀ» UpdateÇÔ.
+//ï¿½Ã¹Ä·ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Updateï¿½ï¿½.
 void Update_Points() {
 	for (int i = 0; i < simulation->particles.size(); i++) {
 		(*fluids_points)[i] = simulation->particles[i].Location;
@@ -171,12 +171,12 @@ void Update_gather_Points() {
 
 
 //========================================================circle mode========================================================//
-//Á¤ n°¢ÇüÀÇ ÁÂÇ¥ »ý¼º - ¹Ì»ç¿ë
+//ï¿½ï¿½ nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½ - ï¿½Ì»ï¿½ï¿½
 
 void pushback_Circle_points() {
 	Vector2D location;
 	fluids_points->clear();
-	//j¹øÂ° particle
+	//jï¿½ï¿½Â° particle
 	for (int j = 0; j < number; j++) {
 		location = simulation->particles[j].Location;
 		for (int i = 0; i < n; i++) {
@@ -193,7 +193,7 @@ void pushback_Circle_points() {
 
 void Update_Circle_points() {
 	Vector2D location;
-	//j¹øÂ° particle
+	//jï¿½ï¿½Â° particle
 	for (int i = 0; i < number; i++) {
 		location = simulation->particles[i].Location;
 		for (int j = 0; j < n; j++) {
@@ -217,7 +217,7 @@ void pushback_Circle_color() {
 		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	//fluid mode´Â blue
+	//fluid modeï¿½ï¿½ blue
 	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
 		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
@@ -234,7 +234,7 @@ void init(void) {
 	gather_points = make_unique<vector<Vector2D>>();
 	color = make_unique<vector<vec3>>();
 
-	//simulation ½ÇÇà ¹× ÀÔÀÚµé »ý¼º
+	//simulation ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½
 	simulation = make_unique<Fluid_Simulator_Grid>(number, grid_N);
 	constant_acceleration_simulation = make_unique<Constant_Acceleration_Simulator>(number, grid_N);
 	sinecosine_simulation = make_unique<Simul_SineCosine>(number);
@@ -256,19 +256,19 @@ void init(void) {
 	pushback_color();
 	//pushback_Circle_color();
 
-	//bbox ¼±¾ð
+	//bbox ï¿½ï¿½ï¿½ï¿½
 	bbox = Box(0.0, 1.0, 0.0, 1.0);
 	box_line.push_back(Vector2D(bbox.xmin, bbox.ymin));
 	box_line.push_back(Vector2D(bbox.xmax, bbox.ymin));
 	box_line.push_back(Vector2D(bbox.xmax, bbox.ymax));
 	box_line.push_back(Vector2D(bbox.xmin, bbox.ymax));
 
-	//vectorÀÇ size¸¦ ¿øÇÏ´Â Å©±â¸¸Å­ ´Ã¸°´Ù.
+	//vectorï¿½ï¿½ sizeï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ Å©ï¿½â¸¸Å­ ï¿½Ã¸ï¿½ï¿½ï¿½.
 	for (int i = 0; i < 4 * (grid_N - 1); i++) {
 		grid_line.push_back(Vector2D(0, 0));
 	}
 
-	//gridÀÇ Á¡À» ±×¸®´Â ÇÔ¼ö
+	//gridï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	make_Points_of_grids(grid_line, grid_N);
 
 	glGenVertexArrays(1, &(vao));
@@ -280,36 +280,36 @@ void init(void) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() +
 		sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) * sine_points->size() + sizeof(Vector2D) * gather_points->size() + sizeof(Vector2D) * color->size(), NULL, GL_STATIC_DRAW);
 
-	//particleµé ·»´õ¸µ
+	//particleï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * fluids_points->size(), &((*fluids_points)[0]));
-	//box ·»´õ¸µ
+	//box ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size(), sizeof(Vector2D) * box_line.size(), &(box_line[0]));
-	//grid ·»´õ¸µ
+	//grid ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size(), sizeof(Vector2D) * grid_line.size(), &(grid_line[0]));
 
-	//fluid cell center point ·»´õ¸µ
+	//fluid cell center point ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 
-	////air cell center point ·»´õ¸µ
+	////air cell center point ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(box_line) + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * 
 	//	simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
 
-	//constant acceleration point ·»´õ¸µ
+	//constant acceleration point ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * constant_acceleration_points->size(), &((*constant_acceleration_points)[0]));
 
-	//sinecosine point ·»´õ¸µ
+	//sinecosine point ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size(), sizeof(Vector2D) * cosine_points->size(), &((*cosine_points)[0]));
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size(), sizeof(Vector2D) * sine_points->size(), &((*sine_points)[0]));
 
-	//gather point ·»´õ¸µ
+	//gather point ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) *
 		sine_points->size(), sizeof(Vector2D) * gather_points->size(), &((*gather_points)[0]));
 
-	//color ÇÒ´ç
+	//color ï¿½Ò´ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) * sine_points->size() + sizeof(Vector2D) * gather_points->size(), sizeof(vec3) * color->size(), &((*color)[0]));
 
@@ -355,17 +355,17 @@ void keyboard(unsigned char key, int x, int y) {
 
 void idle(void)
 {
-	////±¸ºÐ
+	////ï¿½ï¿½ï¿½ï¿½
 	//printf("\n__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 	//printf("__________________________________________________________________________________\n");
 
-	//´©ÀûµÈ ¹Ð¸®ÃÊ ¾ò±â
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ð¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	time_idle = glutGet(GLUT_ELAPSED_TIME);
 
-	//0.06ÃÊ ¸¶´Ù particle À§Ä¡ update
+	//0.06ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ particle ï¿½ï¿½Ä¡ update
 	if (time_idle % 120 == 0) {
 		if (isStart) {
 			//auto start = std::chrono::system_clock::now();
@@ -374,7 +374,7 @@ void idle(void)
 			simulation->particle_simulation();
 
 			/*std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
-			std::cout << "simulation °É¸®´Â ½Ã°£(ÃÊ) : " << sec.count() << "seconds" << std::endl;*/
+			std::cout << "simulation ï¿½É¸ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½(ï¿½ï¿½) : " << sec.count() << "seconds" << std::endl;*/
 
 			//constant
 			constant_acceleration_simulation->particle_simulation();
@@ -389,7 +389,7 @@ void idle(void)
 			//=====================================================================================================
 
 			/*std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
-			std::cout << "simulation °É¸®´Â ½Ã°£(ÃÊ) : " << sec.count() << "seconds" << std::endl;*/
+			std::cout << "simulation ï¿½É¸ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½(ï¿½ï¿½) : " << sec.count() << "seconds" << std::endl;*/
 
 			Update_Points();
 			Update_constant_Points();
@@ -414,11 +414,11 @@ void display() {
 
 	glViewport(0, 0, Width / 2, Height / 2);
 
-	//È­¸é mapping 
-	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // °î¼±ÀÌ ±×·ÁÁú Æò¸é
+	//È­ï¿½ï¿½ mapping 
+	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // ï¿½î¼±ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	glUniformMatrix4fv(projection, 1, GL_TRUE, p);
 
-	//¹Ù²ï ÁÂÇ¥ ´Ù½Ã ¸Þ¸ð¸®¿¡ ³Ö±â
+	//ï¿½Ù²ï¿½ ï¿½ï¿½Ç¥ ï¿½Ù½ï¿½ ï¿½Þ¸ð¸®¿ï¿½ ï¿½Ö±ï¿½
 	glBindVertexArray(vao);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * fluids_points->size(), &((*fluids_points)[0]));
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D)
@@ -427,12 +427,12 @@ void display() {
 		* simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * constant_acceleration_points->size(), &((*constant_acceleration_points)[0]));
 	/*glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) *
 		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));*/
-		//sinecosine point ·»´õ¸µ
+		//sinecosine point ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() +
 		sizeof(Vector2D) * constant_acceleration_points->size(), sizeof(Vector2D) * cosine_points->size(), &((*cosine_points)[0]));
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() +
 		sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size(), sizeof(Vector2D) * sine_points->size(), &((*sine_points)[0]));
-	//gather point ·»´õ¸µ
+	//gather point ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) *
 		sine_points->size(), sizeof(Vector2D) * gather_points->size(), &((*gather_points)[0]));
@@ -440,7 +440,7 @@ void display() {
 
 	glViewport(0, 0, Width / 2, Height / 2);
 
-	//================================fluid ±×¸®±â
+	//================================fluid ï¿½×¸ï¿½ï¿½ï¿½
 	glPointSize(2.0);
 	glLineWidth(1.0);
 
@@ -456,11 +456,11 @@ void display() {
 		}
 	}
 
-	//box ±×¸®±â
+	//box ï¿½×¸ï¿½ï¿½ï¿½
 	glLineWidth(0.1);
 	glDrawArrays(GL_LINE_LOOP, fluids_points->size(), 4);
 
-	//grid ±×¸®±â
+	//grid ï¿½×¸ï¿½ï¿½ï¿½
 	//glDrawArrays(GL_LINES, points->size() + 4, 4 * (grid_N-1));
 
 	glPointSize(10.0);
@@ -476,7 +476,7 @@ void display() {
 		//}
 	}
 
-	//================================constant ±×¸®±â
+	//================================constant ï¿½×¸ï¿½ï¿½ï¿½
 	glViewport(0, Height / 2, Width / 2, Height / 2);
 
 	glPointSize(2.0);
@@ -494,12 +494,12 @@ void display() {
 		}
 	}
 
-	//box ±×¸®±â
+	//box ï¿½×¸ï¿½ï¿½ï¿½
 	glLineWidth(0.1);
 	glDrawArrays(GL_LINE_LOOP, fluids_points->size(), 4);
 
 
-	//================================sinecosine ±×¸®±â
+	//================================sinecosine ï¿½×¸ï¿½ï¿½ï¿½
 	glViewport(Width / 2, 0, Width / 2, Height / 2);
 
 	glPointSize(2.0);
@@ -518,12 +518,12 @@ void display() {
 		}
 	}
 
-	//box ±×¸®±â
+	//box ï¿½×¸ï¿½ï¿½ï¿½
 	glLineWidth(0.1);
 	glDrawArrays(GL_LINE_LOOP, fluids_points->size(), 4);
 
 
-	//================================gather ±×¸®±â
+	//================================gather ï¿½×¸ï¿½ï¿½ï¿½
 	glViewport(Width / 2, Height / 2, Width / 2, Height / 2);
 
 	glPointSize(2.0);
@@ -542,11 +542,11 @@ void display() {
 		}
 	}
 
-	//box ±×¸®±â
+	//box ï¿½×¸ï¿½ï¿½ï¿½
 	glLineWidth(0.1);
 	glDrawArrays(GL_LINE_LOOP, fluids_points->size(), 4);
 
-	//grid ±×¸®±â
+	//grid ï¿½×¸ï¿½ï¿½ï¿½
 	//glDrawArrays(GL_LINES, points->size() + 4, 4 * (grid_N-1));
 
 	//glPointSize(10.0);
