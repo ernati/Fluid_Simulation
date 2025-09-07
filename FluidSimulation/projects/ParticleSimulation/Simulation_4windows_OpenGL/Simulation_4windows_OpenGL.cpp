@@ -115,6 +115,9 @@ void pushback_color() {
 
     color->clear();
 
+    // Debug: Log the start of the function
+    std::cout << "Debug: Starting pushback_color function" << std::endl;
+
     // Fluid particles - blue
     for (int i = 0; i < number; i++) {
         color->push_back(vec3(0.0f, 0.0f, 1.0f));
@@ -149,6 +152,9 @@ void pushback_color() {
     for (int i = 0; i < number; i++) {
         color->push_back(vec3(1.0f, 0.0f, 1.0f));
     }
+
+    // Debug: Log the final color vector size
+    std::cout << "Debug: Total color vector size: " << color->size() << std::endl;
 
     // Reset the flag after updating colors
     particle_data_changed = false;
