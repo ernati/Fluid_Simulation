@@ -307,23 +307,23 @@ void init(void) {
 	//	simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));
 
 	//constant acceleration point ������
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D>
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size(), sizeof(Vector2D) * constant_acceleration_points->size(), &((*constant_acceleration_points)[0]));
 
 	//sinecosine point ������
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D>
-		* simulation->fluid_cell_center_point->size() + sizeof<Vector2D> * constant_acceleration_points->size(), sizeof(Vector2D) * cosine_points->size(), &((*cosine_points)[0]));
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D>
-		* simulation->fluid_cell_center_point->size() + sizeof<Vector2D> * constant_acceleration_points->size() + sizeof<Vector2D> * cosine_points->size(), sizeof(Vector2D) * sine_points->size(), &((*sine_points)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
+		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size(), sizeof(Vector2D) * cosine_points->size(), &((*cosine_points)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
+		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size(), sizeof(Vector2D) * sine_points->size(), &((*sine_points)[0]));
 
 	//gather point ������
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D>
-		* simulation->fluid_cell_center_point->size() + sizeof<Vector2D> * constant_acceleration_points->size() + sizeof<Vector2D> * cosine_points->size() + sizeof<Vector2D> *
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
+		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) *
 		sine_points->size(), sizeof(Vector2D) * gather_points->size(), &((*gather_points)[0]));
 
 	//color �Ҵ�
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D>
-		* simulation->fluid_cell_center_point->size() + sizeof<Vector2D> * constant_acceleration_points->size() + sizeof<Vector2D> * cosine_points->size() + sizeof<Vector2D> * sine_points->size() + sizeof<Vector2D> * gather_points->size(), sizeof(vec3) * color->size(), &((*color)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
+		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) * sine_points->size() + sizeof(Vector2D) * gather_points->size(), sizeof(vec3) * color->size(), &((*color)[0]));
 
 	//load shaders
 	GLuint program = InitShader("vshader_2dBezier_test.glsl", "fshader_2dBezier_test.glsl");
@@ -335,7 +335,7 @@ void init(void) {
 
 	//color position
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), BUFFER_OFFSET(sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D> * simulation->fluid_cell_center_point->size()));
+	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), BUFFER_OFFSET(sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size()));
 
 	glEnableVertexAttribArray(0);
 	//initialize uniform variable from vertex shander
@@ -440,13 +440,13 @@ void display() {
 	/*glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size(), sizeof(Vector2D) *
 		simulation->air_cell_center_point->size(), &((*simulation->air_cell_center_point)[0]));*/
 		//sinecosine point ������
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D> * simulation->fluid_cell_center_point->size() +
-		sizeof<Vector2D> * constant_acceleration_points->size(), sizeof(Vector2D) * cosine_points->size(), &((*cosine_points)[0]));
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D> * simulation->fluid_cell_center_point->size() +
-		sizeof<Vector2D> * constant_acceleration_points->size() + sizeof<Vector2D> * cosine_points->size(), sizeof(Vector2D) * sine_points->size(), &((*sine_points)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() +
+		sizeof(Vector2D) * constant_acceleration_points->size(), sizeof(Vector2D) * cosine_points->size(), &((*cosine_points)[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size() +
+		sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size(), sizeof(Vector2D) * sine_points->size(), &((*sine_points)[0]));
 	//gather point ������
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof<Vector2D> * box_line.size() + sizeof<Vector2D> * grid_line.size() + sizeof<Vector2D>
-		* simulation->fluid_cell_center_point->size() + sizeof<Vector2D> * constant_acceleration_points->size() + sizeof<Vector2D> * cosine_points->size() + sizeof<Vector2D> *
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
+		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) *
 		sine_points->size(), sizeof(Vector2D) * gather_points->size(), &((*gather_points)[0]));
 
 
