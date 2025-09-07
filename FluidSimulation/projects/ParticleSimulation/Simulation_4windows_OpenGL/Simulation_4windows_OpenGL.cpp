@@ -650,3 +650,25 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
+// Debug function to log the contents of fluid_cell_center_point
+void log_fluid_cell_center_point() {
+    std::cout << "Debug: fluid_cell_center_point size: " << simulation->fluid_cell_center_point->size() << std::endl;
+    for (size_t i = 0; i < simulation->fluid_cell_center_point->size(); ++i) {
+        std::cout << "Point " << i << ": (" << (*simulation->fluid_cell_center_point)[i].X << ", "
+                  << (*simulation->fluid_cell_center_point)[i].Y << ")" << std::endl;
+    }
+}
+
+// Ensure pushback_color is called after fluid_cell_center_point is updated
+void update_simulation_and_colors() {
+    // Update simulation data
+    simulation->update(); // Assuming `update` is the function that updates fluid_cell_center_point
+
+    // Log the updated fluid_cell_center_point
+    log_fluid_cell_center_point();
+
+    // Update colors
+    particle_data_changed = true;
+    pushback_color();
+}
