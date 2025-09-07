@@ -108,48 +108,50 @@ void pushback_gather_SimulationPoints_to_Points() {
 void pushback_color() {
 	color->clear();
 
-	// Debug: Print initial state
-	std::cout << "Debug: Starting pushback_color function" << std::endl;
-
 	// Fluid particles - blue
 	for (int i = 0; i < number; i++) {
 		color->push_back(vec3(0.0f, 0.0f, 1.0f));
 	}
-	std::cout << "Debug: Fluid particles count: " << number << std::endl;
 
 	// Constant acceleration particles - green
 	for (int i = 0; i < number; i++) {
 		color->push_back(vec3(0.0f, 1.0f, 0.0f));
 	}
-	std::cout << "Debug: Constant acceleration particles count: " << number << std::endl;
 
 	// Grid lines - gray
 	for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
 		color->push_back(vec3(0.5f, 0.5f, 0.5f));
 	}
-	std::cout << "Debug: Grid lines count: " << (4 + 4 * (grid_N - 1)) << std::endl;
 
 	// Fluid mode cell centers - cyan
-	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
-		color->push_back(vec3(0.0f, 1.0f, 1.0f));
+	if (simulation->fluid_cell_center_point->size() > 0) {
+		for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
+			color->push_back(vec3(0.0f, 1.0f, 1.0f));
+		}
+	} else {
+		std::cout << "Warning: fluid_cell_center_point size is 0, skipping color addition." << std::endl;
 	}
-	std::cout << "Debug: Fluid cell centers count: " << simulation->fluid_cell_center_point->size() << std::endl;
 
 	// Sine and cosine particles - red and yellow
 	for (int i = 0; i < sinecosine_simulation->particle_num; i++) {
 		color->push_back(vec3(1.0f, 0.0f, 0.0f)); // Sine particles
 		color->push_back(vec3(1.0f, 1.0f, 0.0f)); // Cosine particles
 	}
-	std::cout << "Debug: Sine and Cosine particles count: " << sinecosine_simulation->particle_num << std::endl;
 
 	// Gather particles - magenta
 	for (int i = 0; i < number; i++) {
 		color->push_back(vec3(1.0f, 0.0f, 1.0f));
 	}
-	std::cout << "Debug: Gather particles count: " << number << std::endl;
 
-	// Debug: Print final color vector size
-	std::cout << "Debug: Total color vector size: " << color->size() << std::endl;
+	// Validate final color vector size
+	size_t expected_size = (number * 4) + (4 + 4 * (grid_N - 1)) + (sinecosine_simulation->particle_num * 2);
+	if (simulation->fluid_cell_center_point->size() > 0) {
+		expected_size += simulation->fluid_cell_center_point->size();
+	}
+
+	if (color->size() != expected_size) {
+		std::cerr << "Error: Color vector size mismatch. Expected: " << expected_size << ", Actual: " << color->size() << std::endl;
+	}
 }
 
 //�ùķ��̼� ����� ���� ���ڵ��� ���� Update��.
