@@ -150,17 +150,20 @@ void pushback_color() {
         (*color)[current_index++] = vec3(0.0f, 1.0f, 0.0f);
     }
 
-    // Grid lines - black
+    // Box and Grid lines - black (boundary)
+    size_t boundary_start = current_index;
     for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
         (*color)[current_index++] = vec3(0.0f, 0.0f, 0.0f);
     }
+
+    // Store boundary color indices for later use
+    static size_t boundary_color_start = boundary_start;
+    static size_t boundary_color_count = current_index - boundary_start;
 
     // Fluid mode cell centers - cyan
     for (size_t i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
         (*color)[current_index++] = vec3(0.0f, 1.0f, 1.0f);
     }
-
-    colors_initialized = true;
 
     // Sine and cosine particles - red and yellow
     for (int i = 0; i < sinecosine_simulation->particle_num; i++) {
@@ -173,6 +176,7 @@ void pushback_color() {
         (*color)[current_index++] = vec3(1.0f, 0.0f, 1.0f);
     }
 
+    // Set color initialization flag only once at the end
     colors_initialized = true;
     particle_data_changed = false;
 }
@@ -319,19 +323,22 @@ void init(void) {
 	pushback_color();
 	//pushback_Circle_color();
 
-	//bbox ����
+		// bbox 초기화 (한 번만 설정되는 정적 경계)
 	bbox = Box(0.0, 1.0, 0.0, 1.0);
-	box_line.push_back(Vector2D(bbox.xmin, bbox.ymin));
-	box_line.push_back(Vector2D(bbox.xmax, bbox.ymin));
-	box_line.push_back(Vector2D(bbox.xmax, bbox.ymax));
-	box_line.push_back(Vector2D(bbox.xmin, bbox.ymax));
+	box_line = { 
+		Vector2D(bbox.xmin, bbox.ymin),
+		Vector2D(bbox.xmax, bbox.ymin),
+		Vector2D(bbox.xmax, bbox.ymax),
+		Vector2D(bbox.xmin, bbox.ymax)
+	};
 
-	//vector�� size�� ���ϴ� ũ�⸸ŭ �ø���.
+	// grid 선 초기화 (한 번만 설정되는 정적 경계)
+	grid_line.reserve(4 * (grid_N - 1));  // 미리 메모리 할당
 	for (int i = 0; i < 4 * (grid_N - 1); i++) {
 		grid_line.push_back(Vector2D(0, 0));
 	}
 
-	//grid�� ���� �׸��� �Լ�
+	// grid 점 생성 (한 번만 실행)
 	make_Points_of_grids(grid_line, grid_N);
 
 	glGenVertexArrays(1, &(vao));
@@ -490,9 +497,15 @@ void display() {
 	mat4 p = Ortho2D(-1.0, 1.0, -1.0, 1.0); // ��� �׷��� ���
 	glUniformMatrix4fv(projection, 1, GL_TRUE, p);
 
-	//�ٲ� ��ǥ �ٽ� �޸𸮿� �ֱ�
+	//변경된 좌표 다시 메모리에 넣기
 	glBindVertexArray(vao);
+	
+	// 파티클 좌표 업데이트
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector2D) * fluids_points->size(), &((*fluids_points)[0]));
+
+	// box와 grid는 정적이므로 업데이트하지 않음
+	
+	// 셀 중심점 업데이트
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size(), sizeof(Vector2D)
 		* simulation->fluid_cell_center_point->size(), &((*simulation->fluid_cell_center_point)[0]));
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
