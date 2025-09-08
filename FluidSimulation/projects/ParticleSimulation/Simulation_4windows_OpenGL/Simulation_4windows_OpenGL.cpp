@@ -109,31 +109,35 @@ void pushback_gather_SimulationPoints_to_Points() {
 bool particle_data_changed = true;
 
 void pushback_color() {
-    if (!particle_data_changed) {
-        return; // Skip if no changes in particle data
+    static bool colors_initialized = false;
+    
+    // Only initialize colors once unless particle data has changed
+    if (colors_initialized && !particle_data_changed) {
+        return;
     }
 
     color->clear();
 
-    // Debug: Log the start of the function
-    std::cout << "Debug: Starting pushback_color function" << std::endl;
+    // Debug: Log color update
+    std::cout << "Debug: Updating colors, reason: " << 
+        (colors_initialized ? "particle data changed" : "initial setup") << std::endl;
 
-    // Fluid particles - blue
+    // Fluid particles - blue (fixed color)
     for (int i = 0; i < number; i++) {
         color->push_back(vec3(0.0f, 0.0f, 1.0f));
     }
 
-    // Constant acceleration particles - green
+    // Constant acceleration particles - green (fixed color)
     for (int i = 0; i < number; i++) {
         color->push_back(vec3(0.0f, 1.0f, 0.0f));
     }
 
-    // Grid lines - gray
+    // Grid lines and boundaries - black
     for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
-        color->push_back(vec3(0.5f, 0.5f, 0.5f));
+        color->push_back(vec3(0.0f, 0.0f, 0.0f));  // Changed to black
     }
 
-    // Fluid mode cell centers - cyan
+    // Fluid mode cell centers - cyan (fixed color)
     if (simulation->fluid_cell_center_point->size() > 0) {
         for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
             color->push_back(vec3(0.0f, 1.0f, 1.0f));
@@ -141,6 +145,8 @@ void pushback_color() {
     } else {
         std::cout << "Warning: fluid_cell_center_point size is 0, skipping color addition." << std::endl;
     }
+
+    colors_initialized = true;
 
     // Sine and cosine particles - red and yellow
     for (int i = 0; i < sinecosine_simulation->particle_num; i++) {
@@ -162,9 +168,15 @@ void pushback_color() {
 
 //�ùķ��̼� ����� ���� ���ڵ��� ���� Update��.
 void Update_Points() {
+	bool changed = false;
 	for (int i = 0; i < simulation->particles.size(); i++) {
-		(*fluids_points)[i] = simulation->particles[i].Location;
+		Vector2D newLoc = simulation->particles[i].Location;
+		if ((*fluids_points)[i] != newLoc) {
+			(*fluids_points)[i] = newLoc;
+			changed = true;
+		}
 	}
+	if (changed) particle_data_changed = true;
 }
 
 void Update_constant_Points() {
@@ -343,7 +355,7 @@ void init(void) {
 
 	//color position
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), BUFFER_OFFSET(sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size()));
+	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), BUFFER_OFFSET(sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size()));
 
 	glEnableVertexAttribArray(0);
 	//initialize uniform variable from vertex shander
