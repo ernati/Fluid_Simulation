@@ -72,6 +72,9 @@ bool isPixelMode = false;
 bool isParticleMode = true;
 //bool isExtrapolationCell = false;
 
+// 색상 초기화 상태를 추적하는 플래그
+bool colors_initialized = false;
+
 //========================================================particle mode ========================================================//
 
 //simulation�� particle���� ��ġ�� points�� ����
@@ -109,60 +112,68 @@ void pushback_gather_SimulationPoints_to_Points() {
 bool particle_data_changed = true;
 
 void pushback_color() {
-    static bool colors_initialized = false;
-    
-    // Only initialize colors once unless particle data has changed
+    // 이미 초기화되었고 파티클 데이터가 변경되지 않았다면 리턴
     if (colors_initialized && !particle_data_changed) {
         return;
     }
 
-    color->clear();
+    // 처음 초기화할 때만 벡터 크기를 계산
+    if (!colors_initialized) {
+        size_t total_size = 
+            number +  // Fluid particles
+            number +  // Constant acceleration particles
+            (4 + 4 * (grid_N - 1)) +  // Grid lines
+            simulation->fluid_cell_center_point->size() +  // Fluid cell centers
+            2 * sinecosine_simulation->particle_num +  // Sine and cosine particles
+            number;  // Gather particles
 
-    // Debug: Log color update
-    std::cout << "Debug: Updating colors, reason: " << 
-        (colors_initialized ? "particle data changed" : "initial setup") << std::endl;
-
-    // Fluid particles - blue (fixed color)
-    for (int i = 0; i < number; i++) {
-        color->push_back(vec3(0.0f, 0.0f, 1.0f));
-    }
-
-    // Constant acceleration particles - green (fixed color)
-    for (int i = 0; i < number; i++) {
-        color->push_back(vec3(0.0f, 1.0f, 0.0f));
-    }
-
-    // Grid lines and boundaries - black
-    for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
-        color->push_back(vec3(0.0f, 0.0f, 0.0f));  // Changed to black
-    }
-
-    // Fluid mode cell centers - cyan (fixed color)
-    if (simulation->fluid_cell_center_point->size() > 0) {
-        for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
-            color->push_back(vec3(0.0f, 1.0f, 1.0f));
-        }
+        color->resize(total_size);
+        
+        // Debug: Log initial setup
+        std::cout << "Debug: Initial color setup, total size: " << total_size << std::endl;
     } else {
-        std::cout << "Warning: fluid_cell_center_point size is 0, skipping color addition." << std::endl;
+        // Debug: Log update reason
+        std::cout << "Debug: Skipping color update - colors are fixed" << std::endl;
+        particle_data_changed = false;
+        return;
+    }
+
+    size_t current_index = 0;
+
+    // Fluid particles - blue
+    for (int i = 0; i < number; i++) {
+        (*color)[current_index++] = vec3(0.0f, 0.0f, 1.0f);
+    }
+
+    // Constant acceleration particles - green
+    for (int i = 0; i < number; i++) {
+        (*color)[current_index++] = vec3(0.0f, 1.0f, 0.0f);
+    }
+
+    // Grid lines - black
+    for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
+        (*color)[current_index++] = vec3(0.0f, 0.0f, 0.0f);
+    }
+
+    // Fluid mode cell centers - cyan
+    for (size_t i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
+        (*color)[current_index++] = vec3(0.0f, 1.0f, 1.0f);
     }
 
     colors_initialized = true;
 
     // Sine and cosine particles - red and yellow
     for (int i = 0; i < sinecosine_simulation->particle_num; i++) {
-        color->push_back(vec3(1.0f, 0.0f, 0.0f)); // Sine particles
-        color->push_back(vec3(1.0f, 1.0f, 0.0f)); // Cosine particles
+        (*color)[current_index++] = vec3(1.0f, 0.0f, 0.0f); // Sine particles
+        (*color)[current_index++] = vec3(1.0f, 1.0f, 0.0f); // Cosine particles
     }
 
     // Gather particles - magenta
     for (int i = 0; i < number; i++) {
-        color->push_back(vec3(1.0f, 0.0f, 1.0f));
+        (*color)[current_index++] = vec3(1.0f, 0.0f, 1.0f);
     }
 
-    // Debug: Log the final color vector size
-    std::cout << "Debug: Total color vector size: " << color->size() << std::endl;
-
-    // Reset the flag after updating colors
+    colors_initialized = true;
     particle_data_changed = false;
 }
 
@@ -180,22 +191,42 @@ void Update_Points() {
 }
 
 void Update_constant_Points() {
-	for (int i = 0; i < constant_acceleration_simulation->particles.size(); i++) {
-		(*constant_acceleration_points)[i] = constant_acceleration_simulation->particles[i].Location;
-	}
+    bool changed = false;
+    for (int i = 0; i < constant_acceleration_simulation->particles.size(); i++) {
+        Vector2D newLoc = constant_acceleration_simulation->particles[i].Location;
+        if ((*constant_acceleration_points)[i] != newLoc) {
+            (*constant_acceleration_points)[i] = newLoc;
+            changed = true;
+        }
+    }
+    if (changed) particle_data_changed = true;
 }
 
 void Update_sinecosine_Points() {
-	for (int i = 0; i < sinecosine_simulation->particle_num; i++) {
-		(*cosine_points)[i] = (*sinecosine_simulation->cosine_particles)[i];
-		(*sine_points)[i] = (*sinecosine_simulation->sine_particles)[i];
-	}
+    bool changed = false;
+    for (int i = 0; i < sinecosine_simulation->particle_num; i++) {
+        Vector2D newCosLoc = (*sinecosine_simulation->cosine_particles)[i];
+        Vector2D newSinLoc = (*sinecosine_simulation->sine_particles)[i];
+        
+        if ((*cosine_points)[i] != newCosLoc || (*sine_points)[i] != newSinLoc) {
+            (*cosine_points)[i] = newCosLoc;
+            (*sine_points)[i] = newSinLoc;
+            changed = true;
+        }
+    }
+    if (changed) particle_data_changed = true;
 }
 
 void Update_gather_Points() {
-	for (int i = 0; i < gather_simulation->particles.size(); i++) {
-		(*gather_points)[i] = gather_simulation->particles[i].Location;
-	}
+    bool changed = false;
+    for (int i = 0; i < gather_simulation->particles.size(); i++) {
+        Vector2D newLoc = gather_simulation->particles[i].Location;
+        if ((*gather_points)[i] != newLoc) {
+            (*gather_points)[i] = newLoc;
+            changed = true;
+        }
+    }
+    if (changed) particle_data_changed = true;
 }
 
 //========================================================particle mode ========================================================//
