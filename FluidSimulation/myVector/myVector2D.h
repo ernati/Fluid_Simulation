@@ -95,5 +95,16 @@ public :
         return tmp;
     }
 
+    // 등호 연산자 - 두 벡터가 같은지 비교
+    bool operator== (const Vector2D& c) const
+    {
+        return (X == c.X && Y == c.Y);
+    }
+
+    // 불등호 연산자 - 두 벡터가 다른지 비교
+    bool operator!= (const Vector2D& c) const
+    {
+        return !(*this == c);
+    }
 
 };

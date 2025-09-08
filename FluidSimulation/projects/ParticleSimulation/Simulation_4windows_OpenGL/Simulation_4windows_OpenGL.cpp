@@ -423,9 +423,6 @@ void idle(void)
 			/*std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
 			std::cout << "simulation �ɸ��� �ð�(��) : " << sec.count() << "seconds" << std::endl;*/
 
-			// Debug: Log cell data before rendering fluid
-    		debug_cell_data();
-
 			Update_Points();
 			Update_constant_Points();
 			Update_sinecosine_Points();
@@ -673,19 +670,4 @@ void log_fluid_cell_center_point() {
         std::cout << "Point " << i << ": (" << (*simulation->fluid_cell_center_point)[i].X << ", "
                   << (*simulation->fluid_cell_center_point)[i].Y << ")" << std::endl;
     }
-}
-
-void debug_cell_data() {
-    // Debug: Log cell_type_grid
-    std::cout << "Debug: cell_type_grid state:" << std::endl;
-    for (int i = 0; i < simulation->cell_number; ++i) {
-        std::cout << "Cell " << i << ": Type = " << static_cast<int>(simulation->cell_type_grid->cell_values[i]) << std::endl;
-    }
-
-    // Debug: Log cell_center_point
-    std::cout << "Debug: cell_center_point state:" << std::endl;
-    for (int i = 0; i < simulation->cell_center_point->cell_values.size(); ++i) {
-        std::cout << "Cell " << i << ": Center = (" << simulation->cell_center_point->cell_values[i].X << ", "
-                  << simulation->cell_center_point->cell_values[i].Y << ")" << std::endl;
-    }
-}
+} 
