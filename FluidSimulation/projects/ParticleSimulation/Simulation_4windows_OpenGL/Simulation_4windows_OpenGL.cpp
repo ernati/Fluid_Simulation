@@ -72,6 +72,9 @@ bool isPixelMode = false;
 bool isParticleMode = true;
 //bool isExtrapolationCell = false;
 
+// 색상 초기화 상태를 추적하는 플래그
+bool colors_initialized = false;
+
 //========================================================particle mode ========================================================//
 
 //simulation�� particle���� ��ġ�� points�� ����
