@@ -320,11 +320,10 @@ void init(void) {
 	//gather
 	pushback_gather_SimulationPoints_to_Points();
 
-	// 색상 초기화 및 업데이트
-	initialize_colors();
-	update_particle_colors();
+	pushback_color();
+	//pushback_Circle_color();
 
-	// bbox 초기화 (한 번만 설정되는 정적 경계)
+		// bbox 초기화 (한 번만 설정되는 정적 경계)
 	bbox = Box(0.0, 1.0, 0.0, 1.0);
 	box_line = { 
 		Vector2D(bbox.xmin, bbox.ymin),
@@ -475,7 +474,7 @@ void idle(void)
 
             // 실제 변경이 있을 때만 색상 업데이트
             if (particle_data_changed) {
-                update_particle_colors();
+                pushback_color();
             }
 
             ////circle
