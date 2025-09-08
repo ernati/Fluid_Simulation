@@ -55,13 +55,18 @@ unique_ptr<vector<Vector2D>> constant_acceleration_points;
 unique_ptr<vector<Vector2D>> cosine_points;
 unique_ptr<vector<Vector2D>> sine_points;
 unique_ptr<vector<Vector2D>> gather_points;
+// Color data management
 unique_ptr<vector<vec3>> color;
+size_t boundary_color_start = 0;     // 경계선 색상 시작 인덱스
+size_t boundary_color_count = 0;      // 경계선 색상 개수
+size_t particle_color_start = 0;      // 파티클 색상 시작 인덱스
+bool colors_initialized = false;       // 색상 초기화 여부
 
 Box bbox;
 vector<Vector2D> grid_line;
 vector<Vector2D> box_line;
 
-//grid_N�� �����ϸ� grid ���� �ٲ��.
+//grid_N을 수정하면 grid 밀도가 바뀜
 int grid_N = 40;
 
 //�ùķ��̼� ���¸� ������ option
@@ -111,34 +116,44 @@ void pushback_gather_SimulationPoints_to_Points() {
 // Global flag to track if particle data has changed
 bool particle_data_changed = true;
 
-void pushback_color() {
-    // 이미 초기화되었고 파티클 데이터가 변경되지 않았다면 리턴
-    if (colors_initialized && !particle_data_changed) {
+void initialize_colors() {
+    if (colors_initialized) {
         return;
     }
 
-    // 처음 초기화할 때만 벡터 크기를 계산
-    if (!colors_initialized) {
-        size_t total_size = 
-            number +  // Fluid particles
-            number +  // Constant acceleration particles
-            (4 + 4 * (grid_N - 1)) +  // Grid lines
-            simulation->fluid_cell_center_point->size() +  // Fluid cell centers
-            2 * sinecosine_simulation->particle_num +  // Sine and cosine particles
-            number;  // Gather particles
+    // 전체 크기 계산
+    size_t total_size = 
+        number +  // Fluid particles
+        number +  // Constant acceleration particles
+        (4 + 4 * (grid_N - 1)) +  // Grid lines and box
+        simulation->fluid_cell_center_point->size() +  // Fluid cell centers
+        2 * sinecosine_simulation->particle_num +  // Sine and cosine particles
+        number;  // Gather particles
 
-        color->resize(total_size);
-        
-        // Debug: Log initial setup
-        std::cout << "Debug: Initial color setup, total size: " << total_size << std::endl;
-    } else {
-        // Debug: Log update reason
-        std::cout << "Debug: Skipping color update - colors are fixed" << std::endl;
-        particle_data_changed = false;
-        return;
-    }
-
+    color->resize(total_size);
     size_t current_index = 0;
+
+    // 1. 정적 데이터 (경계선) 색상 설정
+    boundary_color_start = current_index;
+    // Box와 Grid 경계선 - 검정색
+    for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
+        (*color)[current_index++] = vec3(0.0f, 0.0f, 0.0f);
+    }
+    boundary_color_count = current_index - boundary_color_start;
+
+    // 2. 동적 데이터 (파티클) 색상 설정
+    particle_color_start = current_index;
+    
+    std::cout << "Debug: Initializing colors - total size: " << total_size << std::endl;
+    colors_initialized = true;
+}
+
+void update_particle_colors() {
+    if (!colors_initialized || !particle_data_changed) {
+        return;
+    }
+
+    size_t current_index = particle_color_start;
 
     // Fluid particles - blue
     for (int i = 0; i < number; i++) {
