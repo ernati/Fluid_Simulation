@@ -372,9 +372,11 @@ void init(void) {
 		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) *
 		sine_points->size(), sizeof(Vector2D) * gather_points->size(), &((*gather_points)[0]));
 
-	//color �Ҵ�
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
-		* simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) * sine_points->size() + sizeof(Vector2D) * gather_points->size(), sizeof(vec3) * color->size(), &((*color)[0]));
+	//color 데이터는 particle_data_changed가 true일 때만 업데이트
+    if (particle_data_changed) {
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D)
+            * simulation->fluid_cell_center_point->size() + sizeof(Vector2D) * constant_acceleration_points->size() + sizeof(Vector2D) * cosine_points->size() + sizeof(Vector2D) * sine_points->size() + sizeof(Vector2D) * gather_points->size(), sizeof(vec3) * color->size(), &((*color)[0]));
+    }
 
 	//load shaders
 	GLuint program = InitShader("vshader_2dBezier_test.glsl", "fshader_2dBezier_test.glsl");
@@ -386,7 +388,7 @@ void init(void) {
 
 	//color position
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), BUFFER_OFFSET(sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size()));
+	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 0, BUFFER_OFFSET(sizeof(Vector2D) * fluids_points->size() + sizeof(Vector2D) * box_line.size() + sizeof(Vector2D) * grid_line.size() + sizeof(Vector2D) * simulation->fluid_cell_center_point->size()));
 
 	glEnableVertexAttribArray(0);
 	//initialize uniform variable from vertex shander
@@ -454,16 +456,23 @@ void idle(void)
 			/*std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
 			std::cout << "simulation �ɸ��� �ð�(��) : " << sec.count() << "seconds" << std::endl;*/
 
-			Update_Points();
-			Update_constant_Points();
-			Update_sinecosine_Points();
-			Update_gather_Points();
+            // 이전 위치를 저장
+            particle_data_changed = false;
+            
+            // 각 시뮬레이션의 파티클 위치 업데이트
+            Update_Points();
+            Update_constant_Points();
+            Update_sinecosine_Points();
+            Update_gather_Points();
 
-			pushback_color();
+            // 실제 변경이 있을 때만 색상 업데이트
+            if (particle_data_changed) {
+                pushback_color();
+            }
 
-			////circle
-			//simulation->particle_simulation();
-			//Update_Circle_points();
+            ////circle
+            //simulation->particle_simulation();
+            //Update_Circle_points();
 		}
 	}
 
