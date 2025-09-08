@@ -411,6 +411,9 @@ void idle(void)
 			/*std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
 			std::cout << "simulation �ɸ��� �ð�(��) : " << sec.count() << "seconds" << std::endl;*/
 
+			// Debug: Log cell data before rendering fluid
+    		debug_cell_data();
+
 			Update_Points();
 			Update_constant_Points();
 			Update_sinecosine_Points();
@@ -673,26 +676,4 @@ void debug_cell_data() {
         std::cout << "Cell " << i << ": Center = (" << simulation->cell_center_point->cell_values[i].X << ", "
                   << simulation->cell_center_point->cell_values[i].Y << ")" << std::endl;
     }
-}
-
-// Ensure pushback_color is called after fluid_cell_center_point is updated
-void update_simulation_and_colors() {
-    // Update simulation data
-    simulation->particle_simulation(); // Assuming this updates particle data
-
-    // Classify cell types
-    simulation->classify_cell_type();
-
-    // Debug: Log cell data before rendering fluid
-    debug_cell_data();
-
-    // Update fluid cell center points
-    simulation->rendering_fluid();
-
-    // Log the updated fluid_cell_center_point
-    log_fluid_cell_center_point();
-
-    // Update colors
-    particle_data_changed = true;
-    pushback_color();
 }
