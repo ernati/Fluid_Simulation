@@ -107,26 +107,7 @@
 //	glutPostRedisplay();
 //}
 //
-//void idle(void)
-//{
-//	////구분
-//	//printf("\n__________________________________________________________________________________\n");
-//	//printf("__________________________________________________________________________________\n");
-//	//printf("__________________________________________________________________________________\n");
-//	//printf("__________________________________________________________________________________\n");
-//	//printf("__________________________________________________________________________________\n");
-//
-//	//누적된 밀리초 얻기
-//	time_idle = glutGet(GLUT_ELAPSED_TIME);
-//
-//
-//	//입자 움직임
-//	for (int i = 0; i < number; i++) {
-//		/*printf("%f %f -> ", points[i].x, points[i].y);*/
-//		particles[i].move( ( time_idle + i ) );
-//		points[i] = particles[i].Location;
-//		//printf("%f %f\n", points[i].x, points[i].y);
-//	}
+// Note: Idle function disabled - this was for quadratic particle simulation testing
 //
 //	glutPostRedisplay();
 //}
@@ -157,30 +138,4 @@
 //	glLineWidth(2.0);
 //	glDrawArrays(GL_LINE_LOOP, number, 4);
 //
-//	glBindVertexArray(0);
-//	glutSwapBuffers();
-//}
-//
-//int main(int argc, char** argv) {
-//	glutInit(&argc, argv);
-//
-//	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-//	glutInitWindowSize(Width, Height);
-//
-//	glutCreateWindow("2D Particle Simulation");
-//
-//
-//
-//	glewInit();
-//	init();
-//
-//	glutDisplayFunc(display);
-//	glutIdleFunc(idle);
-//	glutReshapeFunc(reshape);
-//	glutKeyboardFunc(keyboard);
-//	glutMainLoop();
-//
-//	/*delete simulation;*/
-//
-//	return 0;
-//}
+// Note: OpenGL display and main functions commented out - functionality moved to main.cpp

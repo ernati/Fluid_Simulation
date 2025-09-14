@@ -20,6 +20,7 @@
 #include "../header_background/drawgrid.h"
 #include "../Simulation/fluid_grid_2D_multithread.h"
 #include "../header_background/box.h"
+#include "../../config/SimulationConfig.h"
 
 using namespace std;
 
@@ -193,18 +194,11 @@ void keyboard(unsigned char key, int x, int y) {
 
 void idle(void)
 {
-	////구분
-	//printf("\n__________________________________________________________________________________\n");
-	//printf("__________________________________________________________________________________\n");
-	//printf("__________________________________________________________________________________\n");
-	//printf("__________________________________________________________________________________\n");
-	//printf("__________________________________________________________________________________\n");
-
-	//누적된 밀리초 얻기
+	// Get accumulated milliseconds
 	time_idle = glutGet(GLUT_ELAPSED_TIME);
 
-	//0.06초 마다 particle 위치 update
-	if (time_idle % 120 == 0) {
+	// Update particle positions using configured interval
+	if (time_idle % SimulationConfig::IDLE_UPDATE_INTERVAL == 0) {
 		if (isStart) {
 
 			/*thread t1 = thread( &Fluid_Simulator_Grid::particle_simulation, simulation );
@@ -560,8 +554,9 @@ void idle(void)
 
 
 			std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+			#ifdef DEBUG
 			std::cout << "simulation 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;
-
+			#endif
 
 			Update_Points();
 		}

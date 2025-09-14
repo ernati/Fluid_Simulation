@@ -1,5 +1,19 @@
 # Fluid_Simulation
 
+## Recent Code Quality Improvements (September 2025)
+- ✅ **Dead Code Removal**: Cleaned up commented-out legacy code and unused functions
+- ✅ **Debug Output Management**: Added conditional compilation for debug statements using `#ifdef DEBUG`
+- ✅ **Magic Number Elimination**: Created `SimulationConfig.h` with centralized configuration constants
+- ✅ **Code Documentation**: Standardized comments and added function documentation
+- ✅ **Memory Management**: Improved consistency with smart pointers usage
+
+## Configuration
+Simulation parameters can now be easily modified in `FluidSimulation/config/SimulationConfig.h`:
+- Particle count, grid size, timestep
+- Physical properties (density, gravity)
+- Window dimensions and update intervals
+- Particle generation parameters
+
 ## 사용하는 방법
 1. 프로젝트 clone
 2. FluidSimulation/projects/ParticleSimulation/ParticleSimulation.sln 파일 실행

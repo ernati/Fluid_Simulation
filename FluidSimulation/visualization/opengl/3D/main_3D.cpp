@@ -177,26 +177,7 @@
 //	model_view = glGetUniformLocation(program, "model_view");
 //	projection = glGetUniformLocation(program, "projection");
 //
-//	glEnable(GL_DEPTH_TEST);
-//	glClearColor(1.0, 1.0, 1.0, 0.0);
-//}
-//
-//void reshape(int width, int height)
-//{
-//	glViewport(0, 0, width, height);
-//	aspect = GLfloat(width) / height;
-//}
-//
-//
-//double xxx = 0;
-//
-//void keyboard(unsigned char key, int x, int y) {
-//	switch (key) {
-//	case 'q':
-//		//simulation->delete_vectors();
-//		//delete simulation;
-//		exit(EXIT_SUCCESS);
-//		break;
+// Note: 3D visualization functions disabled
 //
 //
 //	case 'z': zNear *= 1.1; zFar *= 1.1; break;
@@ -337,35 +318,7 @@
 //	//	break;
 //
 //	}
-//}
-//
-//int main(int argc, char** argv) {
-//	glutInit(&argc, argv);
-//
-//	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-//	glutInitWindowSize(Width, Height);
-//
-//	aspect = 1024.0 / 1024.0;
-//
-//	glutCreateWindow("3D Particle Simulation");
-//
-//	glewInit();
-//	init();
-//
-//	glutDisplayFunc(display);
-//	glutIdleFunc(idle);
-//	glutReshapeFunc(reshape);
-//	glutKeyboardFunc(keyboard);
-//
-//	glutCreateMenu(Menu);
-//	glutAddMenuEntry("ParticleMode", 0);
-//	glutAddMenuEntry("FluidMode", 1);
-//	glutAddMenuEntry("Start", 2);
-//	glutAddMenuEntry("Finish", 3);
-//	//glutAddMenuEntry("extra_visible", 4);
-//	glutAttachMenu(GLUT_RIGHT_BUTTON);
-//
-//	glutMainLoop();
+// Note: 3D main function disabled - this is experimental 3D visualization code
 //
 //	return 0;
 //}

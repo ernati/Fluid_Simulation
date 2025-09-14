@@ -19,7 +19,7 @@
 #include "../../Simulation/Constant_Acceleration_Simulation_2D.h"
 #include "../../Simulation/gather_simulation.h"
 #include "../../Simulation/simul_sinecosine.h"
-
+#include "../../config/SimulationConfig.h"
 
 using namespace std;
 
@@ -38,17 +38,14 @@ GLuint vbo;
 //time
 int time_idle;
 
-//simulation 선언
+// Simulation declarations
 unique_ptr<Fluid_Simulator_Grid> simulation;
 unique_ptr<Constant_Acceleration_Simulator> constant_acceleration_simulation;
 unique_ptr<Simul_SineCosine> sinecosine_simulation;
 unique_ptr<GatherSimulation> gather_simulation;
 
-//n각형 - 미사용
-int n = 12;
-
-//number를 조절하면 particle 수가 바뀐다.
-int number = 4000;
+// Particle count configuration - reduced for 4-window mode performance
+int number = SimulationConfig::DEFAULT_PARTICLE_COUNT / 2;
 
 unique_ptr<vector<Vector2D>> fluids_points;
 unique_ptr<vector<Vector2D>> constant_acceleration_points;

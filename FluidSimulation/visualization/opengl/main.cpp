@@ -16,18 +16,17 @@
 #include "../../grid/drawgrid.h"
 #include "../../Simulation/fluid_grid_2D.h"
 #include "../../box/box.h"
-
-
+#include "../../config/SimulationConfig.h"
 
 using namespace std;
 
-//window size
-int Width = 1024;
-int Height = 1024;
+// Window size configuration
+int Width = SimulationConfig::DEFAULT_WINDOW_WIDTH;
+int Height = SimulationConfig::DEFAULT_WINDOW_HEIGHT;
 
 GLuint model_view; // model-view matrix uniform shader variable location
 
-					//Projection transformation parameters
+// Projection transformation parameters
 GLuint projection; //projection matrix uniform shader variable location
 
 GLuint vao;
@@ -39,11 +38,8 @@ int time_idle;
 //simulation 선언
 Fluid_Simulator_Grid* simulation;
 
-//n각형 - 미사용
-int n = 12;
-
-//number를 조절하면 particle 수가 바뀐다.
-int number = 8000;
+// Current simulation parameters (can be modified at runtime)
+int number = SimulationConfig::DEFAULT_PARTICLE_COUNT;      // Current particle count
 
 vector<Vector2D>* points;
 vector<vec3>* color;
@@ -51,12 +47,13 @@ Box bbox;
 vector<Vector2D> grid_line;
 vector<Vector2D> box_line;
 
-//grid_N을 조절하면 grid 수가 바뀐다.
-int grid_N = 40;
+// Current simulation parameters (can be modified at runtime)
+int grid_N = SimulationConfig::DEFAULT_GRID_SIZE;           // Current grid size
 
-//시뮬레이션 상태를 조절할 option - 실행 후 마우스 우클릭을 누르면 나오는 메뉴를 통해 조절할 수 있다.
-int Option = 3;
+// Simulation state options - controlled via right-click menu during execution
+int Option = SimulationConfig::DEFAULT_SIMULATION_OPTION;
 
+// Simulation control flags
 bool isStart = false;
 bool isPixelMode = false;
 bool isParticleMode = true;
@@ -64,36 +61,44 @@ bool isExtrapolationCell = false;
 
 //========================================================particle mode ========================================================//
 
-//simulation의 particle들의 위치를 points에 저장
+/**
+ * Copy simulation particle positions to points vector for rendering
+ * Updates the global points vector with current particle locations
+ */
 void pushback_SimulationPoints_to_Points() {
 	points->clear();
 	for (int i = 0; i < number; i++) {
 		points->push_back(simulation->particles[i].Location);
 	}
-
 }
 
-//color를 초기화하는 함수
+/**
+ * Initialize color values for rendering
+ * Sets up color vectors for particles, grid, and fluid cells
+ */
 void pushback_color() {
 	color->clear();
 
-	//입자들
+	// Colors for particles
 	for (int i = 0; i < number; i++) {
 		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	//box와 grid
+	// Colors for bounding box and grid lines
 	for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
 		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	//fluid(pixel)
+	// Colors for fluid cells (pixels)
 	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
 		color->push_back(vec3(0.0f, 0.0f, 0.0f));
 	}
-
 }
 
+/**
+ * Update particle positions in the points vector
+ * Called during animation to update rendering data
+ */
 void Update_Points() {
 	for (int i = 0; i < simulation->particles.size(); i++) {
 			(*points)[i] = simulation->particles[i].Location;
@@ -104,83 +109,31 @@ void Update_Points() {
 
 
 
-//========================================================circle mode========================================================//
-//정 n각형의 좌표 생성 - 미사용
+//========================================================particle mode ========================================================//
 
-void pushback_Circle_points() {
-	Vector2D location;
-	points->clear();
-	//j번째 particle
-	for (int j = 0; j < number; j++) {
-		location = simulation->particles[j].Location;
-		for (int i = 0; i < n; i++) {
-			int theta = 360 / n;
-			double x = location.X + 0 * cos(theta * i);
-			double y = location.Y + 0 * sin(theta * i);
-
-			Vector2D new_location = Vector2D(x, y);
-
-			points->push_back(new_location);
-		}
-	}
-}
-
-void Update_Circle_points() {
-	Vector2D location;
-	//j번째 particle
-	for (int i = 0; i < number; i++) {
-		location = simulation->particles[i].Location;
-		for (int j = 0; j < n; j++) {
-			int theta = 360 / n;
-			double x = location.X + 0 * cos(theta * j);
-			double y = location.Y + 0 * sin(theta * j);
-
-			(*points)[ i * n + j ] = Vector2D(x, y);
-		}
-	}
-}
-
-void pushback_Circle_color() {
-	color->clear();
-
-	for (int i = 0; i < n * number; i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
-	}
-
-	for (int i = 0; i < 4 + 4 * (grid_N - 1); i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
-	}
-
-	//fluid mode는 blue
-	for (int i = 0; i < simulation->fluid_cell_center_point->size(); i++) {
-		color->push_back(vec3(0.0f, 0.0f, 0.0f));
-	}
-}
-
-//========================================================circle mode========================================================//
+// Note: Circle mode functions removed as they were unused legacy code
 
 void init(void) {
 
 	points = new vector<Vector2D>();
 	color = new vector<vec3>();
 	
-	//simulation 실행 및 입자들 생성
+	// Initialize simulation and create particles
 	simulation = new Fluid_Simulator_Grid(number, grid_N);
 
 	pushback_SimulationPoints_to_Points();
-	//pushback_Circle_points();
 
 	pushback_color();
-	//pushback_Circle_color();
 
-	//bbox 선언 및 초기화
-	bbox = Box(0.0, 1.0, 0.0, 1.0);
+	// Initialize bounding box using configuration constants
+	bbox = Box(SimulationConfig::SIMULATION_BOUNDARY_MIN, SimulationConfig::SIMULATION_BOUNDARY_MAX, 
+			   SimulationConfig::SIMULATION_BOUNDARY_MIN, SimulationConfig::SIMULATION_BOUNDARY_MAX);
 	box_line.push_back( Vector2D(bbox.xmin, bbox.ymin) );
 	box_line.push_back(Vector2D(bbox.xmax, bbox.ymin));
 	box_line.push_back(Vector2D(bbox.xmax, bbox.ymax));
 	box_line.push_back(Vector2D(bbox.xmin, bbox.ymax));
 
-	//vector의 size를 원하는 크기만큼 늘린다.
+	// Extend vector size to desired grid dimensions
 	for (int i = 0; i < 4 * (grid_N - 1); i++) {
 		grid_line.push_back(Vector2D(0, 0));
 	}

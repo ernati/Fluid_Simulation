@@ -3,6 +3,7 @@
 #include "../myVector/myVector2D.h"
 #include "../particle/particle.h"
 #include "../grid/grid.h"
+#include "../config/SimulationConfig.h"
 #include "ParticleSimulator.h"
 #include <vector>
 #include <math.h>
@@ -15,9 +16,16 @@
 #include <thread>
 #include <chrono>
 
+// Uncomment the line below to enable debug output
 //#define DEBUG
 
-//난수 생성
+#ifdef DEBUG
+    #define DEBUG_PRINT(x) std::cout << x << std::endl
+#else
+    #define DEBUG_PRINT(x)
+#endif
+
+// Random number generation
 #include<cstdlib> //rand(), srand()
 #include<ctime>
 
@@ -187,14 +195,12 @@ void Adjust_velocity_from_bodyforce_reupdate();
 
 };
 
-//기본생성자
+// Default constructor
 Fluid_Simulator_Grid::Fluid_Simulator_Grid() {
-    //timestep의 default = 0.06
-    timestep = 0.06;
-
+    timestep = SimulationConfig::DEFAULT_TIMESTEP;
     gridsize = 10;
 
-    //velocity grid 초기화
+    // Initialize velocity grid
     previous_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < (gridsize) * (gridsize); n++) {
         previous_velocity_grid->cell_values.push_back(Vector2D());
@@ -221,32 +227,38 @@ void Fluid_Simulator_Grid::init(int particle_number, int grid_N) {
     for (int i = 0; i < particle_number; i++) {
         //0~99 난수 생성    
         int randomLocation_X = rand() % 200;
-        //0~99 난수 생성
-        int randomLocation_Y = rand() % 200;
+        // Generate random numbers for particle positioning
+        int randomLocation_Y = rand() % SimulationConfig::PARTICLE_RANDOM_RANGE;
 
-        //위치 X : 0.1~0.3, 위치 Y : 0.6~0.8
-        Particle2D tmp = Particle2D(((double)randomLocation_X + 100) / 1000.0, (((double)randomLocation_Y) + 600) / 1000.0, (double)randomLocation_X / 500.0, (double)randomLocation_Y / 500.0, (double)randomLocation_Y / 1000.0, -9.8);
+        // Position X: 0.1~0.3, Position Y: 0.6~0.8 using configuration constants
+        Particle2D tmp = Particle2D(
+            ((double)randomLocation_X + SimulationConfig::PARTICLE_POSITION_OFFSET_X) / SimulationConfig::PARTICLE_POSITION_SCALE, 
+            (((double)randomLocation_Y) + SimulationConfig::PARTICLE_POSITION_OFFSET_Y) / SimulationConfig::PARTICLE_POSITION_SCALE, 
+            (double)randomLocation_X / SimulationConfig::PARTICLE_VELOCITY_SCALE, 
+            (double)randomLocation_Y / SimulationConfig::PARTICLE_VELOCITY_SCALE, 
+            (double)randomLocation_Y / SimulationConfig::PARTICLE_MASS_SCALE, 
+            SimulationConfig::DEFAULT_GRAVITY);
         particles.push_back(tmp);
 
     }
 
-    //timestep의 default = 0.06
-    timestep = 0.06;
-    density = 1.0;
+    // Initialize simulation parameters using configuration constants
+    timestep = SimulationConfig::DEFAULT_TIMESTEP;
+    density = SimulationConfig::DEFAULT_DENSITY;
     delta_x = 1.0 / (double)grid_N;
     delta_y = 1.0 / (double)grid_N;
 
-    particle_radius = 0.05;
+    particle_radius = SimulationConfig::DEFAULT_PARTICLE_RADIUS;
 
     tool = make_unique<MAC_Grid<bool>>(gridsize);
 
-    //previous_velocity grid 초기화
+    // Initialize previous velocity grid
     previous_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         previous_velocity_grid->cell_values.push_back(Vector2D());
     }
 
-    //next_velocity grid 초기화
+    // Initialize next velocity grid
     next_velocity_grid = make_unique<MAC_Grid<Vector2D>>(gridsize);
     for (int n = 0; n < cell_number; n++) {
         next_velocity_grid->cell_values.push_back(Vector2D());

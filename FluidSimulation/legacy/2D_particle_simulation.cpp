@@ -147,28 +147,5 @@
 //
 //	glBindVertexArray(0);
 //	glutSwapBuffers();
-//}
-//
-//int main(int argc, char** argv) {
-//	glutInit(&argc, argv);
-//
-//	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-//	glutInitWindowSize(Width, Height);
-//
-//	glutCreateWindow("2D Particle Simulation");
-//
-//
-//
-//	glewInit();
-//	init();
-//
-//	glutDisplayFunc(display);
-//	glutIdleFunc(idle);
-//	glutReshapeFunc(reshape);
-//	glutKeyboardFunc(keyboard);
-//	glutMainLoop();
-//
-//	/*delete simulation;*/
-//
-//	return 0;
-//}
+// Note: Main function commented out as this is legacy code
+// The active main function is in the visualization/opengl files
