@@ -4,21 +4,8 @@ class Vector2D {
 
 public :
 
-    Vector2D operator* (const double& c) const
-    {
-        Vector2D tmp = Vector2D();
-        tmp.X = this->X * c;
-        tmp.Y = this->Y * c;
-        return tmp;
-    }
-
-    Vector2D operator/ (const double& c) const
-    {
-        Vector2D tmp = Vector2D();
-        tmp.X = this->X / c;
-        tmp.Y = this->Y / c;
-        return tmp;
-    }  double X;
+    //벡터 성분
+    double X;
     double Y;
 
 
@@ -67,7 +54,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator/ (const double& c)
+    Vector2D operator/ (const double& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X / c;
@@ -109,6 +96,18 @@ public :
     }
 
     // 등호 연산자 - 두 벡터가 같은지 비교
+    bool operator== (const Vector2D& c) const
+    {
+        return (X == c.X && Y == c.Y);
+    }
+
+    // 불등호 연산자 - 두 벡터가 다른지 비교
+    bool operator!= (const Vector2D& c) const
+    {
+        return !(*this == c);
+    }
+
+};
     bool operator== (const Vector2D& c) const
     {
         return (X == c.X && Y == c.Y);
