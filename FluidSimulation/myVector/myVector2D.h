@@ -4,8 +4,21 @@ class Vector2D {
 
 public :
 
-    //벡터 성분
-    double X;
+    Vector2D operator* (const double& c) const
+    {
+        Vector2D tmp = Vector2D();
+        tmp.X = this->X * c;
+        tmp.Y = this->Y * c;
+        return tmp;
+    }
+
+    Vector2D operator/ (const double& c) const
+    {
+        Vector2D tmp = Vector2D();
+        tmp.X = this->X / c;
+        tmp.Y = this->Y / c;
+        return tmp;
+    }  double X;
     double Y;
 
 
@@ -30,7 +43,7 @@ public :
     //scalar에서는 따로 정의를 안하면,
     //Vector2D + Scalar 는 컴파일이 제대로 되지만,
     //Scalar + Vector2D 는 컴파일 에러가 뜬다...!
-    Vector2D operator+ (const double& c)
+    Vector2D operator+ (const double& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = c + this->X;
@@ -38,7 +51,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator- (const double& c)
+    Vector2D operator- (const double& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X - c;
@@ -46,7 +59,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator* (const double& c)
+    Vector2D operator* (const double& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = this->X * c;
@@ -63,7 +76,7 @@ public :
     }
 
     //연산자 재정의 - element wise
-    Vector2D operator+ (const Vector2D& c)
+    Vector2D operator+ (const Vector2D& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = X + c.X;
@@ -71,7 +84,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator- (const Vector2D& c)
+    Vector2D operator- (const Vector2D& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = X - c.X;
@@ -79,7 +92,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator* (const Vector2D& c)
+    Vector2D operator* (const Vector2D& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = X * c.X;
@@ -87,7 +100,7 @@ public :
         return tmp;
     }
 
-    Vector2D operator/ (const Vector2D& c)
+    Vector2D operator/ (const Vector2D& c) const
     {
         Vector2D tmp = Vector2D();
         tmp.X = X / c.X;

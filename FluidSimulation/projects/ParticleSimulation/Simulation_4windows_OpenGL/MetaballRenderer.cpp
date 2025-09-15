@@ -66,12 +66,12 @@ float MetaballRenderer::calculateFieldValue(const Vector2D& point, const std::ve
     
     for (const auto& particle : particles) {
         Vector2D diff = point - particle;
-        float distance = sqrt(diff.X * diff.X + diff.Y * diff.Y);
+        double distance = sqrt(diff.X * diff.X + diff.Y * diff.Y);
         
-        if (distance < radius && distance > 0.0f) {
+        if (distance < radius && distance > 0.0) {
             // Use inverse square falloff for metaball field
-            float influence = strength * radius * radius / (distance * distance);
-            totalValue += influence;
+            double influence = strength * radius * radius / (distance * distance);
+            totalValue += static_cast<float>(influence);
         }
     }
     
@@ -158,8 +158,8 @@ GridCell MetaballRenderer::getGridCell(int x, int y) {
     GridCell cell;
     
     // Calculate corner positions
-    float stepX = (gridMax.X - gridMin.X) / (gridWidth - 1);
-    float stepY = (gridMax.Y - gridMin.Y) / (gridHeight - 1);
+    double stepX = (gridMax.X - gridMin.X) / (gridWidth - 1);
+    double stepY = (gridMax.Y - gridMin.Y) / (gridHeight - 1);
     
     cell.position[0] = Vector2D(gridMin.X + x * stepX, gridMin.Y + y * stepY);       // Bottom-left
     cell.position[1] = Vector2D(gridMin.X + (x+1) * stepX, gridMin.Y + y * stepY);   // Bottom-right
@@ -177,11 +177,11 @@ GridCell MetaballRenderer::getGridCell(int x, int y) {
 
 Vector2D MetaballRenderer::interpolate(const Vector2D& p1, float val1, const Vector2D& p2, float val2) {
     if (std::abs(val1 - val2) < 1e-6f) {
-        return (p1 + p2) * 0.5f;
+        return (p1 + p2) * 0.5;
     }
     
-    float t = (threshold - val1) / (val2 - val1);
-    t = std::max(0.0f, std::min(1.0f, t)); // Clamp to [0, 1]
+    double t = (threshold - val1) / (val2 - val1);
+    t = std::max(0.0, std::min(1.0, t)); // Clamp to [0, 1]
     
     return p1 + (p2 - p1) * t;
 }
