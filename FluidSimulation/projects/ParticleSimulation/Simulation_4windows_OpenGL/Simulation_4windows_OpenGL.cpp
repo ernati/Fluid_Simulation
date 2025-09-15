@@ -19,6 +19,7 @@
 #include "../../../Simulation/Constant_Acceleration_Simulation_2D.h"
 #include "../../../Simulation/gather_simulation.h"
 #include "../../../Simulation/simul_sinecosine.h"
+#include "MetaballRenderer.h"
 
 
 using namespace std;
@@ -70,10 +71,15 @@ int Option = 3;
 bool isStart = false;
 bool isPixelMode = false;
 bool isParticleMode = true;
+bool isMetaballMode = false;
 //bool isExtrapolationCell = false;
 
 // 색상 초기화 상태를 추적하는 플래그
 bool colors_initialized = false;
+
+// Metaball renderer
+unique_ptr<MetaballRenderer> metaballRenderer;
+GLuint metaballVAO, metaballVBO, metaballEBO;
 
 //========================================================particle mode ========================================================//
 
@@ -106,6 +112,98 @@ void pushback_gather_SimulationPoints_to_Points() {
 	for (int i = 0; i < number; i++) {
 		gather_points->push_back(gather_simulation->particles[i].Location);
 	}
+}
+
+//========================================================metaball mode ========================================================//
+
+void initMetaballRenderer() {
+	// Initialize metaball renderer with simulation bounds
+	Vector2D minBounds(-1.0f, -1.0f);
+	Vector2D maxBounds(1.0f, 1.0f);
+	metaballRenderer = make_unique<MetaballRenderer>(64, 64, minBounds, maxBounds);
+	
+	// Set metaball parameters
+	metaballRenderer->setThreshold(0.5f);
+	metaballRenderer->setRadius(0.15f);
+	metaballRenderer->setStrength(1.5f);
+	
+	// Generate OpenGL buffers for metaball mesh
+	glGenVertexArrays(1, &metaballVAO);
+	glGenBuffers(1, &metaballVBO);
+	glGenBuffers(1, &metaballEBO);
+}
+
+void generateMetaballMesh() {
+	if (!metaballRenderer) return;
+	
+	// Convert fluid particles to Vector2D format for metaball renderer
+	std::vector<Vector2D> particles;
+	for (int i = 0; i < number; i++) {
+		particles.push_back(simulation->particles[i].Location);
+	}
+	
+	// Generate scalar field and mesh
+	metaballRenderer->generateScalarField(particles);
+	metaballRenderer->generateMesh();
+}
+
+void updateMetaballBuffers() {
+	if (!metaballRenderer) return;
+	
+	const MetaballMesh& mesh = metaballRenderer->getMesh();
+	
+	if (mesh.vertices.empty()) return;
+	
+	// Bind VAO
+	glBindVertexArray(metaballVAO);
+	
+	// Update vertex buffer
+	glBindBuffer(GL_ARRAY_BUFFER, metaballVBO);
+	glBufferData(GL_ARRAY_BUFFER, 
+				 mesh.vertices.size() * sizeof(Vector2D), 
+				 mesh.vertices.data(), 
+				 GL_DYNAMIC_DRAW);
+	
+	// Update element buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, metaballEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+				 mesh.indices.size() * sizeof(unsigned int), 
+				 mesh.indices.data(), 
+				 GL_DYNAMIC_DRAW);
+	
+	// Set vertex attributes
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2D), (void*)0);
+	glEnableVertexAttribArray(0);
+	
+	glBindVertexArray(0);
+}
+
+void renderMetaballMesh() {
+	if (!metaballRenderer) return;
+	
+	const MetaballMesh& mesh = metaballRenderer->getMesh();
+	
+	if (mesh.indices.empty()) return;
+	
+	// Set metaball color (light blue for fluid surface)
+	glColor3f(0.3f, 0.7f, 1.0f);
+	
+	// Enable line smoothing for better visual quality
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	
+	// Render as wireframe to show the surface outline
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glLineWidth(2.0f);
+	
+	glBindVertexArray(metaballVAO);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.indices.size()), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	
+	// Reset polygon mode
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glLineWidth(1.0f);
+	glDisable(GL_LINE_SMOOTH);
 }
 
 // Global flag to track if particle data has changed
@@ -323,6 +421,9 @@ void init(void) {
 	pushback_color();
 	//pushback_Circle_color();
 
+	// Initialize metaball renderer
+	initMetaballRenderer();
+
 		// bbox 초기화 (한 번만 설정되는 정적 경계)
 	bbox = Box(0.0, 1.0, 0.0, 1.0);
 	box_line = { 
@@ -420,6 +521,28 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'q':
 		exit(EXIT_SUCCESS);
 		break;
+	case 'm':
+	case 'M':
+		// Toggle metaball mode
+		isMetaballMode = !isMetaballMode;
+		if (isMetaballMode) {
+			isParticleMode = false;
+			isPixelMode = false;
+			printf("Metaball mode enabled\n");
+		} else {
+			isParticleMode = true;
+			printf("Particle mode enabled\n");
+		}
+		break;
+	case 'p':
+	case 'P':
+		// Toggle particle mode
+		isParticleMode = !isParticleMode;
+		if (isParticleMode) {
+			isPixelMode = false;
+			isMetaballMode = false;
+		}
+		break;
 
 	}
 	glutPostRedisplay();
@@ -475,6 +598,12 @@ void idle(void)
             // 실제 변경이 있을 때만 색상 업데이트
             if (particle_data_changed) {
                 pushback_color();
+            }
+
+            // Update metaball mesh if in metaball mode
+            if (isMetaballMode) {
+                generateMetaballMesh();
+                updateMetaballBuffers();
             }
 
             ////circle
@@ -538,6 +667,11 @@ void display() {
 			//for (int i = 0; i < number; i++) {
 			//	glDrawArrays(GL_LINES, i * n, n );
 			//}
+		}
+		
+		// Render metaball surface if in metaball mode
+		if (isMetaballMode) {
+			renderMetaballMesh();
 		}
 	}
 
@@ -659,12 +793,21 @@ void Menu(int Option) {
 	case 0:
 		isParticleMode = true;
 		isPixelMode = false;
+		isMetaballMode = false;
 		break;
 
 		//fluidmode
 	case 1:
 		isParticleMode = false;
 		isPixelMode = true;
+		isMetaballMode = false;
+		break;
+
+		//metaballmode
+	case 4:
+		isParticleMode = false;
+		isPixelMode = false;
+		isMetaballMode = true;
 		break;
 
 		//start
@@ -708,6 +851,7 @@ int main(int argc, char** argv) {
 	glutAddMenuEntry("PixelMode", 1);
 	glutAddMenuEntry("Start", 2);
 	glutAddMenuEntry("Finish", 3);
+	glutAddMenuEntry("MetaballMode", 4);
 	//glutAddMenuEntry("extra_visible", 4);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 

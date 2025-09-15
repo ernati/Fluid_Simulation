@@ -20,6 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Simulation_4windows_OpenGL.cpp" />
+    <ClCompile Include="MetaballRenderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MetaballRenderer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
