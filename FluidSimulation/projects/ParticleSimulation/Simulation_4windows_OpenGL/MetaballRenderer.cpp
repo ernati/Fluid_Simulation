@@ -66,7 +66,7 @@ float MetaballRenderer::calculateFieldValue(const Vector2D& point, const std::ve
     
     for (const auto& particle : particles) {
         Vector2D diff = point - particle;
-        float distance = diff.magnitude();
+        float distance = sqrt(diff.X * diff.X + diff.Y * diff.Y);
         
         if (distance < radius && distance > 0.0f) {
             // Use inverse square falloff for metaball field

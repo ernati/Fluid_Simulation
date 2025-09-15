@@ -28,7 +28,12 @@ struct Triangle {
         Vector2D edge2 = vertices[2] - vertices[0];
         // For 2D, we'll use a simple perpendicular vector
         normal = Vector2D(-edge1.Y, edge1.X);
-        normal = normal.normalize();
+        
+        // Normalize the normal vector
+        double length = sqrt(normal.X * normal.X + normal.Y * normal.Y);
+        if (length > 0.0) {
+            normal = normal / length;
+        }
     }
 };
 
